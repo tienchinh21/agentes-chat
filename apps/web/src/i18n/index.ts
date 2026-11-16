@@ -171,7 +171,7 @@ const options = (lng: LocaleCode): InitOptions => ({
  * so English, every key's fallback, comes only with one that isn't ready.
  */
 export async function loadI18n(lng: LocaleCode): Promise<I18n> {
-  const codes = [...new Set<LocaleCode>(localeInfo(lng).ready ? [lng] : [lng, DEFAULT_LOCALE])];
+  const codes = [...new Set<LocaleCode>([lng, DEFAULT_LOCALE])];
   const strings = await Promise.all(codes.map((code) => retryOnce(loadStrings[code])));
   const instance = i18n.createInstance();
   void instance.use(initReactI18next).init({
