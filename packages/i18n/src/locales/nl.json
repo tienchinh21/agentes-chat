@@ -7761,7 +7761,8 @@
     "table": {
       "task": "Taak",
       "github": "GitHub",
-      "sortBy": "Sorteren op {{column}}"
+      "sortBy": "Sorteren op {{column}}",
+      "resize": "Breedte van kolom {{column}} aanpassen"
     },
     "fold": {
       "open": "{{name}} openen",
@@ -7845,6 +7846,7 @@
       "canceled": "#{{number}} staat weer op zijn plek.",
       "assigned": "#{{number}} ligt nu bij {{name}}.",
       "unassigned": "#{{number}} is nu aan niemand toegewezen.",
+      "removed": "#{{number}} ligt niet meer bij {{name}}.",
       "prioritized": "#{{number}} heeft nu prioriteit {{priority}}."
     },
     "canceledColumn": "Geannuleerd",
@@ -7999,6 +8001,10 @@
       "high": "hoog"
     },
     "noAssignee": "Niet toegewezen",
+    "assignees": {
+      "people": "Mensen en agents",
+      "done": "Klaar"
+    },
     "agentRole": "Agent · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -8142,7 +8148,9 @@
       "status_changed": "heeft de status gewijzigd in {{status}}",
       "priority_changed": "heeft de prioriteit gewijzigd in {{priority}}",
       "assigned": "heeft de taak toegewezen",
-      "unassigned": "heeft de toewijzing verwijderd",
+      "unassigned": "heeft een toewijzing verwijderd",
+      "assigned_named": "heeft de taak toegewezen aan {{name}}",
+      "unassigned_named": "heeft {{name}} van de taak gehaald",
       "due_date_set": "heeft de deadline op {{date}} gezet",
       "due_date_removed": "heeft de deadline verwijderd",
       "pr_linked": "heeft PR #{{number}} gekoppeld",

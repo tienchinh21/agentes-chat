@@ -3272,9 +3272,11 @@ export interface AgentActionTarget {
  * Values for the sentence, by kind:
  * - `issue.created`: `number`, `title`
  * - `issue.updated`: `number`, `title`, `fields` (any of title, description, status, priority,
- *   assignee, labels, dueDate, criteria) and the new `status`, `priority`, `dueDate`, `labels`,
- *   `assigneeType`/`assigneeId`/`assigneeName`/`assigneeIsSelf` for the fields that changed
- * - `issue.assigned`: `number`, `title`, `assigneeType`, `assigneeId`, `assigneeName`, `assigneeIsSelf`
+ *   assignees, labels, dueDate, criteria) and the new `status`, `priority`, `dueDate`, `labels`,
+ *   `assigneeName`/`assigneeIsSelf`/`assigneeNames` for the fields that changed
+ * - `issue.assigned`: `number`, `title`, `assigneeName` (who was given it, several joined; null when people only
+ *   left it), `assigneeIsSelf`, `assigneeNames` (everyone who has it now); an older server sends `assigneeType` and
+ *   `assigneeId` of the one assignee
  * - `memory.saved`: `text` (and `previousText` when it replaced one); `memory.updated`: `text`, `previousText`;
  *   `memory.forgotten`: `text`
  * - `routine.created`: `name`, `rule` (an `ApiRule`, said in the person's language), `schedule` (the server's
@@ -3876,7 +3878,8 @@ export interface Issue {
   priority: IssuePriority;
   /** Its one project, or none (a server from before projects sends nothing). */
   project?: IssueProjectRef | null;
-  assignee: Actor | null;
+  /** Who does it, people and agents, in order; empty when nobody. */
+  assignees: Actor[];
   labels: string[];
   /** Day only, `YYYY-MM-DD`. */
   dueDate: string | null;
@@ -3909,7 +3912,7 @@ export interface Issue {
   /** The issue this one is a sub-issue of. */
   parentIssueId?: string | null;
   /** On the detail: its sub-issues. */
-  subIssues?: { id: string; number: number; title: string; status: IssueStatus; assignee: Actor | null }[];
+  subIssues?: { id: string; number: number; title: string; status: IssueStatus; assignees: Actor[] }[];
   createdAt: string;
   updatedAt: string;
 }
@@ -3937,6 +3940,8 @@ export interface IssueActivity {
   text: string;
   /** Machine form of an event (`status_changed`, `assigned`, `agent_asked`, …). */
   event?: string;
+  /** An `assigned` event: who was put on the task, or taken off it (`textCode` `unassigned`). */
+  assignee?: Actor;
   /** The event in the app's words: `issues.event.{textCode}` with `textParams`. */
   textCode?: string;
   textParams?: Record<string, string>;
@@ -3951,7 +3956,7 @@ export interface IssueInput {
   title: string;
   description?: string;
   criteria?: string[];
-  assignee?: Actor | null;
+  assignees?: Actor[];
   priority?: IssuePriority;
   dueDate?: string | null;
   labels?: string[];
@@ -3966,7 +3971,7 @@ export interface IssueInput {
 export type IssuePatch = Partial<
   Pick<
     Issue,
-    "title" | "description" | "status" | "priority" | "assignee" | "dueDate" | "labels" | "boardRank" | "githubUrl"
+    "title" | "description" | "status" | "priority" | "assignees" | "dueDate" | "labels" | "boardRank" | "githubUrl"
   >
 > & {
   /** Move to a board column: the issue takes that column's stage. */
@@ -4424,7 +4429,7 @@ export interface CalendarRange {
   /** Pending reminders the viewer may see (absent on an older server). */
   reminders?: CalendarReminder[];
   /** Issues due in the range (all-day), with who has each (absent on an older server). */
-  deadlines: { issueId: string; number: number; title: string; date: string; assignee?: Actor | null }[];
+  deadlines: { issueId: string; number: number; title: string; date: string; assignees?: Actor[] }[];
   proposals: CalendarProposal[];
 }
 
@@ -7105,7 +7110,7 @@ export interface IssuesView {
   sort: "manual" | "priority" | "due" | "updated";
   /** What the cards show besides their number and title. */
   fields: Record<IssueCardField, boolean>;
-  /** Only tasks with one of these assignees: `agent:<id>`, `person:<id>` or `none` (empty: every task). */
+  /** Only tasks one of these has: `agent:<id>`, `person:<id>`, or `none` for a task nobody has (empty: every task). */
   assignees: string[];
   /** Only tasks with one of these priorities (empty: every task). */
   priorities: IssuePriority[];
@@ -7118,8 +7123,15 @@ export interface IssuesView {
   hideEmpty: boolean;
   /** The groups folded to their name and count: column ids, assignee keys or priorities. */
   collapsed: string[];
+  /**
+   * The list's columns I gave a width, in pixels (`ISSUE_COLUMN_WIDTHS` holds each one's least and most); a column
+   * not named has its own width.
+   */
+  widths: Partial<Record<IssueListColumn, number>>;
 }
 export type IssueCardField = "project" | "assignee" | "priority" | "due" | "criteria" | "pullRequest" | "label";
+/** A column of the list a person can give a width: the task's title, or a card field's. */
+export type IssueListColumn = "title" | IssueCardField;
 
 export interface NotificationCount {
   unread: number;

@@ -7940,7 +7940,8 @@
     "table": {
       "task": "Tarea",
       "github": "GitHub",
-      "sortBy": "Ordenar por {{column}}"
+      "sortBy": "Ordenar por {{column}}",
+      "resize": "Cambiar el ancho de la columna {{column}}"
     },
     "fold": {
       "open": "Abrir {{name}}",
@@ -8025,6 +8026,7 @@
       "canceled": "La #{{number}} volvió a su lugar.",
       "assigned": "La #{{number}} ahora está con {{name}}.",
       "unassigned": "La #{{number}} quedó sin responsable.",
+      "removed": "La #{{number}} ya no está con {{name}}.",
       "prioritized": "La #{{number}} ahora tiene prioridad {{priority}}."
     },
     "canceledColumn": "Canceladas",
@@ -8186,6 +8188,10 @@
       "high": "alta"
     },
     "noAssignee": "Sin responsable",
+    "assignees": {
+      "people": "Personas y agentes",
+      "done": "Listo"
+    },
     "agentRole": "Agente · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -8333,7 +8339,9 @@
       "status_changed": "cambió el estado a {{status}}",
       "priority_changed": "cambió la prioridad a {{priority}}",
       "assigned": "asignó la tarea",
-      "unassigned": "quitó al responsable",
+      "unassigned": "quitó a un responsable",
+      "assigned_named": "asignó la tarea a {{name}}",
+      "unassigned_named": "quitó a {{name}} de la tarea",
       "due_date_set": "puso la fecha límite el {{date}}",
       "due_date_removed": "quitó la fecha límite",
       "pr_linked": "vinculó el PR #{{number}}",

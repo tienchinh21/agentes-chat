@@ -7468,7 +7468,8 @@
     "table": {
       "task": "Tugas",
       "github": "GitHub",
-      "sortBy": "Urutkan menurut {{column}}"
+      "sortBy": "Urutkan menurut {{column}}",
+      "resize": "Ubah lebar kolom {{column}}"
     },
     "fold": {
       "open": "Buka {{name}}",
@@ -7551,6 +7552,7 @@
       "canceled": "#{{number}} kembali ke tempatnya.",
       "assigned": "#{{number}} sekarang dipegang {{name}}.",
       "unassigned": "#{{number}} sekarang tanpa penanggung jawab.",
+      "removed": "#{{number}} tidak lagi dipegang {{name}}.",
       "prioritized": "#{{number}} sekarang berprioritas {{priority}}."
     },
     "canceledColumn": "Dibatalkan",
@@ -7698,6 +7700,10 @@
       "high": "tinggi"
     },
     "noAssignee": "Tanpa penanggung jawab",
+    "assignees": {
+      "people": "Orang dan agen",
+      "done": "Selesai"
+    },
     "agentRole": "Agen · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -7837,7 +7843,9 @@
       "status_changed": "mengubah status menjadi {{status}}",
       "priority_changed": "mengubah prioritas menjadi {{priority}}",
       "assigned": "menugaskan tugas",
-      "unassigned": "menghapus penanggung jawab",
+      "unassigned": "menghapus satu penanggung jawab",
+      "assigned_named": "menugaskan tugas kepada {{name}}",
+      "unassigned_named": "melepas {{name}} dari tugas",
       "due_date_set": "mengatur tenggat ke {{date}}",
       "due_date_removed": "menghapus tenggat",
       "pr_linked": "menautkan PR #{{number}}",

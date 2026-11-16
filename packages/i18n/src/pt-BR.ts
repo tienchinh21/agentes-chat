@@ -8129,7 +8129,12 @@ export const ptBR = {
     assigneeFilter: "Responsável",
     priorityFilter: "Prioridade",
     labelFilter: "Rótulo",
-    table: { task: "Tarefa", github: "GitHub", sortBy: "Ordenar por {{column}}" },
+    table: {
+      task: "Tarefa",
+      github: "GitHub",
+      sortBy: "Ordenar por {{column}}",
+      resize: "Redimensionar a coluna {{column}}",
+    },
     fold: { open: "Abrir {{name}}", close: "Recolher {{name}}", column: "Recolher coluna" },
     title: "Tarefas",
     summary: "{{open}} em aberto · {{agents}} com agentes",
@@ -8195,6 +8200,8 @@ export const ptBR = {
       canceled: "A #{{number}} voltou para o lugar.",
       assigned: "#{{number}} agora está com {{name}}.",
       unassigned: "#{{number}} ficou sem responsável.",
+      /** Dragged off one of several who have it: the others still do. */
+      removed: "#{{number}} não está mais com {{name}}.",
       prioritized: "#{{number}} agora tem prioridade {{priority}}.",
     },
     canceledColumn: "Canceladas",
@@ -8343,6 +8350,8 @@ export const ptBR = {
     priority: { low: "Baixa", normal: "Normal", high: "Alta" },
     priorityLower: { low: "baixa", normal: "normal", high: "alta" },
     noAssignee: "Sem responsável",
+    /** The dialog that picks who has a task: the list's name over it, and the button that closes it. */
+    assignees: { people: "Pessoas e agentes", done: "Pronto" },
     agentRole: "Agente · {{role}}",
     pr: "PR #{{number}}",
     open: "#{{number}} {{title}}",
@@ -8486,7 +8495,10 @@ export const ptBR = {
       status_changed: "mudou o status para {{status}}",
       priority_changed: "mudou a prioridade para {{priority}}",
       assigned: "atribuiu a tarefa",
-      unassigned: "removeu o responsável",
+      unassigned: "removeu um responsável",
+      /** With who it was (`name`), when the event says. */
+      assigned_named: "atribuiu a tarefa a {{name}}",
+      unassigned_named: "tirou {{name}} da tarefa",
       due_date_set: "definiu o prazo para {{date}}",
       due_date_removed: "removeu o prazo",
       pr_linked: "ligou o PR #{{number}}",

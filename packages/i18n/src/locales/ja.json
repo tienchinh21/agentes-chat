@@ -7440,7 +7440,8 @@
     "table": {
       "task": "タスク",
       "github": "GitHub",
-      "sortBy": "{{column}}で並べ替え"
+      "sortBy": "{{column}}で並べ替え",
+      "resize": "列「{{column}}」の幅を変更"
     },
     "fold": {
       "open": "{{name}}を開く",
@@ -7523,6 +7524,7 @@
       "canceled": "#{{number}}は元の場所に戻りました。",
       "assigned": "#{{number}}の担当は{{name}}になりました。",
       "unassigned": "#{{number}}の担当者がいなくなりました。",
+      "removed": "#{{number}}の担当から{{name}}が外れました。",
       "prioritized": "#{{number}}の優先度は{{priority}}になりました。"
     },
     "canceledColumn": "キャンセル済み",
@@ -7665,6 +7667,10 @@
       "high": "高"
     },
     "noAssignee": "担当者なし",
+    "assignees": {
+      "people": "人とエージェント",
+      "done": "完了"
+    },
     "agentRole": "エージェント · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -7800,7 +7806,9 @@
       "status_changed": "ステータスを{{status}}に変更しました",
       "priority_changed": "優先度を{{priority}}に変更しました",
       "assigned": "タスクを割り当てました",
-      "unassigned": "担当者を外しました",
+      "unassigned": "担当者を1人外しました",
+      "assigned_named": "タスクを{{name}}に割り当てました",
+      "unassigned_named": "{{name}}をタスクの担当から外しました",
       "due_date_set": "期日を{{date}}に設定しました",
       "due_date_removed": "期日を削除しました",
       "pr_linked": "PR #{{number}}をリンクしました",

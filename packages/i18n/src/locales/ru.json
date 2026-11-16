@@ -8205,7 +8205,8 @@
     "table": {
       "task": "Задача",
       "github": "GitHub",
-      "sortBy": "Сортировать: {{column}}"
+      "sortBy": "Сортировать: {{column}}",
+      "resize": "Изменить ширину столбца «{{column}}»"
     },
     "fold": {
       "open": "Открыть: {{name}}",
@@ -8291,6 +8292,7 @@
       "canceled": "#{{number}} вернулась на место.",
       "assigned": "#{{number}} теперь у: {{name}}.",
       "unassigned": "У #{{number}} теперь нет исполнителя.",
+      "removed": "#{{number}} больше не у: {{name}}.",
       "prioritized": "У #{{number}} теперь приоритет «{{priority}}»."
     },
     "canceledColumn": "Отменённые",
@@ -8459,6 +8461,10 @@
       "high": "высокий"
     },
     "noAssignee": "Без исполнителя",
+    "assignees": {
+      "people": "Люди и агенты",
+      "done": "Готово"
+    },
     "agentRole": "Агент · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -8612,7 +8618,9 @@
       "status_changed": "сменил(а) статус на «{{status}}»",
       "priority_changed": "сменил(а) приоритет на «{{priority}}»",
       "assigned": "назначил(а) исполнителя",
-      "unassigned": "убрал(а) исполнителя",
+      "unassigned": "убрал(а) одного из исполнителей",
+      "assigned_named": "назначил(а) исполнителя: {{name}}",
+      "unassigned_named": "убрал(а) исполнителя: {{name}}",
       "due_date_set": "установил(а) срок {{date}}",
       "due_date_removed": "убрал(а) срок",
       "pr_linked": "привязал(а) PR #{{number}}",

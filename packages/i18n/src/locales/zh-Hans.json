@@ -7479,7 +7479,8 @@
     "table": {
       "task": "任务",
       "github": "GitHub",
-      "sortBy": "按{{column}}排序"
+      "sortBy": "按{{column}}排序",
+      "resize": "调整“{{column}}”列的宽度"
     },
     "fold": {
       "open": "打开{{name}}",
@@ -7562,6 +7563,7 @@
       "canceled": "#{{number}} 回到了原位。",
       "assigned": "#{{number}} 现在由{{name}}负责。",
       "unassigned": "#{{number}} 现在没有负责人。",
+      "removed": "#{{number}} 不再由{{name}}负责。",
       "prioritized": "#{{number}} 现在是{{priority}}优先级。"
     },
     "canceledColumn": "已取消",
@@ -7709,6 +7711,10 @@
       "high": "高"
     },
     "noAssignee": "无负责人",
+    "assignees": {
+      "people": "成员和智能体",
+      "done": "完成"
+    },
     "agentRole": "智能体 · {{role}}",
     "pr": "PR #{{number}}",
     "open": "#{{number}} {{title}}",
@@ -7848,7 +7854,9 @@
       "status_changed": "将状态改为{{status}}",
       "priority_changed": "将优先级改为{{priority}}",
       "assigned": "分配了任务",
-      "unassigned": "移除了负责人",
+      "unassigned": "移除了一位负责人",
+      "assigned_named": "将任务分配给了{{name}}",
+      "unassigned_named": "将{{name}}移出了任务",
       "due_date_set": "将截止日期设为 {{date}}",
       "due_date_removed": "移除了截止日期",
       "pr_linked": "关联了 PR #{{number}}",

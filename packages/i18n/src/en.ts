@@ -8150,7 +8150,13 @@ export const en = {
     assigneeFilter: "Assignee",
     priorityFilter: "Priority",
     labelFilter: "Label",
-    table: { task: "Task", github: "GitHub", sortBy: "Sort by {{column}}" },
+    table: {
+      task: "Task",
+      github: "GitHub",
+      sortBy: "Sort by {{column}}",
+      /** The name of the handle at a column's end in the task list: dragging it changes that column's width. */
+      resize: "Resize column {{column}}",
+    },
     fold: { open: "Open {{name}}", close: "Fold {{name}}", column: "Fold column" },
     title: "Tasks",
     summary: "{{open}} open · {{agents}} with agents",
@@ -8216,6 +8222,8 @@ export const en = {
       canceled: "#{{number}} went back to its place.",
       assigned: "#{{number}} is now with {{name}}.",
       unassigned: "#{{number}} has no assignee now.",
+      /** Dragged off one of several who have it: the others still do. */
+      removed: "#{{number}} is no longer with {{name}}.",
       prioritized: "#{{number}} now has {{priority}} priority.",
     },
     canceledColumn: "Canceled",
@@ -8360,6 +8368,8 @@ export const en = {
     priority: { low: "Low", normal: "Normal", high: "High" },
     priorityLower: { low: "low", normal: "normal", high: "high" },
     noAssignee: "No assignee",
+    /** The dialog that picks who has a task: the list's name over it, and the button that closes it. */
+    assignees: { people: "People and agents", done: "Done" },
     agentRole: "Agent · {{role}}",
     pr: "PR #{{number}}",
     open: "#{{number}} {{title}}",
@@ -8501,7 +8511,10 @@ export const en = {
       status_changed: "changed the status to {{status}}",
       priority_changed: "changed the priority to {{priority}}",
       assigned: "assigned the task",
-      unassigned: "removed the assignee",
+      unassigned: "removed an assignee",
+      /** With who it was (`name`), when the event says. */
+      assigned_named: "assigned the task to {{name}}",
+      unassigned_named: "took {{name}} off the task",
       due_date_set: "set the due date to {{date}}",
       due_date_removed: "removed the due date",
       pr_linked: "linked PR #{{number}}",
