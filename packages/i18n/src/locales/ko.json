@@ -2546,6 +2546,13 @@
   "rightHand": {
     "label": "당신의 오른팔",
     "labelCapitalized": "당신의 오른팔",
+    "unusable": {
+      "title": "지금은 {{name}} 대신 생각할 수 없음",
+      "computerOnly": "{{computer}}에서만 로그인됨. {{name}}은(는) 계정으로 로그인된 플랜으로 생각합니다.",
+      "away": "{{owner}}님의 것, {{computer}}에 있으며 자리를 비웠습니다.",
+      "awayYours": "내 것, {{computer}}에 있으며 자리를 비웠습니다.",
+      "connect": "컴퓨터 연결"
+    },
     "newDot": "신규",
     "actsAsYou": "당신의 권한으로 일해요",
     "composerHint": "당신 없이는 아무것도 바뀌지 않아요",
@@ -9931,10 +9938,10 @@
       "copies_other": "에이전트가 없는 이 계정의 로그인이 {{count}}개 더 있어요.",
       "removeCopies": "삭제",
       "copiesRemoved_other": "쓰지 않는 로그인 {{count}}개를 삭제했어요.",
-      "removeAllDone": "Grok 로그인 {{n}}개를 제거했습니다.",
-      "removeAllText": "{{computers}}에서 각자의 에이전트를 위해 생각하지 않게 됩니다. 다른 사람의 로그인은 그대로 둡니다.",
-      "removeAllTitle": "Grok 로그인 {{n}}개를 모두 제거할까요?",
       "removeAllGrok": "Grok 로그인 모두 제거",
+      "removeAllTitle": "Grok 로그인 {{n}}개를 모두 제거할까요?",
+      "removeAllText": "{{computers}}에서 각자의 에이전트를 위해 생각하지 않게 됩니다. 다른 사람의 로그인은 그대로 둡니다.",
+      "removeAllDone": "Grok 로그인 {{n}}개를 제거했습니다.",
       "disconnect": "연결 해제",
       "renameTitle": "{{label}} 이름 바꾸기",
       "nameLabel": "이름",
@@ -15939,11 +15946,11 @@
       "rolesPersonal": "여기 있는 사람마다 할 수 있는 일. 소유자는 모든 걸 할 수 있어요."
     },
     "about": {
-      "basedOn": "Codari Global, LLC의 <site>agentes.chat</site> 기반",
+      "basedOn": "AGENTESCHAT, LLC의 <site>agentes.chat</site> 기반",
       "version": "버전",
       "license": "<license>GNU Affero General Public License v3</license>에 따른 자유 소프트웨어이며 보증은 없습니다.",
       "source": "소스 코드",
-      "copyright": "Copyright © 2026 Codari Global, LLC 및 기여자"
+      "copyright": "Copyright © 2026 AGENTESCHAT, LLC 및 기여자"
     },
     "title": "설정",
     "account": {
@@ -16371,6 +16378,18 @@
       "see": "사용량 보기"
     }
   },
+  "usage": {
+    "kinds": {
+      "label": "종류별",
+      "handoffs": "에이전트 간 인계",
+      "people": "사람과의 대화",
+      "routines": "루틴"
+    },
+    "hint": {
+      "handoffs": "이번 주 사용량의 대부분은 에이전트끼리 작업을 넘긴 데서 나왔습니다. 긴 작업은 에이전트에게 직접 요청하세요.",
+      "message": "{{name}}에게 메시지"
+    }
+  },
   "usageViews": {
     "signedOut": "로그아웃됨",
     "whose": "{{name}}의 계정",
@@ -16553,6 +16572,14 @@
     "speedFallback": {
       "text": "ChatGPT가 이 계정이나 모델에서 빠른 속도를 거부해서 이 답변은 표준 속도로 왔어요.",
       "action": "에이전트 열기"
+    },
+    "standIn": {
+      "needsComputer": "{{via}}(으)로 답했어요: {{plan}}에는 컴퓨터가 필요해요.",
+      "away": "{{via}}(으)로 답했어요: {{plan}}의 컴퓨터가 자리를 비웠어요.",
+      "notShared": "{{via}}(으)로 답했어요: {{plan}}은(는) 연결한 사람만 쓸 수 있어요.",
+      "limit": "{{via}}(으)로 답했어요: {{plan}}이(가) 한도에 도달했어요.",
+      "cant": "{{via}}(으)로 답했어요: {{plan}}이(가) 지금 생각할 수 없어요.",
+      "change": "변경"
     },
     "modelStandIn": {
       "text": "{{plan}}이(가) 이 키로 {{from}}을(를) 거부했어요. 이 키로 작동하는 {{to}}(으)로 답했어요.",

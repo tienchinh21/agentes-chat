@@ -7788,12 +7788,22 @@ export interface PlanAccountInfo {
   logins?: number;
 }
 
+/** What a plan's use was for: work handed between agents, people's conversations, routines. */
+export type PlanUseKind = "handoffs" | "people" | "routines";
+
 export interface PlanAccountUsage extends PlanAccountInfo {
   /** Its windows as last reported, each with the agents' parts; null: not known yet. */
   usage: (Omit<PlanUsage, "windows"> & { windows: PlanWindowParts[] }) | null;
   /** This month per agent; `now`: it thinks with this account today. */
   agents: { agentId: string; name: string; tokens: number; now: boolean }[];
   monthTokens: number;
+  /**
+   * This month's tokens by what they were for, each with its estimated part of the window the agents' list splits
+   * (null: none has parts). Absent: an older server.
+   */
+  kinds?: { kind: PlanUseKind; tokens: number; percent: number | null }[];
+  /** Handoffs led the week: the agent that took most of that work, to ask directly. Absent: an older server. */
+  hint?: { kind: "handoffs"; agentId: string } | null;
   /** `view_usage` only: what the month's tokens would cost through the API (null: no price). */
   equivalentUsd?: number | null;
 }

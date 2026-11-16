@@ -2712,6 +2712,15 @@ export const ptBR = {
   rightHand: {
     label: "seu braço direito",
     labelCapitalized: "Seu braço direito",
+    unusable: {
+      title: "Não pensa pelo {{name}} agora",
+      title_female: "Não pensa pela {{name}} agora",
+      computerOnly: "Conectado só em {{computer}}. O {{name}} pensa com um plano conectado como conta.",
+      computerOnly_female: "Conectado só em {{computer}}. A {{name}} pensa com um plano conectado como conta.",
+      away: "De {{owner}}, em {{computer}}, que está ausente.",
+      awayYours: "Seu, em {{computer}}, que está ausente.",
+      connect: "Conectar um computador",
+    },
     newDot: "Novo",
     actsAsYou: "age com as suas permissões",
     composerHint: "nada muda sem você",
@@ -16733,11 +16742,11 @@ export const ptBR = {
       rolesPersonal: "O que cada pessoa daqui pode fazer. Quem é dono pode tudo.",
     },
     about: {
-      basedOn: "Baseado no <site>agentes.chat</site> da Codari Global, LLC",
+      basedOn: "Baseado no <site>agentes.chat</site> da AGENTESCHAT, LLC",
       version: "Versão",
       license: "Software livre sob a <license>GNU Affero General Public License v3</license>, sem garantia.",
       source: "Código-fonte",
-      copyright: "Copyright © 2026 Codari Global, LLC e colaboradores",
+      copyright: "Copyright © 2026 AGENTESCHAT, LLC e colaboradores",
     },
     title: "Configurações",
     account: {
@@ -17157,6 +17166,19 @@ export const ptBR = {
     },
     actions: { raise: "Aumentar para {{amount}} este mês", refuse: "Recusar", see: "Ver o uso" },
   },
+  usage: {
+    kinds: {
+      label: "Por tipo",
+      handoffs: "Repasses entre agentes",
+      people: "Conversas com pessoas",
+      routines: "Rotinas",
+    },
+    hint: {
+      handoffs:
+        "A maior parte do uso desta semana veio de agentes passando trabalho uns aos outros. Para trabalhos longos, peça direto ao agente.",
+      message: "Mandar mensagem para {{name}}",
+    },
+  },
   usageViews: {
     signedOut: "Saiu da conta",
     whose: "de {{name}}",
@@ -17368,6 +17390,14 @@ export const ptBR = {
     speedFallback: {
       text: "O ChatGPT recusou a velocidade Rápida nesta conta ou neste modelo, então esta resposta veio no padrão.",
       action: "Abrir agente",
+    },
+    standIn: {
+      needsComputer: "Respondi com {{via}}: {{plan}} precisa de um computador.",
+      away: "Respondi com {{via}}: o computador do {{plan}} está ausente.",
+      notShared: "Respondi com {{via}}: {{plan}} atende só quem o conectou.",
+      limit: "Respondi com {{via}}: {{plan}} chegou ao limite.",
+      cant: "Respondi com {{via}}: {{plan}} não consegue pensar agora.",
+      change: "Trocar",
     },
     /** Under a reply "Automático" gave with another model because the plan refused the one it maps to (`meta.modelStandIn`). */
     modelStandIn: {
