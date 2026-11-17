@@ -346,10 +346,11 @@ describe("Criar agente: steps", () => {
     expect(screen().queryByRole("group", { name: "Função" })).toBeNull();
     expect(screen().queryByRole("complementary", { name: "Prévia do agente" })).toBeNull();
     expect(screen().queryByRole("button", { name: /^Continuar/ })).toBeNull();
-    // Enter in its field reads what's there, never moves the steps on.
+    // The file sheet: Enter in its field reads what's there, never moves the steps on.
+    await click(screen().getByRole("button", { name: "Tenho um arquivo ou link" }));
     const field = screen().getByLabelText("Ou cole um link do GitHub ou a resposta do outro app");
     await press(field, "Enter");
-    expect(title()).toBe("Trazer agentes de outro app");
+    expect(screen().getByRole("dialog", { name: "Trazer de um arquivo ou link" })).toBeTruthy();
 
     // A pasted reply: planned, then Importar brings the agent, and the report links to it.
     const reply = {
@@ -378,6 +379,9 @@ describe("Criar agente: steps", () => {
     const pasted = `\`\`\`json\n${JSON.stringify(reply)}\n\`\`\``;
     await act(async () => fireEvent.paste(field, { clipboardData: { getData: () => pasted } }));
     await settle(10);
+    // Who comes, in the sheet; closing it leaves the full preview on the page.
+    await click(document.querySelector(".imp-sheet .hosting-sheet__close") as HTMLElement);
+    expect(title()).toBe("Trazer agentes de outro app");
     expect(screen().getByRole("heading", { name: "Minhas automações" })).toBeTruthy();
     await click(screen().getByRole("button", { name: /^Importar 1 / }));
     await settle(8);

@@ -59,7 +59,10 @@ export const offersKeyNow = (gate: PlanGate, held: boolean) =>
     ? gate.view !== null && !held
     : !held && (gate.state === "offline" || gate.state === "missing" || gate.state === "unsupported");
 
-/** Where the flow is: the first page, the plans, one plan's page, the API key's, or that key's makers. */
+/**
+ * A page of the flow, each its own pushed screen: the first page (the two ways), the plans, one plan's page, the API
+ * key's, or that key's makers.
+ */
 export type FlowView =
   | { page: "home" }
   | { page: "plans" }
@@ -67,12 +70,11 @@ export type FlowView =
   | { page: "key" }
   | { page: "makers" };
 
-/** What Back opens: a list's pick goes back to its list, and a sign-in from a row of what the person has to that row. */
-export const flowBack = (view: FlowView, fromRow: boolean): FlowView | null => {
-  if (view.page === "home") return null;
-  if (view.page === "makers") return { page: "key" };
-  return view.page === "plan" && !fromRow ? { page: "plans" } : { page: "home" };
-};
+/** The flow's steps, counted in its bar's subtitle ("1 de 3"): the way, the sign-in or the key, done. */
+export const FLOW_STEPS = 3;
+
+/** The step a page stands for: the two ways first, any page after them second, done last. */
+export const flowStep = (view: FlowView, done: boolean) => (done ? FLOW_STEPS : view.page === "home" ? 1 : 2);
 
 /** How often a plan's page asks again while it waits (the web's first run asks as often). */
 export const PLAN_POLL_MS = 5000;

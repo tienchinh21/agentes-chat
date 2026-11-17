@@ -1170,6 +1170,108 @@
         "held": "工作区的套餐生效后，即可使用“通过 MCP 连接”。现在请先用这种方式导入智能体。",
         "paused": "此工作区暂停期间，“通过 MCP 连接”不可用。现在请先用这种方式导入智能体。"
       },
+      "haveFileButton": "我有文件或链接",
+      "sheet": {
+        "title": "从 {{app}} 导入团队",
+        "otherTitle": "从其他应用导入",
+        "workspaceTitle": "从另一个工作区导入",
+        "fileTitle": "从文件或链接导入",
+        "fileLead": "支持的任何应用的文件都可以，会自动识别。",
+        "paths": {
+          "lead": "选择导入方式。创建之前，你会先检查所有内容。",
+          "best": "最完整",
+          "safe": "无论选哪种方式，{{app}} 的密钥、密码和会话都不会导入。",
+          "command": {
+            "title": "用一条命令",
+            "line": "全部导入，包括文件和工作流。通过编程助手或终端"
+          },
+          "mcp": {
+            "title": "连接 {{app}}",
+            "line": "它通过 MCP 在这里创建智能体。不含文件和工作流"
+          },
+          "prompt": {
+            "title": "让 {{app}} 导出",
+            "line": "它写下所知道的内容，你粘贴到这里。不含文件和工作流"
+          }
+        },
+        "useRequest": "我想改为粘贴请求，再把回复带回来",
+        "backToMcp": "返回 MCP",
+        "waitingMore": "正在等待后续智能体…",
+        "arrivedMore": "{{app}} 可能还在创建中。之后到达的智能体也会显示在这里。",
+        "arrivedMoreAny": "你的 AI 应用可能还在创建中。之后到达的智能体也会显示在这里。",
+        "readHere": "在你的浏览器中读取。在你确认之前，这里不会有任何改动。",
+        "request": {
+          "grok-bot": {
+            "lead": "机器人会把它拥有的一切写成 JSON。你把它粘贴到这里，在创建任何内容之前先检查。",
+            "copyStep": "粘贴到与机器人的聊天中",
+            "answerStep": "把完整的回复粘贴到这里",
+            "answerPlaceholder": "机器人回复的 JSON"
+          },
+          "chatgpt-dots": {
+            "lead": "你的 dot 会把它拥有的一切写进一个文件。你把文件拖到这里，在创建任何内容之前先检查。",
+            "copyStep": "粘贴到一个新的聊天中",
+            "answerStep": "把它生成的文件拖到这里"
+          },
+          "other": {
+            "copyStep": "粘贴到另一个应用的新对话中",
+            "answerStep": "拖入它返回的文件，或粘贴它的回复",
+            "answerPlaceholder": "回复，或 GitHub 链接"
+          },
+          "computer": {
+            "lead": "{{app}} 的智能体把它知道的内容写进一个文件，创建之前由你检查。",
+            "copyStep": "在与 {{app}} 智能体的对话中，粘贴这个请求",
+            "answerStep": "拖入它生成的文件，或粘贴它的回复",
+            "answerPlaceholder": "{{app}} 的回复"
+          }
+        },
+        "workspace": {
+          "download": "下载另一个工作区的文件",
+          "where": "在那里：设置 › 导入和导出 › 下载文件。",
+          "open": "在新标签页中打开 {{org}}",
+          "drop": "把 .json 拖到这里"
+        },
+        "lead": "你的助手会读取这台电脑上的 {{app}}，并把文件写到你选择的位置。创建任何内容之前，你都会先检查一遍。",
+        "leadCommand": "这条命令会读取这台电脑上的 {{app}}，并把文件写到你选择的位置。创建任何内容之前，你都会先检查一遍。",
+        "pasteAssistant": "把这段粘贴到你的编程助手中",
+        "pasteTerminal": "把这段粘贴到终端中",
+        "pastePowerShell": "把这段粘贴到 PowerShell 中",
+        "promptLabel": "给编程助手的请求",
+        "commandLabel": "命令",
+        "copy": "复制请求",
+        "assistants": "Claude Code、Codex，或其他能在这台电脑上运行命令的助手。",
+        "commandHelp": "它会询问保存位置，然后写入一个文件。不会发送任何内容。",
+        "useCommand": "我想自己运行命令",
+        "usePrompt": "回到给助手的请求",
+        "os": {
+          "label": "这台电脑的系统",
+          "unix": "Mac 或 Linux",
+          "windows": "Windows"
+        },
+        "dropStep": "把它写出的文件拖到这里",
+        "drop": "把文件拖到这里",
+        "dropHelp": "{{file}}，在你选择的文件夹中",
+        "safe": "只读。绝不会读取 {{app}} 中的密钥、密码和登录信息。",
+        "ready_other": "{{count}} 个智能体准备好导入了",
+        "readyOther": "准备好导入了",
+        "others_other": "以及另外 {{count}} 个智能体",
+        "routines_other": "{{count}} 个例行工作",
+        "notes_other": "{{count}} 条记忆",
+        "skills_other": "{{count}} 个技能",
+        "channels_other": "{{count}} 个频道",
+        "files_other": "{{count}} 个智能体的文件，复制到 Drive",
+        "filesSize": "{{size}}。整个工作区都能看到这些文件夹。",
+        "after": "之后各点一下即可",
+        "bring_other": "导入 {{count}} 个智能体",
+        "choose": "选择要带上的内容",
+        "arrivedTitle": "团队到了",
+        "arrived_other": "{{names}} 已经到了。",
+        "arrivedOther_other": "{{count}} 项已经到了。",
+        "copying": "正在把文件复制到 Drive",
+        "copyCount": "{{done}}/{{total}}",
+        "keepOpen": "完成之前，请保持这个标签页打开。",
+        "missed_other": "{{count}} 项没有导入。列表中写明了每一项的原因。",
+        "see": "查看导入的内容"
+      },
       "otherName": "其他应用",
       "agenteschatName": "agentes.chat",
       "where": {
@@ -1287,13 +1389,105 @@
         "app_other": "{{who}} 使用 {{label}}。",
         "secret_other": "{{who}} 使用 {{label}}。它不包含在文件中：智能体会在聊天中向你索要。",
         "model_other": "{{who}} 使用 {{label}}，但它在这里不可用。",
-        "file_other": "{{who}} 使用 {{label}}。"
+        "file_other": "{{who}} 使用 {{label}}。",
+        "webhook_other": "{{who}} 的例行工作 {{label}} 在这里会获得新地址：请在调用旧地址的网站或应用中改成新地址。"
+      },
+      "say": {
+        "intro": "这是从 {{app}} 带过来的工作流“{{title}}”。",
+        "skillAbout": "有人请求时，运行从 {{app}} 带过来的工作流“{{title}}”。",
+        "asked": "在 {{app}} 中它会自动启动。在这里，有人请求时才运行。",
+        "webhook": "有人调用这个例行工作的地址时，它就会开始：收到的内容就是你的输入。",
+        "pr": "GitHub 上有人发起拉取请求时，它就会开始：这个拉取请求就是你的输入。",
+        "prIn": "GitHub 上的 {{repos}} 中有人发起拉取请求时，它就会开始：这个拉取请求就是你的输入。如果它来自其他仓库，就停下，什么都不要发。",
+        "text": "从这段文字开始：“{{text}}”",
+        "keep": "（请记住：{{text}}）",
+        "ask": "带上你目前已有的内容，向 @{{handle}} 提出：“{{task}}”，然后使用它的回答。",
+        "image": "生成一张图片：{{prompt}}",
+        "video": "生成一段视频：{{prompt}}",
+        "if": "如果“{{rule}}”的答案是“是”，就继续。",
+        "otherwise": "否则：",
+        "stop": "否则，就在这里停下，什么都不要发。",
+        "approval": "继续之前，先在聊天中请你的负责人审批：“{{question}}”",
+        "approvalPlain": "继续之前，先在聊天中请你的负责人审批。",
+        "channel": "把结果发到 #{{channel}}。",
+        "notify": "把结果发给你的负责人。",
+        "file": "把结果作为文件保存到 Drive。",
+        "githubComment": "把结果作为评论发到 GitHub 上。",
+        "githubDo": "在 GitHub 上，用结果完成这件事：{{action}}。",
+        "pass": "完成后，把你的回答交给 @{{handle}}：{{instruction}}",
+        "passPlain": "完成后，把你的回答交给 @{{handle}}。"
+      },
+      "choose": {
+        "who": "带上谁",
+        "with": "随它们一起带上的内容",
+        "flows": "工作流",
+        "agentOnly": "连同原应用中的指令",
+        "same": "这里已有相同的内容",
+        "of": {
+          "routine_other": "{{picked}}/{{count}} 个例行工作",
+          "skill_other": "{{picked}}/{{count}} 个技能",
+          "note_other": "{{picked}}/{{count}} 条记忆",
+          "channel_other": "{{picked}}/{{count}} 个频道"
+        },
+        "files_other": "{{count}} 个文件，复制到 Drive",
+        "paused_other": "{{count}} 个会像原来一样以暂停状态导入",
+        "pausedOne": "以暂停状态导入",
+        "here_other": "{{count}} 个已经在这里了",
+        "library": "来自技能库，供你开启的智能体使用",
+        "passes": "把回答交给 {{names}}",
+        "webhook": "新地址",
+        "pr": "有人发起拉取请求时",
+        "routine": "例行工作",
+        "skill": "技能",
+        "asked": "有人请求时运行",
+        "was": {
+          "schedule": "在原应用中有无法读取的时间安排，在这里，有人请求时运行",
+          "webhook": "在原应用中通过一个地址触发，在这里，有人请求时运行",
+          "message": "在原应用中由消息触发，在这里，有人请求时运行",
+          "github": "在原应用中由 GitHub 触发，在这里，有人请求时运行",
+          "discord": "在原应用中由 Discord 触发，在这里，有人请求时运行",
+          "telegram": "在原应用中由 Telegram 触发，在这里，有人请求时运行",
+          "slack": "在原应用中由 Slack 触发，在这里，有人请求时运行",
+          "other": "在原应用中自动启动，在这里，有人请求时运行"
+        },
+        "flowsLead": "在这里，工作流会变成例行工作：触发条件就是它的运行时机，步骤写进请求内容。",
+        "becomesRoutine": "变成由 {{agent}} 运行的例行工作，步骤写在它的请求内容里。",
+        "becomesSkill": "变成 {{agent}} 在有人请求时使用的技能，步骤写在技能里。",
+        "postsIn": "在 #{{channel}} 发帖。",
+        "step": {
+          "when": "例行工作的运行时机",
+          "asked": "有人请求时",
+          "text": "从文本开始",
+          "by": "应 {{name}} 的请求",
+          "image": "图片",
+          "video": "视频",
+          "if": "如果",
+          "stop": "继续，否则停止",
+          "else": "继续，否则：",
+          "approval": "在聊天中请求审批",
+          "channel": "在 #{{channel}} 发帖",
+          "notify": "把结果发给你",
+          "file": "保存到 Drive",
+          "github": "在 GitHub 上",
+          "lost": {
+            "file": "原应用中的一个文件",
+            "slack": "在 Slack 发帖",
+            "discord": "在 Discord 发帖",
+            "telegram": "在 Telegram 发帖",
+            "messaging": "在即时通讯聊天中发帖"
+          },
+          "notHere": "不会带上"
+        },
+        "bringWith_other": "导入 {{count}} 个智能体和{{more}}",
+        "more_other": "另外 {{count}} 项",
+        "notComing": "即时通讯连接（{{list}}）不会带上：这里没有可以连接它们的地方。"
       },
       "needDo": {
         "connection": "连接",
         "app": "连接",
         "model": "选择模型",
-        "file": "打开 Drive"
+        "file": "打开 Drive",
+        "webhook": "打开例行工作"
       },
       "linkSkipped_other": "{{count}} 个文件超出了链接的上限",
       "linkSkippedHelp": "一个链接最多读取 200 个文件和 8 MB。要带上其余内容，请下载文件夹并拖到这里。",
@@ -2543,6 +2737,16 @@
     }
   },
   "rightHand": {
+    "brain": {
+      "unusable": {
+        "title": "需要一台电脑",
+        "computerOnly": "属于 {{owner}}，仅在 {{computer}} 上登录。Lodi 使用以账号登录的方案思考。",
+        "noComputer": "属于 {{owner}}。需要一台电脑，而工作区还没有连接任何电脑。",
+        "away": "属于 {{owner}}，在 {{computer}} 上，该电脑当前离线。",
+        "connect": "连接电脑",
+        "plans": "查看方案"
+      }
+    },
     "label": "你的得力助手",
     "labelCapitalized": "你的得力助手",
     "unusable": {
@@ -2657,6 +2861,7 @@
     "sharedName": "{{name}}(共享)",
     "sharedPlace": "用于频道和自动运行的工作。整个工作区共用这个空间。请不要在这里存放任何私密内容。",
     "computerNoHome": "还没有电脑。等这个工作区有了自己的电脑后，它就会有一台。",
+    "computerNoHomeServer": "还没有浏览器。将<guide>此服务器设为智能体的电脑</guide>即可获得一个。",
     "addComputer": "添加电脑",
     "computerOneUser": "这里没有电脑。工作区的电脑让所有智能体以同一个用户运行，无法把每个人的空间分开。用安装程序的 --system 选项安装的 Linux 服务器可以做到。",
     "powers": {
@@ -3145,7 +3350,7 @@
       "gemini": {
         "title": "你的 Gemini 套餐",
         "tiers": "Google AI Pro、Google AI Ultra 或 Gemini Enterprise",
-        "warning": "Google 表示，在其他应用中使用个人 Gemini 套餐可能导致账号被停用。"
+        "warning": "Google 表示，在其他应用中使用个人 Gemini 套餐可能导致账号被停用。为避免这一风险，请使用 Gemini API 密钥或 Gemini Enterprise。"
       },
       "zen": {
         "title": "OpenCode",
@@ -4073,6 +4278,7 @@
     "seeNewer": "查看更新的请求",
     "computerAway": "{{agent}} 的电脑目前没有响应。此请求在 {{time}} 前保持开放。请稍后重试。",
     "computerPaused": "{{agent}} 的电脑已被所有者暂停。此请求在 {{time}} 前保持开放。",
+    "insecureContext": "此页面不是通过 https 打开的,因此浏览器无法锁定密钥。请通过 https://(或 localhost)打开。",
     "failed": "无法送达。智能体的电脑开着吗？",
     "changed": "你回复时此请求已更改。未发送任何内容。请重新发送。",
     "empty": "请输入值。",
@@ -7464,6 +7670,9 @@
     }
   },
   "issues": {
+    "handedBy": "由 <0/>{{name}} 移交",
+    "fromDm": "来自<0>你与 {{name}} 的私信</0>",
+    "fromDmText": "来自你与 {{name}} 的私信",
     "delete": {
       "action": "删除任务",
       "title": "删除任务 #{{number}}？",
@@ -7666,6 +7875,9 @@
       "runningTitle_female": "{{name}} 正在处理",
       "waitingTitle": "{{name}} 在等你",
       "waitingTitle_female": "{{name}} 在等你",
+      "finishedTitle": "{{name}} 已完成",
+      "finishedMeta": "{{when}} · 由 {{name}} 移交",
+      "answer": "回答",
       "stalledTitle": "{{name}} 于 {{when}} 停止",
       "stalledTitle_female": "{{name}} 于 {{when}} 停止",
       "stalledText": "任务仍由 {{name}} 负责，但目前没有运行。",
@@ -11411,7 +11623,7 @@
     "levelOf": "在 {{name}} 中的级别",
     "cell": "{{agent}} 在 {{resource}}：{{level}}",
     "cellAsks": "{{agent}} 在 {{resource}}：{{level}}，敏感操作需要审批",
-    "asksList": "需要批准：{{tools}}",
+    "asksList": "需要审批：{{tools}}",
     "asksMore_other": "等另外 {{count}} 项",
     "asksLegend": "需要审批",
     "customText": "已逐个工具授权。选择一个级别即可简化。",
@@ -14962,6 +15174,7 @@
       "ui_automation_off": "UI 自动化已关闭",
       "xcode_missing": "Mac 上没有安装 Xcode",
       "xcode_too_old": "Xcode 版本太旧，不支持此 iOS",
+      "ios_behind_xcode": "此 iPhone 的 iOS 比 Xcode 对应的版本旧",
       "device_support": "Mac 正在获取 iPhone 工具",
       "helper_missing": "测试助手还没有设置好",
       "helper_expired": "测试助手需要续期",
@@ -14990,6 +15203,7 @@
       "ui_automation_off": "打开 UI 自动化",
       "xcode_missing": "安装 Xcode",
       "xcode_too_old": "更新 Xcode",
+      "ios_behind_xcode": "更新 iPhone",
       "device_support": "让 Mac 保持开机",
       "helper_missing": "在 Mac 上打开应用",
       "helper_expired": "在 Mac 上打开应用",
@@ -15307,6 +15521,7 @@
       "helperText": "由 Mac 构建，并每 7 天续期一次。在 Xcode 中登录免费的 Apple 账户即可。",
       "helperUntrustedText": "点按开发者的名称，然后点按“信任”。",
       "teamLimitText": "从 iPhone 上删除一个你自己构建的 App：免费 Apple 账户最多允许 3 个。",
+      "iosBehind": "此 iPhone 运行 iOS {{ios}},而这台 Mac 上的 Xcode 适用于 iOS {{sdk}}。请更新 iPhone:设置 › 通用 › 软件更新。",
       "xcodeOld": "{{name}} 运行 iOS {{version}}，而 {{mac}} 上的 Xcode 最高只支持 iOS {{sdk}}。安装 Xcode {{major}}，然后在终端中运行下面的命令。",
       "xcodeOldAny": "{{name}} 运行 iOS {{version}}，比 {{mac}} 上的 Xcode 支持的版本更新。安装 Xcode {{major}}，然后在终端中运行下面的命令。",
       "uiRefusedText": "iPhone 拒绝了测试助手的点按。请解锁它，如有要求就输入密码。如果反复出现，把 设置 › 开发者 › 启用 UI 自动化 关闭再打开。",
@@ -16567,6 +16782,21 @@
     "tomorrowAt": "明天 {{time}}"
   },
   "work": {
+    "handed": {
+      "lead": "已移交给 <0/>{{name}}",
+      "working": "进行中",
+      "done": "用时 {{duration}} 完成",
+      "waitingYou": "等待你的回答",
+      "waiting": "等待回答",
+      "waitingApprovalYou": "等待你的批准",
+      "waitingApproval": "等待批准",
+      "waitingComputer": "等待电脑",
+      "paused": "已在方案限额处暂停",
+      "queued": "排队中",
+      "failed": "未完成",
+      "stopped": "已停止",
+      "step": "第 {{current}} 步，共 {{total}} 步"
+    },
     "duration": {
       "minutes_other": "{{count}} 分钟",
       "hours_other": "{{count}} 小时",
@@ -16643,6 +16873,9 @@
     "working": "后台进行中"
   },
   "chat": {
+    "request": {
+      "asksYou": "{{name}} 问你"
+    },
     "speedFallback": {
       "text": "ChatGPT 拒绝了此账号或模型的快速模式，因此这条回复以标准速度发送。",
       "action": "打开智能体"

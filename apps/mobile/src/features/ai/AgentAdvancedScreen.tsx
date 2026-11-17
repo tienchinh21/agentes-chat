@@ -1,5 +1,5 @@
 import type { AgentBrain, AgentBrainInput, BrainSpeed } from "@agenteschat/client";
-import { keys, useAgentBrain, useAiAccounts, useAiStatus, useApi, useModels } from "@agenteschat/client";
+import { useAgentBrain, useAiAccounts, useAiStatus, useModels } from "@agenteschat/client";
 import { signInPlan } from "@agenteschat/client/lib/ai-accounts";
 import { EVERYONE_AUDIENCE } from "@agenteschat/client/lib/audience";
 import {
@@ -22,21 +22,22 @@ import { agentGrammar } from "@agenteschat/client/lib/grammar";
 import { planOf } from "@agenteschat/client/lib/plans";
 import { isAuto } from "@agenteschat/client/lib/providers";
 import { isPersonal } from "@agenteschat/client/lib/workspace-mode";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useOrg } from "@/providers/org";
-import { GroupedHeader, GroupedList, GroupedRow, useToast } from "@/ui";
+import { GROUPED_ROW, GroupedHeader, GroupedList, GroupedRow, SkeletonList } from "@/ui";
 import { router } from "@/ui/navigation";
 import { useWidenAsk } from "../chat/ReachLines";
+import { Gap } from "../settings/parts";
+import { LoadFailed } from "../shared/FirstUse";
 import { useColors, useDirectory } from "../shared/hooks";
 import { agentLook } from "../shared/logic";
 import { PushedHeader } from "../shared/parts";
 import { EffortRamp, useBrainChoice, useEffortChoice } from "./EffortRamp";
 import { accountKindOf, advancedResetInput, agentAccounts } from "./logic";
-import { Note, PlanReplies } from "./parts";
+import { PlanReplies } from "./parts";
+import { useSaveBrain } from "./useSaveBrain";
 
 /*
  * An agent's "Configuração avançada" on the phone (ADR 0086), the web's dialog over "Quem pensa" as a screen of its
@@ -62,12 +63,23 @@ export const advancedOf = (view: AgentBrain, options?: readonly ContextLimit[]):
   };
 };
 
+/** The settings as saved, with the changes still on their way over them: each row shows its pick on the tap. */
+const withPending = (view: AgentBrain, now: Advanced, pending: AgentBrainInput): Advanced => ({
+  effort: pending.effort === undefined ? now.effort : effortOf(view.brain, pending.effort),
+  speed: pending.speed ?? now.speed,
+  contextTokens:
+    pending.contextTokens === undefined
+      ? now.contextTokens
+      : isContextLimit(pending.contextTokens)
+        ? pending.contextTokens
+        : null,
+  onlyOwner: pending.onlyOwner ?? now.onlyOwner,
+  fallback: pending.fallback ?? now.fallback,
+});
+
 export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
   const { t, i18n } = useTranslation();
   const { orgId, org } = useOrg();
-  const api = useApi();
-  const qc = useQueryClient();
-  const toast = useToast();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const dir = useDirectory();
@@ -79,7 +91,7 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
   const brain = useAgentBrain(orgId, agentId);
   const models = useModels();
   const apiKey = useAiStatus(orgId).data?.apiKey !== false;
-  const [busy, setBusy] = useState(false);
+  const { pending, save: send } = useSaveBrain(agentId);
   const view = brain.data;
   const kind = accountKindOf(view?.brain);
   // Its computer's row, where the computer's own sign-in's plan is (a seat has its own words).
@@ -100,34 +112,25 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
             : view.options.find((o) => o.kind === view.brain)?.models.find((m) => m.value === view.effectiveModel),
         );
   const now = view ? advancedOf(view, options) : null;
-  const may = !busy && view?.canEdit === true;
-  const effort = useEffortChoice(agentId, now?.effort);
-  const speed = useBrainChoice<BrainSpeed>(agentId, now?.speed ?? "standard", (value) => ({ speed: value }));
+  const shown = view && now ? withPending(view, now, pending) : null;
+  const may = view?.canEdit === true;
+  const effort = useEffortChoice(agentId, shown?.effort);
+  const speed = useBrainChoice<BrainSpeed>(agentId, shown?.speed ?? "standard", (value) => ({ speed: value }));
   const fallbackLabel = t("agentPage.work.brain.fallbackTitle", {
     computer: computerNameOf(t, org?.name ?? "", view?.computer?.name ?? "", isPersonal(org)),
   });
 
-  /** Saves at once and says what the row on "Pensa com" will say now (or `done`). */
-  const save = async (input: AgentBrainInput, done?: string) => {
-    setBusy(true);
-    try {
-      const next = await api.agents.setBrain(orgId, agentId, input);
-      qc.setQueryData(keys.agentBrain(orgId, agentId), next);
-      const line = advancedSummary(t, i18n.language, {
-        kind: next.brain,
-        autoModel,
-        apiKey,
-        now: advancedOf(next, options),
-      });
-      toast({ title: done ?? line, icon: "check" });
-    } catch {
-      toast({ title: t("agentPage.work.failed"), icon: "x" });
-    } finally {
-      for (const key of [keys.agentBrain(orgId, agentId), keys.agents(orgId)])
-        void qc.invalidateQueries({ queryKey: key });
-      setBusy(false);
-    }
-  };
+  /**
+   * Saves at once and says what the row on "Pensa com" will say now (or `done`). The row shows its pick on the tap and
+   * only it waits for the answer (`useSaveBrain`).
+   */
+  const save = (input: AgentBrainInput, done?: string) =>
+    send(
+      input,
+      (next) =>
+        done ??
+        advancedSummary(t, i18n.language, { kind: next.brain, autoModel, apiKey, now: advancedOf(next, options) }),
+    );
   const putBack = () => {
     if (!view || !now) return;
     void save(advancedResetInput(view, now, autoModel));
@@ -141,13 +144,14 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
         contentContainerStyle={[styles.in, { paddingBottom: insets.bottom + 24 }]}
       >
         {brain.isPending ? (
-          <ActivityIndicator color={c.muted} style={styles.loading} />
-        ) : !view || !now ? (
-          <Note icon="x">{t("common.loadFailed")}</Note>
+          <SkeletonList rows={4} />
+        ) : !view || !now || !shown ? (
+          <LoadFailed onRetry={() => void brain.refetch()} />
         ) : (
           <>
             {kind || view.brain === "model" ? (
-              <View style={styles.gap}>
+              <>
+                <Gap />
                 <GroupedList>
                   {autoModel ? (
                     // "Automático" picks the effort too: the row says so and, on a plan, leads to a model, which
@@ -170,7 +174,7 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                     </View>
                   )}
                 </GroupedList>
-              </View>
+              </>
             ) : null}
             {viewSpeedFits(view) ? (
               <>
@@ -201,9 +205,9 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                 label={t("brain.auto.label")}
                 sub={autoContextLine(t, view.brain)}
                 subLines={2}
-                checked={now.contextTokens === null}
+                checked={shown.contextTokens === null}
                 disabled={!may}
-                onPress={() => now.contextTokens !== null && void save({ contextTokens: null })}
+                onPress={() => shown.contextTokens !== null && void save({ contextTokens: null })}
               />
               {options.map((n) => (
                 <GroupedRow
@@ -211,9 +215,9 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                   label={contextSize(n)}
                   sub={t(`agentPage.work.brain.contextText.${n}`)}
                   subLines={2}
-                  checked={now.contextTokens === n}
+                  checked={shown.contextTokens === n}
                   disabled={!may}
-                  onPress={() => n !== now.contextTokens && void save({ contextTokens: n })}
+                  onPress={() => n !== shown.contextTokens && void save({ contextTokens: n })}
                 />
               ))}
             </GroupedList>
@@ -224,9 +228,10 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                   <PlanReplies
                     agent={name}
                     owner={view.canUsePlans ? undefined : ownerFirst}
-                    on={!view.onlyOwner}
+                    on={!shown.onlyOwner}
                     onChange={async (on) => {
-                      if (busy) return;
+                      // The switch waits for its own save before it flips again.
+                      if (pending.onlyOwner !== undefined) return;
                       // Letting more people in on someone else's plan asks first: it spends their plan.
                       if (on && view.onlyOwner && !(await ask(EVERYONE_AUDIENCE)([]))) return;
                       void save(
@@ -241,12 +246,12 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                     brain={kind}
                     plan={signInPlan(view, row, kind)}
                     coding={planOf(current?.provider)}
-                    disabled={busy}
                     keep
                   />
                 ) : null}
                 {apiKey ? (
-                  <View style={styles.gap}>
+                  <>
+                    <Gap />
                     <GroupedList>
                       <GroupedRow
                         label={fallbackLabel}
@@ -255,24 +260,24 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
                           name: t("common.about", { label: fallbackLabel }),
                           text: t("agentPage.work.brain.fallbackHint", g),
                         }}
-                        toggle={view.fallback}
+                        toggle={shown.fallback}
                         disabled={!may}
-                        onPress={() => void save({ fallback: !view.fallback })}
+                        onPress={() => pending.fallback === undefined && void save({ fallback: !shown.fallback })}
                       />
                     </GroupedList>
-                  </View>
+                  </>
                 ) : null}
               </>
             ) : null}
-            <View style={styles.gap}>
-              <GroupedList>
-                <GroupedRow
-                  label={t("agentPage.work.brain.advanced.defaults")}
-                  disabled={!may || isAdvancedDefault(view.brain, now)}
-                  onPress={putBack}
-                />
-              </GroupedList>
-            </View>
+            <Gap />
+            <GroupedList>
+              <GroupedRow
+                icon="undo"
+                label={t("agentPage.work.brain.advanced.defaults")}
+                disabled={!may || isAdvancedDefault(view.brain, shown)}
+                onPress={putBack}
+              />
+            </GroupedList>
           </>
         )}
       </ScrollView>
@@ -283,9 +288,6 @@ export function AgentAdvancedScreen({ agentId }: { agentId: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   in: { paddingHorizontal: 16, paddingTop: 8 },
-  loading: { marginTop: 16 },
-  // A list without a header keeps a header's room above it.
-  gap: { marginTop: 20 },
-  // On the rows' 14 pt edge.
-  ramp: { paddingHorizontal: 14, paddingVertical: 12 },
+  // On a grouped row's edges, as the rows around it.
+  ramp: { paddingHorizontal: GROUPED_ROW.padX, paddingVertical: 12 },
 });

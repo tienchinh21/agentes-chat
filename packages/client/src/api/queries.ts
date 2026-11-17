@@ -14,7 +14,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from "react";
 import { moveInGroups } from "../lib/agent-groups";
 import { type LevelsBefore, levelsBefore } from "../lib/approvals-level";
 import { artifactRefs } from "../lib/artifacts";
@@ -149,6 +149,7 @@ import type {
   MailImapInput,
   Me,
   Message,
+  ModelTier,
   MoveAgentsInput,
   NoticeCategory,
   NoticePrefs,
@@ -1525,7 +1526,10 @@ export function useAddChannelMember(orgId: string) {
  * `clientId`), which always waits in the channel list (a thread may not be loaded yet): a reply's copy is removed
  * from there too, or it would stay "sending…" next to the real one.
  */
-export function cacheMessage(qc: ReturnType<typeof useQueryClient>, orgId: string, message: Message) {
+export function cacheMessage(qc: ReturnType<typeof useQueryClient>, orgId: string, landed: Message) {
+  // A run that handed work over before this message of it came: its lines go under it.
+  const handed = landed.agentRunId ? handedByRun.get(`${orgId}:${landed.agentRunId}`) : undefined;
+  const message = handed && !landed.handedWorks ? { ...landed, handedWorks: handed } : landed;
   const channelKey = keys.messages(orgId, message.channelId);
   const key = message.threadId ? keys.thread(orgId, message.channelId, message.threadId) : channelKey;
   const withoutLocal = (list: Message[] | undefined) =>
@@ -1541,7 +1545,17 @@ export function cacheMessage(qc: ReturnType<typeof useQueryClient>, orgId: strin
   }
   // While that read is on its way, the root stands in as `useThreadMessages` shows it.
   const root = message.threadId ? cachedTopLevel(qc, orgId, message.threadId, message.channelId) : undefined;
-  qc.setQueryData<Message[]>(key, (list) => upsertMessage(withoutLocal(list) ?? (root && [root]), message));
+  qc.setQueryData<Message[]>(key, (list) => {
+    const next = upsertMessage(withoutLocal(list) ?? (root && [root]), message);
+    // The lines move under the run's newest message: one place each.
+    return handed && next
+      ? next.map((m) =>
+          m.id !== message.id && m.agentRunId === message.agentRunId && m.handedWorks
+            ? { ...m, handedWorks: undefined }
+            : m,
+        )
+      : next;
+  });
 }
 
 /**
@@ -1729,11 +1743,24 @@ export function cacheAgentProposal(
   void qc.invalidateQueries({ queryKey: keys.agentProposal(orgId, where.messageId) });
 }
 
-/** A new message's `clientId`: sent again with the same one (its answer was lost), it's written only once. */
-export const newClientId = () =>
-  typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID()
-    : `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+/**
+ * A new message's `clientId`: sent again with the same one (its answer was lost), it's written only once. A v4 UUID
+ * everywhere, since some routes take only a UUID: on a plain-http page `crypto.randomUUID` is missing but
+ * `getRandomValues` isn't, and the phone's JavaScript engine has no `crypto` at all (reading `crypto.randomUUID` there
+ * threw on every send and closed the app), so its bytes come from `Math.random`: an id that only has to be unique, not
+ * secret.
+ */
+export const newClientId = (): string => {
+  const c = (globalThis as { crypto?: Partial<Crypto> }).crypto;
+  if (typeof c?.randomUUID === "function") return c.randomUUID();
+  const b = new Uint8Array(16);
+  if (typeof c?.getRandomValues === "function") c.getRandomValues(b);
+  else for (let i = 0; i < b.length; i++) b[i] = Math.floor(Math.random() * 256);
+  b[6] = ((b[6] ?? 0) & 0x0f) | 0x40;
+  b[8] = ((b[8] ?? 0) & 0x3f) | 0x80;
+  const h = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+};
 
 /**
  * What `chat.post` gets for a message of mine: the quoted message, the files by id and a GIF or a sticker by what
@@ -1777,9 +1804,24 @@ function cacheSent(qc: QueryClient, orgId: string, message: Message, { clientId,
  * is replaced by the server's copy (matched by `clientId`, from the response
  * or the WebSocket, whichever comes first), or turns `failed` with a retry.
  * One with no answer from the server waits in the `outbox` instead.
+ *
+ * The component that sends draws the copy in the same render as the send: the cache tells the lists that read it on
+ * its next tick (on the phone, the next frame), so the field emptied first and the message showed a frame or more
+ * later. Drawn again with the send itself, the sender reads the list as the copy left it, and the words leave the field
+ * and land in the conversation together.
  */
 export function usePostMessage(orgId: string, channelId: string, options: PostMessageOptions) {
-  return useMutation(postMessageMutation(useApi(), useQueryClient(), orgId, channelId, options));
+  const [, drawn] = useReducer((n: number) => n + 1, 0);
+  const { onOptimistic } = options;
+  return useMutation(
+    postMessageMutation(useApi(), useQueryClient(), orgId, channelId, {
+      ...options,
+      onOptimistic: (local) => {
+        drawn();
+        onOptimistic?.(local);
+      },
+    }),
+  );
 }
 
 export interface PostMessageOptions {
@@ -2695,13 +2737,57 @@ export const useSettings = (orgId: string) => {
   return useQuery({ queryKey: keys.settings(orgId), queryFn: () => api.orgs.settings(orgId) });
 };
 
-export function useUpdateSettings(orgId: string) {
-  const api = useApi();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (input: Parameters<ApiClient["orgs"]["updateSettings"]>[1]) => api.orgs.updateSettings(orgId, input),
+/** What `orgs.updateSettings` takes: the settings that change, each optional. */
+export type OrgSettingsInput = Parameters<ApiClient["orgs"]["updateSettings"]>[1];
+
+/**
+ * The workspace's settings with a change shown before the server answers (a model of null is the default's). The
+ * context waits for the answer: the first run reads it to know its step, so it moves on only once the context is saved
+ * (and a refusal never sends it back a step with the words gone).
+ */
+export function settingsWith(settings: OrgSettings, input: OrgSettingsInput): OrgSettings {
+  const { autoModels, ...rest } = input;
+  delete rest.context;
+  if (!autoModels) return { ...settings, ...rest };
+  const models = { ...settings.autoModels };
+  for (const [provider, tiers] of Object.entries(autoModels)) {
+    const own = { ...models[provider] };
+    for (const [tier, model] of Object.entries(tiers ?? {})) {
+      if (model) own[tier as ModelTier] = model;
+      else delete own[tier as ModelTier];
+    }
+    models[provider] = own;
+  }
+  return { ...settings, ...rest, autoModels: models };
+}
+
+/**
+ * `useUpdateSettings`'s mutation, for a `MutationObserver` outside React (tests). The change shows in the settings at
+ * once (a switch moves as it is tapped, not when the server answers; the context once saved, `settingsWith`), and a
+ * refusal puts back what was there. With
+ * several in flight, only the last answer is written (an earlier one would flick a later change back meanwhile), and
+ * once the last one settles the settings are read again, so answers that crossed on the way leave the server's truth.
+ */
+export function updateSettingsMutation(api: ApiClient, qc: QueryClient, orgId: string) {
+  const key = keys.settings(orgId);
+  const mutationKey = ["org", orgId, "settings", "update"] as const;
+  // Counted while this one's own callbacks run: it is still pending then.
+  const alone = () => qc.isMutating({ mutationKey }) <= 1;
+  return mutationOptions({
+    mutationKey,
+    mutationFn: (input: OrgSettingsInput) => api.orgs.updateSettings(orgId, input),
+    onMutate: async (input: OrgSettingsInput) => {
+      // A read on its way would land over the change shown.
+      await qc.cancelQueries({ queryKey: key });
+      const before = qc.getQueryData<OrgSettings>(key);
+      if (before) qc.setQueryData<OrgSettings>(key, settingsWith(before, input));
+      return { before };
+    },
+    onError: (_e, _input, context) => {
+      if (context?.before && alone()) qc.setQueryData(key, context.before);
+    },
     onSuccess: (settings) => {
-      qc.setQueryData(keys.settings(orgId), settings);
+      if (alone()) qc.setQueryData(key, settings);
       void qc.invalidateQueries({ queryKey: keys.me });
       void qc.invalidateQueries({ queryKey: keys.overview(orgId) });
       // The default agent budget moves every percentage that follows it.
@@ -2713,7 +2799,17 @@ export function useUpdateSettings(orgId: string) {
         predicate: (q) => q.queryKey[0] === "org" && q.queryKey[1] === orgId && q.queryKey[4] === "detail",
       });
     },
+    onSettled: () => {
+      if (alone()) void qc.invalidateQueries({ queryKey: key });
+    },
   });
+}
+
+/** The workspace's settings, saved as they change: see `updateSettingsMutation`. */
+export function useUpdateSettings(orgId: string) {
+  const api = useApi();
+  const qc = useQueryClient();
+  return useMutation(updateSettingsMutation(api, qc, orgId));
 }
 
 /** Sets the workspace's approvals level: the settings and every agent's level show it at once. */
@@ -3260,17 +3356,39 @@ export const useTeamWeekPrefs = (orgId: string, enabled = true) => {
   return useQuery({ queryKey: keys.teamWeek(orgId), queryFn: () => api.orgs.teamWeek(orgId), enabled });
 };
 
+/**
+ * Saves some of those choices: a switch, an hour or a day shows at once and goes back if the server refuses it. The
+ * saves go one at a time, so the last answer is the last choice, and an earlier answer never undoes a later choice
+ * still on its way (`onMutate` still runs at once for one that waits its turn).
+ */
 export const useSetTeamWeekPrefs = (orgId: string) => {
   const api = useApi();
   const qc = useQueryClient();
+  const mutationKey = ["team-week-prefs", orgId];
   return useMutation({
+    mutationKey,
+    scope: { id: `team-week-prefs:${orgId}` },
     // A server from before the two cards is saved in the words it knows: it would drop these and answer 200.
     mutationFn: (patch: LodiPrefsPatch) =>
       api.orgs.setTeamWeek(
         orgId,
         qc.getQueryData<LodiPrefs>(keys.teamWeek(orgId))?.legacy ? legacyPatch(patch) : patch,
       ),
-    onSuccess: (prefs) => qc.setQueryData(keys.teamWeek(orgId), prefs),
+    onMutate: async (patch) => {
+      await qc.cancelQueries({ queryKey: keys.teamWeek(orgId) });
+      const before = qc.getQueryData<LodiPrefs>(keys.teamWeek(orgId));
+      if (before) qc.setQueryData<LodiPrefs>(keys.teamWeek(orgId), { ...before, ...patch });
+      return { before };
+    },
+    onError: (_error, _patch, context) => {
+      // A later choice still on its way answers with every choice the server keeps: its answer decides.
+      if (qc.isMutating({ mutationKey }) > 1) return;
+      if (context?.before) qc.setQueryData(keys.teamWeek(orgId), context.before);
+      void qc.invalidateQueries({ queryKey: keys.teamWeek(orgId) });
+    },
+    onSuccess: (prefs) => {
+      if (qc.isMutating({ mutationKey }) <= 1) qc.setQueryData(keys.teamWeek(orgId), prefs);
+    },
   });
 };
 
@@ -3421,6 +3539,9 @@ export const useConsultations = (orgId: string, channelId: string, enabled = tru
     queryFn: () => api.agents.consultations(orgId, channelId),
     enabled,
     staleTime: 10_000,
+    // Kept as long as the conversation's messages (`messagesQuery`): they change its rows, so a conversation shown
+    // again at once from memory has them too.
+    gcTime: 30 * 60_000,
     refetchInterval: (q) => (q.state.data?.some((c) => c.status === "open") ? CONSULT_GROUP_POLL_MS : false),
   });
 };
@@ -3766,6 +3887,24 @@ export function cacheMessageActions(
   });
 }
 
+/** Handed works by the run that handed them (`orgId:runId`), for that run's messages still to come (`cacheMessage`). */
+const handedByRun = new Map<string, WorkView[]>();
+
+/**
+ * A handed work in a cached list: where it already is, else under the last message here of the run that handed it.
+ * Unchanged when that run has no message here yet.
+ */
+export function withHandedWork(list: Message[], work: WorkView): Message[] {
+  const at = list.findIndex((m) => m?.handedWorks?.some((w) => w.id === work.id));
+  if (at >= 0)
+    return list.map((m, i) =>
+      i === at ? { ...m, handedWorks: m.handedWorks?.map((w) => (w.id === work.id ? work : w)) } : m,
+    );
+  const last = list.findLastIndex((m) => m && m.agentRunId === work.askerRunId);
+  if (last < 0) return list;
+  return list.map((m, i) => (i === last ? { ...m, handedWorks: [...(m.handedWorks ?? []), work] } : m));
+}
+
 /** A long work changed (`agent.work`, ADR 0121): its anchor's cached message carries the new view. */
 export function cacheMessageWork(
   qc: ReturnType<typeof useQueryClient>,
@@ -3773,9 +3912,14 @@ export function cacheMessageWork(
   channelId: string,
   work: WorkView,
 ) {
+  if (work.askerRunId) {
+    const key = `${orgId}:${work.askerRunId}`;
+    handedByRun.set(key, [...(handedByRun.get(key) ?? []).filter((w) => w.id !== work.id), work]);
+  }
   qc.setQueriesData({ queryKey: ["org", orgId, "channel", channelId] }, (data: unknown) => {
     if (!Array.isArray(data)) return data;
     const list = data as Message[];
+    if (work.askerRunId) return withHandedWork(list, work);
     if (!list.some((m) => m && m.id === work.anchorMessageId)) return data;
     return list.map((m) => (m.id === work.anchorMessageId ? { ...m, longWork: work } : m));
   });
@@ -5669,6 +5813,8 @@ export const channelThreadsQuery = (api: ApiClient, orgId: string, channelId: st
     queryKey: keys.channelThreads(orgId, channelId, tab),
     queryFn: () => api.threads.inChannel(orgId, channelId, { tab, limit: 100 }),
     staleTime: 30_000,
+    // As long as the conversation's messages (`messagesQuery`): its links are rows of that conversation.
+    gcTime: 30 * 60_000,
   });
 
 export function useChannelThreads(orgId: string, channelId: string, tab: "all" | "archived", enabled = true) {

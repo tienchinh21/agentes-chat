@@ -1196,6 +1196,119 @@
         "held": "MCP ile bağlan, çalışma alanının planı etkinleşince kullanılabilir. Şimdilik ajanları bu yolla getirin.",
         "paused": "Bu çalışma alanı duraklatıldığı sürece MCP ile bağlan kapalı. Şimdilik ajanları bu yolla getirin."
       },
+      "haveFileButton": "Bir dosyam veya bağlantım var",
+      "sheet": {
+        "title": "Ekibi {{app}} uygulamasından getirin",
+        "otherTitle": "Başka bir uygulamadan getirin",
+        "workspaceTitle": "Başka bir çalışma alanından getirin",
+        "fileTitle": "Bir dosyadan veya bağlantıdan getirin",
+        "fileLead": "Tanıdığımız herhangi bir uygulamanın dosyası. Kendiliğinden tanınır.",
+        "paths": {
+          "lead": "Nasıl getireceğinizi seçin. Bir şey oluşturulmadan önce her şeyi kontrol edersiniz.",
+          "best": "en eksiksizi",
+          "safe": "{{app}} anahtarları, şifreleri ve oturumları hiçbir yolla gelmez.",
+          "command": {
+            "title": "Bir komutla",
+            "line": "Dosyalar ve iş akışları dahil her şeyi getirir. Bir kodlama asistanı ya da terminal üzerinden"
+          },
+          "mcp": {
+            "title": "{{app}} uygulamasını bağlayarak",
+            "line": "Ajanları MCP üzerinden burada oluşturur. Dosyalar ve iş akışları olmadan"
+          },
+          "prompt": {
+            "title": "{{app}} uygulamasından isteyerek",
+            "line": "Bildiklerini yazar, siz de buraya yapıştırırsınız. Dosyalar ve iş akışları olmadan"
+          }
+        },
+        "useRequest": "İsteği yapıştırıp yanıtı getirmeyi tercih ederim",
+        "backToMcp": "MCP'ye dön",
+        "waitingMore": "Sıradakiler bekleniyor…",
+        "arrivedMore": "{{app}} hâlâ oluşturuyor olabilir. Sonradan gelenler burada görünür.",
+        "arrivedMoreAny": "Yapay zeka uygulamanız hâlâ oluşturuyor olabilir. Sonradan gelenler burada görünür.",
+        "readHere": "Tarayıcınızda okunur. Siz onaylayana kadar burada hiçbir şey değişmez.",
+        "request": {
+          "grok-bot": {
+            "lead": "Bot, sahip olduğu her şeyi JSON olarak yazar. Siz buraya yapıştırır ve bir şey oluşturulmadan önce kontrol edersiniz.",
+            "copyStep": "Botunuzla sohbete yapıştırın",
+            "answerStep": "Yanıtının tamamını buraya yapıştırın",
+            "answerPlaceholder": "Botun yanıt olarak verdiği JSON"
+          },
+          "chatgpt-dots": {
+            "lead": "Dot'unuz sahip olduğu her şeyi bir dosyaya yazar. Siz buraya bırakır ve bir şey oluşturulmadan önce kontrol edersiniz.",
+            "copyStep": "Yeni bir sohbete yapıştırın",
+            "answerStep": "Oluşturduğu dosyayı buraya bırakın"
+          },
+          "other": {
+            "copyStep": "Diğer uygulamada yeni bir sohbete yapıştırın",
+            "answerStep": "Döndürdüğü dosyayı bırakın ya da yanıtını yapıştırın",
+            "answerPlaceholder": "Yanıt ya da bir GitHub bağlantısı"
+          },
+          "computer": {
+            "lead": "{{app}} uygulamasındaki bir ajan bildiklerini bir dosyaya yazar, siz de bir şey oluşturulmadan önce kontrol edersiniz.",
+            "copyStep": "{{app}} uygulamasındaki bir ajanla bir sohbette bu isteği yapıştırın",
+            "answerStep": "Oluşturduğu dosyayı bırakın ya da yanıtını yapıştırın",
+            "answerPlaceholder": "{{app}} yanıtı"
+          }
+        },
+        "workspace": {
+          "download": "Diğer çalışma alanının dosyasını indirin",
+          "where": "Orada: Ayarlar › İçe ve dışa aktarma › Dosyayı indir.",
+          "open": "{{org}} çalışma alanını yeni sekmede aç",
+          "drop": ".json dosyasını buraya bırakın"
+        },
+        "lead": "Asistanınız bu bilgisayardaki {{app}} verilerini okur ve seçtiğiniz yere bir dosya yazar. Bir şey oluşturulmadan önce her şeyi kontrol edersiniz.",
+        "leadCommand": "Komut, bu bilgisayardaki {{app}} verilerini okur ve seçtiğiniz yere bir dosya yazar. Bir şey oluşturulmadan önce her şeyi kontrol edersiniz.",
+        "pasteAssistant": "Bunu kodlama asistanınıza yapıştırın",
+        "pasteTerminal": "Bunu bir terminale yapıştırın",
+        "pastePowerShell": "Bunu PowerShell'e yapıştırın",
+        "promptLabel": "Kodlama asistanı için istek",
+        "commandLabel": "Komut",
+        "copy": "İsteği kopyala",
+        "assistants": "Claude Code, Codex ya da bu bilgisayarda komut çalıştıran başka bir asistan.",
+        "commandHelp": "Nereye kaydedileceğini sorar ve bir dosya yazar. Hiçbir şey gönderilmez.",
+        "useCommand": "Komutu kendim çalıştırmayı tercih ederim",
+        "usePrompt": "Asistan için isteğe dön",
+        "os": {
+          "label": "Bu bilgisayarın sistemi",
+          "unix": "Mac veya Linux",
+          "windows": "Windows"
+        },
+        "dropStep": "Yazdığı dosyayı buraya bırakın",
+        "drop": "Dosyayı buraya bırakın",
+        "dropHelp": "{{file}}, seçtiğiniz klasörde",
+        "safe": "Yalnızca okuma. {{app}} içindeki anahtarlar, şifreler ve oturum bilgileri asla okunmaz.",
+        "ready_one": "{{count}} ajan gelmeye hazır",
+        "ready_other": "{{count}} ajan gelmeye hazır",
+        "readyOther": "Gelmeye hazır",
+        "others_one": "Ve {{count}} ajan daha",
+        "others_other": "Ve {{count}} ajan daha",
+        "routines_one": "{{count}} rutin",
+        "routines_other": "{{count}} rutin",
+        "notes_one": "{{count}} bellek kaydı",
+        "notes_other": "{{count}} bellek kaydı",
+        "skills_one": "{{count}} beceri",
+        "skills_other": "{{count}} beceri",
+        "channels_one": "{{count}} kanal",
+        "channels_other": "{{count}} kanal",
+        "files_one": "Ajanlara ait {{count}} dosya, Drive'a kopyalanır",
+        "files_other": "Ajanlara ait {{count}} dosya, Drive'a kopyalanır",
+        "filesSize": "{{size}}. Klasörleri tüm çalışma alanı görür.",
+        "after": "Ardından, her biri tek tıkla",
+        "bring_one": "Ajanı getir",
+        "bring_other": "{{count}} ajanı getir",
+        "choose": "Neler geleceğini seç",
+        "arrivedTitle": "Ekip burada",
+        "arrived_one": "{{names}} burada.",
+        "arrived_other": "{{names}} burada.",
+        "arrivedOther_one": "{{count}} öğe burada.",
+        "arrivedOther_other": "{{count}} öğe burada.",
+        "copying": "Dosyalar Drive'a kopyalanıyor",
+        "copyCount": "{{done}}/{{total}}",
+        "keepOpen": "Bitene kadar bu sekmeyi açık tutun.",
+        "missed_one": "{{count}} öğe gelmedi. Nedeni listede.",
+        "missed_other": "{{count}} öğe gelmedi. Her birinin nedeni listede.",
+        "see": "Gelenleri gör"
+      },
       "otherName": "Başka bir uygulama",
       "agenteschatName": "agentes.chat",
       "where": {
@@ -1319,13 +1432,115 @@
         "model_one": "{{who}}, burada kullanılamayan {{label}} modelini kullanıyor.",
         "model_other": "{{who}}, burada kullanılamayan {{label}} modelini kullanıyor.",
         "file_one": "{{who}}, {{label}} kullanıyor.",
-        "file_other": "{{who}}, {{label}} kullanıyor."
+        "file_other": "{{who}}, {{label}} kullanıyor.",
+        "webhook_one": "{{label}} rutini ({{who}}) burada yeni bir adres alıyor: eski adresi çağıran site veya uygulamada bunu değiştirin.",
+        "webhook_other": "{{label}} rutini ({{who}}) burada yeni bir adres alıyor: eski adresi çağıran site veya uygulamada bunu değiştirin."
+      },
+      "say": {
+        "intro": "Bu, {{app}} uygulamasından getirilen “{{title}}” iş akışıdır.",
+        "skillAbout": "{{app}} uygulamasından getirilen “{{title}}” iş akışını biri istediğinde çalıştırır.",
+        "asked": "{{app}} uygulamasında kendiliğinden başlıyordu. Burada biri istediğinde çalışır.",
+        "webhook": "Bu rutinin adresi çağrıldığında başlar: gelen şey sizin girdinizdir.",
+        "pr": "GitHub'da bir pull request açıldığında başlar: o pull request sizin girdinizdir.",
+        "prIn": "GitHub'da {{repos}} içinde bir pull request açıldığında başlar: o pull request sizin girdinizdir. Başka bir depodaysa hiçbir şey göndermeden durun.",
+        "text": "Şu metinden başlayın: “{{text}}”",
+        "keep": "(Şunu göz önünde bulundurun: {{text}})",
+        "ask": "Şimdiye kadar elinizde olanla birlikte @{{handle}} ajanından şunu isteyin: “{{task}}”. Sonra yanıtı kullanın.",
+        "image": "Bir görsel oluşturun: {{prompt}}",
+        "video": "Bir video oluşturun: {{prompt}}",
+        "if": "“{{rule}}” sorusunun yanıtı evetse devam edin.",
+        "otherwise": "Aksi halde:",
+        "stop": "Aksi halde hiçbir şey göndermeden burada durun.",
+        "approval": "Devam etmeden önce sohbette sizden sorumlu kişiden onay isteyin: “{{question}}”",
+        "approvalPlain": "Devam etmeden önce sohbette sizden sorumlu kişiden onay isteyin.",
+        "channel": "Sonucu #{{channel}} kanalına gönderin.",
+        "notify": "Sonucu sizden sorumlu kişiye gönderin.",
+        "file": "Sonucu Drive'a dosya olarak kaydedin.",
+        "githubComment": "Sonucu GitHub'a yorum olarak yazın.",
+        "githubDo": "GitHub'da sonuçla şunu yapın: {{action}}.",
+        "pass": "Bitirdiğinizde yanıtınızı @{{handle}} ajanına iletin: {{instruction}}",
+        "passPlain": "Bitirdiğinizde yanıtınızı @{{handle}} ajanına iletin."
+      },
+      "choose": {
+        "who": "Kimler geliyor",
+        "with": "Onlarla birlikte gelenler",
+        "flows": "İş akışları",
+        "agentOnly": "Oradaki talimatlarıyla",
+        "same": "Zaten burada, aynısı",
+        "of": {
+          "routine_one": "{{picked}}/{{count}} rutin",
+          "routine_other": "{{picked}}/{{count}} rutin",
+          "skill_one": "{{picked}}/{{count}} beceri",
+          "skill_other": "{{picked}}/{{count}} beceri",
+          "note_one": "{{picked}}/{{count}} bellek kaydı",
+          "note_other": "{{picked}}/{{count}} bellek kaydı",
+          "channel_one": "{{picked}}/{{count}} kanal",
+          "channel_other": "{{picked}}/{{count}} kanal"
+        },
+        "files_one": "Drive için {{count}} dosya",
+        "files_other": "Drive için {{count}} dosya",
+        "paused_one": "{{count}} tanesi orada olduğu gibi duraklatılmış gelir",
+        "paused_other": "{{count}} tanesi orada olduğu gibi duraklatılmış gelir",
+        "pausedOne": "duraklatılmış gelir",
+        "here_one": "{{count}} tanesi zaten burada",
+        "here_other": "{{count}} tanesi zaten burada",
+        "library": "Kütüphaneden, açtığınız kişiler için",
+        "passes": "yanıtını iletir: {{names}}",
+        "webhook": "yeni adres",
+        "pr": "bir pull request açıldığında",
+        "routine": "Rutin",
+        "skill": "Beceri",
+        "asked": "biri istediğinde çalışır",
+        "was": {
+          "schedule": "orada okuyamadığımız bir zamanlaması vardı, burada, biri istediğinde",
+          "webhook": "orada bir adresle başlıyordu, burada, biri istediğinde",
+          "message": "orada bir mesajla başlıyordu, burada, biri istediğinde",
+          "github": "orada GitHub'da başlıyordu, burada, biri istediğinde",
+          "discord": "orada Discord'da başlıyordu, burada, biri istediğinde",
+          "telegram": "orada Telegram'da başlıyordu, burada, biri istediğinde",
+          "slack": "orada Slack'te başlıyordu, burada, biri istediğinde",
+          "other": "orada kendiliğinden başlıyordu, burada, biri istediğinde"
+        },
+        "flowsLead": "Burada bir iş akışı rutine dönüşür: tetikleyicisi ne zaman çalışacağını belirler, adımları da isteğe yazılır.",
+        "becomesRoutine": "{{agent}} ajanının yürüttüğü bir rutine dönüşür. Adımlar isteğinde yer alır.",
+        "becomesSkill": "{{agent}} ajanının biri istediğinde kullandığı bir beceriye dönüşür. Adımlar içinde yer alır.",
+        "postsIn": "#{{channel}} kanalına yazar.",
+        "step": {
+          "when": "rutinin ne zaman çalıştığı",
+          "asked": "Biri istediğinde",
+          "text": "Metinle başlar",
+          "by": "{{name}} isteğiyle",
+          "image": "Görsel",
+          "video": "Video",
+          "if": "Eğer",
+          "stop": "devam eder, aksi halde durur",
+          "else": "devam eder, aksi halde:",
+          "approval": "Sohbette onay ister",
+          "channel": "#{{channel}} kanalına yazar",
+          "notify": "Sonucu size gönderir",
+          "file": "Drive'a kaydeder",
+          "github": "GitHub'da",
+          "lost": {
+            "file": "Oradan bir dosya",
+            "slack": "Slack'e yazar",
+            "discord": "Discord'a yazar",
+            "telegram": "Telegram'a yazar",
+            "messaging": "Bir mesajlaşma sohbetine yazar"
+          },
+          "notHere": "gelmiyor"
+        },
+        "bringWith_one": "{{count}} ajan ve {{more}} getir",
+        "bringWith_other": "{{count}} ajan ve {{more}} getir",
+        "more_one": "{{count}} öğe daha",
+        "more_other": "{{count}} öğe daha",
+        "notComing": "Mesajlaşma bağlantıları gelmiyor ({{list}}): burada onları bağlayacak bir yer yok."
       },
       "needDo": {
         "connection": "Bağla",
         "app": "Bağla",
         "model": "Model seç",
-        "file": "Drive'ı aç"
+        "file": "Drive'ı aç",
+        "webhook": "Rutinleri aç"
       },
       "linkSkipped_one": "Bağlantı sınırını aşan {{count}} dosya",
       "linkSkipped_other": "Bağlantı sınırını aşan {{count}} dosya",
@@ -2634,6 +2849,16 @@
     }
   },
   "rightHand": {
+    "brain": {
+      "unusable": {
+        "title": "Bir bilgisayar gerekiyor",
+        "computerOnly": "{{owner}} kişisine ait, yalnızca {{computer}} üzerinde oturum açık. Lodi, hesap olarak oturum açılmış bir planla düşünür.",
+        "noComputer": "{{owner}} kişisine ait. Bir bilgisayar gerekiyor ve çalışma alanında bağlı hiç yok.",
+        "away": "{{owner}} kişisine ait, {{computer}} üzerinde, şu an ulaşılamıyor.",
+        "connect": "Bilgisayar bağla",
+        "plans": "Planları gör"
+      }
+    },
     "label": "sağ kolun",
     "labelCapitalized": "Sağ kolun",
     "unusable": {
@@ -2748,6 +2973,7 @@
     "sharedName": "{{name}} (paylaşılan)",
     "sharedPlace": "Kanallarda ve kendi kendine çalışan işlerde kullanılır. Bu yeri tüm çalışma alanı paylaşır. Burada özel hiçbir şey tutma.",
     "computerNoHome": "Henüz bilgisayar yok. Bu çalışma alanının kendi bilgisayarı olduğunda bir tane olacak.",
+    "computerNoHomeServer": "Henüz tarayıcı yok. Bir tarayıcı olması için <guide>bu sunucuyu ajanların bilgisayarı olarak</guide> kurun.",
     "addComputer": "Bilgisayar ekle",
     "computerOneUser": "Burada bilgisayar yok. Çalışma alanının bilgisayarı tüm ajanları tek bir kullanıcı olarak çalıştırıyor, bu yüzden her kişinin yerini ayrı tutamıyor. Yükleyicinin --system seçeneğiyle kurulan bir Linux sunucusu bunu yapabilir.",
     "powers": {
@@ -3259,7 +3485,7 @@
       "gemini": {
         "title": "Gemini planınız",
         "tiers": "Google AI Pro, Google AI Ultra veya Gemini Enterprise",
-        "warning": "Google, kişisel bir Gemini planını başka uygulamaların içinde kullanmanın hesabın askıya alınmasına yol açabileceğini söylüyor."
+        "warning": "Google, kişisel bir Gemini planını başka uygulamaların içinde kullanmanın hesabın askıya alınmasına yol açabileceğini söylüyor. Bu riskten kaçınmak için bir Gemini API anahtarı veya Gemini Enterprise kullanın."
       },
       "zen": {
         "title": "OpenCode",
@@ -4200,6 +4426,7 @@
     "seeNewer": "Daha yeni isteği gör",
     "computerAway": "{{agent}} bilgisayarı şu anda yanıt vermiyor. Bu istek {{time}} saatine kadar açık kalır. Birazdan yeniden deneyin.",
     "computerPaused": "{{agent}} bilgisayarı sahibi tarafından duraklatıldı. Bu istek {{time}} saatine kadar açık kalır.",
+    "insecureContext": "Bu sayfa https üzerinden açılmadı, bu yüzden tarayıcı anahtarı kilitlemiyor. Sayfayı https:// (veya localhost) adresinden açın.",
     "failed": "İletilemedi. Ajanın bilgisayarı açık mı?",
     "changed": "Bu istek sen yanıtlarken değişti. Hiçbir şey gönderilmedi. Yeniden gönder.",
     "empty": "Değeri yazın.",
@@ -7665,6 +7892,9 @@
     }
   },
   "issues": {
+    "handedBy": "devreden: <0/>{{name}}",
+    "fromDm": "<0>{{name}} ile DM'inden</0>",
+    "fromDmText": "{{name}} ile DM'inden",
     "delete": {
       "action": "Görevi sil",
       "title": "#{{number}} görevi silinsin mi?",
@@ -7873,6 +8103,9 @@
       "label": "{{name}} çalışması",
       "runningTitle": "{{name}} bunun üzerinde çalışıyor",
       "waitingTitle": "{{name}} sizi bekliyor",
+      "finishedTitle": "{{name}} bitirdi",
+      "finishedMeta": "{{when}} · devreden: {{name}}",
+      "answer": "Yanıtla",
       "stalledTitle": "{{name}} durdu: {{when}}",
       "stalledText": "Görev hâlâ {{name}} üzerinde ama süren bir çalıştırma yok.",
       "started": "başladı: {{when}}",
@@ -14377,7 +14610,7 @@
       "ownerOnly": "Bu posta kutusuna erişimi yalnızca {{name}} verir.",
       "ownerOnlyUnknown": "Erişimi yalnızca bu posta kutusunu bağlayan kişi verebilir.",
       "onlyYou": "{{name}} bu posta kutusunu yalnızca senin için, DM'inde kullanır.",
-      "onlyYouAll": "{{name}} posta kutularını yalnızca senin için, DM'inde kullanır.",
+      "onlyYouAll": "{{name}}, posta kutularınızı yalnızca sizin için, DM'inizde kullanır.",
       "remove": "Erişimi kaldır",
       "removed": "{{name}} artık {{address}} adresine erişemiyor.",
       "saveError": {
@@ -15377,6 +15610,7 @@
       "ui_automation_off": "UI Otomasyonu kapalı",
       "xcode_missing": "Mac'te Xcode yüklü değil",
       "xcode_too_old": "Xcode bu iOS için çok eski",
+      "ios_behind_xcode": "Bu iPhone'un iOS'u Xcode'unkinden eski",
       "device_support": "Mac, iPhone araçlarını indiriyor",
       "helper_missing": "Test yardımcısı henüz kurulmadı",
       "helper_expired": "Test yardımcısının yenilenmesi gerekiyor",
@@ -15405,6 +15639,7 @@
       "ui_automation_off": "UI Otomasyonu'nu açın",
       "xcode_missing": "Xcode'u yükleyin",
       "xcode_too_old": "Xcode'u güncelleyin",
+      "ios_behind_xcode": "iPhone'u güncelle",
       "device_support": "Mac'i açık tutun",
       "helper_missing": "Mac'te uygulamayı açın",
       "helper_expired": "Mac'te uygulamayı açın",
@@ -15724,6 +15959,7 @@
       "helperText": "Mac onu her 7 günde bir oluşturur ve yeniler. Xcode'da ücretsiz bir Apple Account yeterlidir.",
       "helperUntrustedText": "Geliştiricinin adına, ardından Güven'e dokunun.",
       "teamLimitText": "iPhone'dan kendi oluşturduğunuz bir uygulamayı silin: Ücretsiz Apple Account 3 taneye izin verir.",
+      "iosBehind": "Bu iPhone iOS {{ios}} kullanıyor ve bu Mac'teki Xcode iOS {{sdk}} için. iPhone'u güncelleyin: Ayarlar › Genel › Yazılım Güncelleme.",
       "xcodeOld": "{{name}} iOS {{version}} kullanıyor ve {{mac}} üzerindeki Xcode en fazla iOS {{sdk}} sürümünü biliyor. Xcode {{major}} yükleyin, ardından bunu Terminal'de çalıştırın.",
       "xcodeOldAny": "{{name}} iOS {{version}} kullanıyor, bu {{mac}} üzerindeki Xcode'un bildiğinden yeni. Xcode {{major}} yükleyin, ardından bunu Terminal'de çalıştırın.",
       "uiRefusedText": "iPhone, test yardımcısının dokunuşlarını reddetti. Kilidini açın ve isterse parolasını girin. Tekrar olursa Ayarlar › Geliştirici › UI Otomasyonunu Etkinleştir seçeneğini kapatıp açın.",
@@ -17012,6 +17248,21 @@
     "tomorrowAt": "yarın {{time}}"
   },
   "work": {
+    "handed": {
+      "lead": "Devredildi: <0/>{{name}}",
+      "working": "üzerinde çalışıyor",
+      "done": "{{duration}} içinde bitti",
+      "waitingYou": "yanıtını bekliyor",
+      "waiting": "bir yanıt bekliyor",
+      "waitingApprovalYou": "onayını bekliyor",
+      "waitingApproval": "onay bekliyor",
+      "waitingComputer": "bilgisayarı bekliyor",
+      "paused": "plan sınırında duraklatıldı",
+      "queued": "sırada",
+      "failed": "bitmedi",
+      "stopped": "durduruldu",
+      "step": "adım {{current}}/{{total}}"
+    },
     "duration": {
       "minutes_one": "{{count}} dk",
       "minutes_other": "{{count}} dk",
@@ -17090,6 +17341,9 @@
     "working": "Arka planda"
   },
   "chat": {
+    "request": {
+      "asksYou": "{{name}} soruyor"
+    },
     "speedFallback": {
       "text": "ChatGPT bu hesap veya model için Hızlı hızı reddetti, bu yüzden bu yanıt standart hızda geldi.",
       "action": "Ajanı aç"

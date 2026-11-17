@@ -1224,6 +1224,130 @@
         "held": "Connecter avec MCP fonctionnera dès que l'abonnement de l'espace de travail sera actif. Pour l'instant, importez les agents par ici.",
         "paused": "Connecter avec MCP est désactivé tant que cet espace de travail est en pause. Pour l'instant, importez les agents par ici."
       },
+      "haveFileButton": "J'ai un fichier ou un lien",
+      "sheet": {
+        "title": "Importer l'équipe depuis {{app}}",
+        "otherTitle": "Les importer depuis une autre app",
+        "workspaceTitle": "Les importer depuis un autre espace de travail",
+        "fileTitle": "Les importer depuis un fichier ou un lien",
+        "fileLead": "Le fichier de n'importe quelle app que nous connaissons. Il est reconnu tout seul.",
+        "paths": {
+          "lead": "Choisissez comment les importer. Vous vérifiez tout avant que rien ne soit créé.",
+          "best": "le plus complet",
+          "safe": "Les clés, mots de passe et sessions de {{app}} ne viennent jamais, quel que soit le chemin.",
+          "command": {
+            "title": "Avec une commande",
+            "line": "Importe tout, même les fichiers et les workflows. Via un assistant de code ou le terminal"
+          },
+          "mcp": {
+            "title": "En connectant {{app}}",
+            "line": "Il crée les agents ici via MCP. Sans fichiers ni workflows"
+          },
+          "prompt": {
+            "title": "En demandant à {{app}}",
+            "line": "Il écrit ce qu'il sait, et vous le collez ici. Sans fichiers ni workflows"
+          }
+        },
+        "useRequest": "Je préfère coller la demande et rapporter la réponse",
+        "backToMcp": "Retour à MCP",
+        "waitingMore": "En attente des suivants…",
+        "arrivedMore": "{{app}} est peut-être encore en train de les créer. Ceux qui arrivent ensuite s'affichent ici.",
+        "arrivedMoreAny": "Votre app d'IA est peut-être encore en train de les créer. Ceux qui arrivent ensuite s'affichent ici.",
+        "readHere": "Lu dans votre navigateur. Rien ne change ici tant que vous ne confirmez pas.",
+        "request": {
+          "grok-bot": {
+            "lead": "Le bot écrit tout ce qu'il a en JSON. Vous le collez ici et le vérifiez avant que rien ne soit créé.",
+            "copyStep": "Collez-la dans la discussion avec votre bot",
+            "answerStep": "Collez toute sa réponse ici",
+            "answerPlaceholder": "Le JSON renvoyé par le bot"
+          },
+          "chatgpt-dots": {
+            "lead": "Votre dot écrit tout ce qu'il a dans un fichier. Vous le déposez ici et le vérifiez avant que rien ne soit créé.",
+            "copyStep": "Collez-la dans une nouvelle discussion",
+            "answerStep": "Déposez ici le fichier qu'il crée"
+          },
+          "other": {
+            "copyStep": "Collez-la dans une nouvelle conversation dans l'autre app",
+            "answerStep": "Déposez le fichier qu'elle renvoie, ou collez sa réponse",
+            "answerPlaceholder": "La réponse, ou un lien GitHub"
+          },
+          "computer": {
+            "lead": "Un agent de {{app}} écrit ce qu'il sait dans un fichier, et vous le vérifiez avant que rien ne soit créé.",
+            "copyStep": "Dans une conversation avec un agent de {{app}}, collez cette demande",
+            "answerStep": "Déposez le fichier qu'il crée, ou collez sa réponse",
+            "answerPlaceholder": "La réponse de {{app}}"
+          }
+        },
+        "workspace": {
+          "download": "Téléchargez le fichier de l'autre espace de travail",
+          "where": "Là-bas, dans Paramètres › Importer et exporter › Télécharger le fichier.",
+          "open": "Ouvrir {{org}} dans un nouvel onglet",
+          "drop": "Déposez le .json ici"
+        },
+        "lead": "Votre assistant lit {{app}} sur cet ordinateur et écrit un fichier à l'endroit de votre choix. Vous vérifiez tout avant que rien ne soit créé.",
+        "leadCommand": "La commande lit {{app}} sur cet ordinateur et écrit un fichier à l'endroit de votre choix. Vous vérifiez tout avant que rien ne soit créé.",
+        "pasteAssistant": "Collez ceci dans votre assistant de code",
+        "pasteTerminal": "Collez ceci dans un terminal",
+        "pastePowerShell": "Collez ceci dans PowerShell",
+        "promptLabel": "Demande pour l'assistant de code",
+        "commandLabel": "Commande",
+        "copy": "Copier la demande",
+        "assistants": "Claude Code, Codex ou un autre qui exécute des commandes sur cet ordinateur.",
+        "commandHelp": "Elle demande où enregistrer et écrit un fichier. Rien n'est envoyé.",
+        "useCommand": "Je préfère lancer la commande moi-même",
+        "usePrompt": "Retour à la demande pour l'assistant",
+        "os": {
+          "label": "Système de cet ordinateur",
+          "unix": "Mac ou Linux",
+          "windows": "Windows"
+        },
+        "dropStep": "Déposez ici le fichier créé",
+        "drop": "Déposez le fichier ici",
+        "dropHelp": "{{file}}, dans le dossier que vous avez choisi",
+        "safe": "Lecture seule. Les clés, mots de passe et connexions de {{app}} ne sont jamais lus.",
+        "ready_one": "{{count}} agent prêt à venir",
+        "ready_many": "{{count}} agents prêts à venir",
+        "ready_other": "{{count}} agents prêts à venir",
+        "readyOther": "Prêt à venir",
+        "others_one": "Et {{count}} autre agent",
+        "others_many": "Et {{count}} autres agents",
+        "others_other": "Et {{count}} autres agents",
+        "routines_one": "{{count}} routine",
+        "routines_many": "{{count}} routines",
+        "routines_other": "{{count}} routines",
+        "notes_one": "{{count}} souvenir",
+        "notes_many": "{{count}} souvenirs",
+        "notes_other": "{{count}} souvenirs",
+        "skills_one": "{{count}} compétence",
+        "skills_many": "{{count}} compétences",
+        "skills_other": "{{count}} compétences",
+        "channels_one": "{{count}} canal",
+        "channels_many": "{{count}} canaux",
+        "channels_other": "{{count}} canaux",
+        "files_one": "{{count}} fichier des agents, copié dans le Drive",
+        "files_many": "{{count}} fichiers des agents, copiés dans le Drive",
+        "files_other": "{{count}} fichiers des agents, copiés dans le Drive",
+        "filesSize": "{{size}}. Tout l'espace de travail voit les dossiers.",
+        "after": "Ensuite, un clic pour chacun",
+        "bring_one": "Importer l'agent",
+        "bring_many": "Importer les {{count}} agents",
+        "bring_other": "Importer les {{count}} agents",
+        "choose": "Choisir ce qui vient avec",
+        "arrivedTitle": "L'équipe est là",
+        "arrived_one": "{{names}} est là.",
+        "arrived_many": "{{names}} sont là.",
+        "arrived_other": "{{names}} sont là.",
+        "arrivedOther_one": "{{count}} élément est là.",
+        "arrivedOther_many": "{{count}} éléments sont là.",
+        "arrivedOther_other": "{{count}} éléments sont là.",
+        "copying": "Copie des fichiers dans le Drive",
+        "copyCount": "{{done}} sur {{total}}",
+        "keepOpen": "Gardez cet onglet ouvert jusqu'à la fin.",
+        "missed_one": "{{count}} élément n'est pas venu. La liste indique pourquoi.",
+        "missed_many": "{{count}} éléments ne sont pas venus. La liste indique pourquoi pour chacun.",
+        "missed_other": "{{count}} éléments ne sont pas venus. La liste indique pourquoi pour chacun.",
+        "see": "Voir ce qui est arrivé"
+      },
       "otherName": "Une autre app",
       "agenteschatName": "agentes.chat",
       "where": {
@@ -1353,13 +1477,125 @@
         "model_other": "{{who}} utilisent {{label}}, qui n'est pas disponible ici.",
         "file_one": "{{who}} utilise {{label}}.",
         "file_many": "{{who}} utilisent {{label}}.",
-        "file_other": "{{who}} utilisent {{label}}."
+        "file_other": "{{who}} utilisent {{label}}.",
+        "webhook_one": "La routine {{label}}, de {{who}}, reçoit une nouvelle adresse ici : changez-la sur le site ou dans l'app qui appelait l'ancienne.",
+        "webhook_many": "La routine {{label}}, de {{who}}, reçoit une nouvelle adresse ici : changez-la sur le site ou dans l'app qui appelait l'ancienne.",
+        "webhook_other": "La routine {{label}}, de {{who}}, reçoit une nouvelle adresse ici : changez-la sur le site ou dans l'app qui appelait l'ancienne."
+      },
+      "say": {
+        "intro": "Voici le workflow « {{title}} », importé depuis {{app}}.",
+        "skillAbout": "Exécute le workflow « {{title}} », importé depuis {{app}}, quand quelqu'un le demande.",
+        "asked": "Dans {{app}}, il démarrait tout seul. Ici, il s'exécute quand quelqu'un le demande.",
+        "webhook": "Il démarre quand l'adresse de cette routine est appelée : ce qui arrive est votre entrée.",
+        "pr": "Il démarre quand une pull request est ouverte sur GitHub : cette pull request est votre entrée.",
+        "prIn": "Il démarre quand une pull request est ouverte sur GitHub dans {{repos}} : cette pull request est votre entrée. Si elle est dans un autre dépôt, arrêtez-vous sans rien publier.",
+        "text": "Partez de ce texte : « {{text}} »",
+        "keep": "(Tenez compte de ceci : {{text}})",
+        "ask": "Demandez à @{{handle}} : « {{task}} », avec ce que vous avez jusqu'ici, et utilisez la réponse.",
+        "image": "Créez une image : {{prompt}}",
+        "video": "Créez une vidéo : {{prompt}}",
+        "if": "Si la réponse à « {{rule}} » est oui, continuez.",
+        "otherwise": "Sinon :",
+        "stop": "Sinon, arrêtez-vous ici sans rien publier.",
+        "approval": "Avant de continuer, demandez une approbation à la personne qui s'occupe de vous, dans la discussion : « {{question}} »",
+        "approvalPlain": "Avant de continuer, demandez une approbation à la personne qui s'occupe de vous, dans la discussion.",
+        "channel": "Publiez le résultat dans #{{channel}}.",
+        "notify": "Envoyez le résultat à la personne qui s'occupe de vous.",
+        "file": "Enregistrez le résultat sous forme de fichier dans le Drive.",
+        "githubComment": "Publiez le résultat en commentaire sur GitHub.",
+        "githubDo": "Sur GitHub, faites ceci avec le résultat : {{action}}.",
+        "pass": "Quand vous avez terminé, transmettez votre réponse à @{{handle}} : {{instruction}}",
+        "passPlain": "Quand vous avez terminé, transmettez votre réponse à @{{handle}}."
+      },
+      "choose": {
+        "who": "Qui vient",
+        "with": "Ce qui vient avec eux",
+        "flows": "Les workflows",
+        "agentOnly": "Avec ses instructions de là-bas",
+        "same": "Déjà ici, à l'identique",
+        "of": {
+          "routine_one": "{{picked}} sur {{count}} routine",
+          "routine_many": "{{picked}} sur {{count}} routines",
+          "routine_other": "{{picked}} sur {{count}} routines",
+          "skill_one": "{{picked}} sur {{count}} compétence",
+          "skill_many": "{{picked}} sur {{count}} compétences",
+          "skill_other": "{{picked}} sur {{count}} compétences",
+          "note_one": "{{picked}} sur {{count}} souvenir",
+          "note_many": "{{picked}} sur {{count}} souvenirs",
+          "note_other": "{{picked}} sur {{count}} souvenirs",
+          "channel_one": "{{picked}} sur {{count}} canal",
+          "channel_many": "{{picked}} sur {{count}} canaux",
+          "channel_other": "{{picked}} sur {{count}} canaux"
+        },
+        "files_one": "{{count}} fichier pour le Drive",
+        "files_many": "{{count}} fichiers pour le Drive",
+        "files_other": "{{count}} fichiers pour le Drive",
+        "paused_one": "{{count}} arrive en pause, comme là-bas",
+        "paused_many": "{{count}} arrivent en pause, comme là-bas",
+        "paused_other": "{{count}} arrivent en pause, comme là-bas",
+        "pausedOne": "arrive en pause",
+        "here_one": "{{count}} est déjà ici",
+        "here_many": "{{count}} sont déjà ici",
+        "here_other": "{{count}} sont déjà ici",
+        "library": "De la bibliothèque, pour qui vous l'activerez",
+        "passes": "transmet sa réponse à {{names}}",
+        "webhook": "nouvelle adresse",
+        "pr": "quand une pull request est ouverte",
+        "routine": "Routine",
+        "skill": "Compétence",
+        "asked": "s'exécute quand quelqu'un le demande",
+        "was": {
+          "schedule": "là-bas, il avait une planification que nous ne savons pas lire, ici, quand quelqu'un le demande",
+          "webhook": "là-bas, il démarrait depuis une adresse, ici, quand quelqu'un le demande",
+          "message": "là-bas, il démarrait à partir d'un message, ici, quand quelqu'un le demande",
+          "github": "là-bas, il démarrait sur GitHub, ici, quand quelqu'un le demande",
+          "discord": "là-bas, il démarrait sur Discord, ici, quand quelqu'un le demande",
+          "telegram": "là-bas, il démarrait sur Telegram, ici, quand quelqu'un le demande",
+          "slack": "là-bas, il démarrait sur Slack, ici, quand quelqu'un le demande",
+          "other": "là-bas, il démarrait tout seul, ici, quand quelqu'un le demande"
+        },
+        "flowsLead": "Ici, un workflow devient une routine : son déclencheur indique quand elle s'exécute, et ses étapes vont dans la demande.",
+        "becomesRoutine": "Devient une routine que {{agent}} exécute, avec les étapes dans sa demande.",
+        "becomesSkill": "Devient une compétence que {{agent}} utilise quand quelqu'un le demande, avec les étapes à l'intérieur.",
+        "postsIn": "Publie dans #{{channel}}.",
+        "step": {
+          "when": "quand la routine s'exécute",
+          "asked": "Quand quelqu'un le demande",
+          "text": "Part du texte",
+          "by": "à la demande de {{name}}",
+          "image": "Image",
+          "video": "Vidéo",
+          "if": "Si",
+          "stop": "continue, sinon, s'arrête",
+          "else": "continue, sinon :",
+          "approval": "Demande une approbation dans la discussion",
+          "channel": "Publie dans #{{channel}}",
+          "notify": "Vous envoie le résultat",
+          "file": "Enregistre dans le Drive",
+          "github": "Sur GitHub",
+          "lost": {
+            "file": "Un fichier de là-bas",
+            "slack": "Publie sur Slack",
+            "discord": "Publie sur Discord",
+            "telegram": "Publie sur Telegram",
+            "messaging": "Publie dans une discussion de messagerie"
+          },
+          "notHere": "ne vient pas"
+        },
+        "bringWith_one": "Importer {{count}} agent et {{more}}",
+        "bringWith_many": "Importer {{count}} agents et {{more}}",
+        "bringWith_other": "Importer {{count}} agents et {{more}}",
+        "more_one": "{{count}} autre élément",
+        "more_many": "{{count}} autres éléments",
+        "more_other": "{{count}} autres éléments",
+        "notComing": "Les connexions de messagerie ne viennent pas ({{list}}) : il n'y a rien ici à quoi les connecter."
       },
       "needDo": {
         "connection": "Connecter",
         "app": "Connecter",
         "model": "Choisir un modèle",
-        "file": "Ouvrir le Drive"
+        "file": "Ouvrir le Drive",
+        "webhook": "Ouvrir les routines"
       },
       "linkSkipped_one": "{{count}} fichier au-delà de la limite du lien",
       "linkSkipped_many": "{{count}} fichiers au-delà de la limite du lien",
@@ -2736,6 +2972,16 @@
     }
   },
   "rightHand": {
+    "brain": {
+      "unusable": {
+        "title": "Besoin d'un ordinateur",
+        "computerOnly": "De {{owner}}, connecté seulement sur {{computer}}. Lodi réfléchit avec un forfait connecté en tant que compte.",
+        "noComputer": "De {{owner}}. Il faut un ordinateur, et l'espace de travail n'en a aucun de connecté.",
+        "away": "De {{owner}}, sur {{computer}}, qui est absent.",
+        "connect": "Connecter un ordinateur",
+        "plans": "Voir les forfaits"
+      }
+    },
     "label": "votre bras droit",
     "labelCapitalized": "Votre bras droit",
     "unusable": {
@@ -2850,6 +3096,7 @@
     "sharedName": "{{name}} (partagé)",
     "sharedPlace": "Utilisé dans les canaux et pour le travail qui s'exécute tout seul. Tout le workspace partage cet espace. N'y gardez rien de privé.",
     "computerNoHome": "Pas encore d'ordinateur. Il en aura un quand ce workspace aura son propre ordinateur.",
+    "computerNoHomeServer": "Pas encore de navigateur. Configurez <guide>ce serveur comme ordinateur des agents</guide> pour lui en donner un.",
     "addComputer": "Ajouter un ordinateur",
     "computerOneUser": "Pas d'ordinateur ici. L'ordinateur du workspace exécute tous les agents sous un seul utilisateur et ne peut donc pas séparer l'espace de chaque personne. Un serveur Linux installé avec l'option --system de l'installateur le peut.",
     "powers": {
@@ -3388,7 +3635,7 @@
       "gemini": {
         "title": "Votre abonnement Gemini",
         "tiers": "Google AI Pro, Google AI Ultra ou Gemini Enterprise",
-        "warning": "Google indique qu'utiliser un abonnement Gemini personnel dans d'autres applications peut entraîner la suspension du compte."
+        "warning": "Google indique qu'utiliser un abonnement Gemini personnel dans d'autres applications peut entraîner la suspension du compte. Pour éviter ce risque, utilisez une clé API Gemini ou Gemini Enterprise."
       },
       "zen": {
         "title": "OpenCode",
@@ -4348,6 +4595,7 @@
     "seeNewer": "Voir la demande plus récente",
     "computerAway": "L'ordinateur de {{agent}} ne répond pas pour le moment. Cette demande reste ouverte jusqu'à {{time}}. Réessayez dans un instant.",
     "computerPaused": "L'ordinateur de {{agent}} est mis en pause par son propriétaire. Cette demande reste ouverte jusqu'à {{time}}.",
+    "insecureContext": "Cette page n'est pas ouverte en https, le navigateur ne verrouille donc pas la clé. Ouvrez-la en https:// (ou localhost).",
     "failed": "Impossible de le transmettre. L'ordinateur de l'agent est-il allumé ?",
     "changed": "Cette demande a changé pendant que vous répondiez. Rien n'a été envoyé. Renvoyez-la.",
     "empty": "Saisissez la valeur.",
@@ -7975,6 +8223,9 @@
     }
   },
   "issues": {
+    "handedBy": "confiée par <0/>{{name}}",
+    "fromDm": "depuis <0>ta DM avec {{name}}</0>",
+    "fromDmText": "depuis ta DM avec {{name}}",
     "delete": {
       "action": "Supprimer la tâche",
       "title": "Supprimer la tâche #{{number}} ?",
@@ -8195,6 +8446,9 @@
       "runningTitle_female": "{{name}} y travaille",
       "waitingTitle": "{{name}} vous attend",
       "waitingTitle_female": "{{name}} vous attend",
+      "finishedTitle": "{{name}} l'a terminée",
+      "finishedMeta": "{{when}} · confiée par {{name}}",
+      "answer": "Répondre",
       "stalledTitle": "{{name}} s'est arrêté {{when}}",
       "stalledTitle_female": "{{name}} s'est arrêtée {{when}}",
       "stalledText": "La tâche est toujours confiée à {{name}}, mais aucune exécution n'est en cours.",
@@ -15945,6 +16199,7 @@
       "ui_automation_off": "L'automatisation de l'IU est désactivée",
       "xcode_missing": "Xcode n'est pas installé sur le Mac",
       "xcode_too_old": "Xcode est trop ancien pour cette version d'iOS",
+      "ios_behind_xcode": "L'iOS de cet iPhone est plus ancien que celui de Xcode",
       "device_support": "Le Mac récupère les outils de l'iPhone",
       "helper_missing": "L'app de test n'est pas encore configurée",
       "helper_expired": "L'app de test doit être renouvelée",
@@ -15973,6 +16228,7 @@
       "ui_automation_off": "Activez l'automatisation de l'IU",
       "xcode_missing": "Installez Xcode",
       "xcode_too_old": "Mettez Xcode à jour",
+      "ios_behind_xcode": "Mettez à jour l'iPhone",
       "device_support": "Laissez le Mac allumé",
       "helper_missing": "Ouvrez l'app sur le Mac",
       "helper_expired": "Ouvrez l'app sur le Mac",
@@ -16294,6 +16550,7 @@
       "helperText": "Créée et renouvelée par le Mac tous les 7 jours. Un Apple Account gratuit dans Xcode suffit.",
       "helperUntrustedText": "Touchez le nom du développeur, puis Se fier.",
       "teamLimitText": "Supprimez de l'iPhone une app que vous avez créée : un Apple Account gratuit en permet 3.",
+      "iosBehind": "Cet iPhone est sous iOS {{ios}} et Xcode sur ce Mac est pour iOS {{sdk}}. Mettez à jour l'iPhone : Réglages › Général › Mise à jour logicielle.",
       "xcodeOld": "{{name}} est sous iOS {{version}} et Xcode sur {{mac}} connaît au plus iOS {{sdk}}. Installez Xcode {{major}}, puis lancez ceci dans Terminal.",
       "xcodeOldAny": "{{name}} est sous iOS {{version}}, plus récent que ce que connaît Xcode sur {{mac}}. Installez Xcode {{major}}, puis lancez ceci dans Terminal.",
       "uiRefusedText": "L'iPhone a refusé les touchers de l'app de test. Déverrouillez-le et saisissez son code s'il le demande. Si cela continue, désactivez puis réactivez Réglages › Développeur › Activer l'automatisation de l'IU.",
@@ -17616,6 +17873,21 @@
     "tomorrowAt": "demain à {{time}}"
   },
   "work": {
+    "handed": {
+      "lead": "Confié à <0/>{{name}}",
+      "working": "en cours",
+      "done": "terminé en {{duration}}",
+      "waitingYou": "attend ta réponse",
+      "waiting": "attend une réponse",
+      "waitingApprovalYou": "attend ton approbation",
+      "waitingApproval": "attend une approbation",
+      "waitingComputer": "attend l'ordinateur",
+      "paused": "en pause à la limite du forfait",
+      "queued": "en file d'attente",
+      "failed": "n'a pas abouti",
+      "stopped": "arrêté",
+      "step": "étape {{current}} sur {{total}}"
+    },
     "duration": {
       "minutes_one": "{{count}} min",
       "minutes_many": "{{count}} min",
@@ -17696,6 +17968,9 @@
     "working": "En arrière-plan"
   },
   "chat": {
+    "request": {
+      "asksYou": "{{name}} te demande"
+    },
     "speedFallback": {
       "text": "ChatGPT a refusé la vitesse Rapide pour ce compte ou ce modèle, cette réponse est donc arrivée en standard.",
       "action": "Ouvrir l'agent"

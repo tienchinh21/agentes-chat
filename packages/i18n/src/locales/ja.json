@@ -1170,6 +1170,108 @@
         "held": "「MCPで接続」は、ワークスペースのプランが有効になると使えます。今はこの方法でエージェントを取り込んでください。",
         "paused": "このワークスペースは一時停止中のため、「MCPで接続」は使えません。今はこの方法でエージェントを取り込んでください。"
       },
+      "haveFileButton": "ファイルかリンクがあります",
+      "sheet": {
+        "title": "{{app}}からチームを移行",
+        "otherTitle": "別のアプリから移行",
+        "workspaceTitle": "別のワークスペースから移行",
+        "fileTitle": "ファイルかリンクから移行",
+        "fileLead": "対応しているアプリのファイルなら、どれでも使えます。自動で判別されます。",
+        "paths": {
+          "lead": "移行の方法を選んでください。作成する前にすべて確認できます。",
+          "best": "最も完全",
+          "safe": "{{app}}のキー、パスワード、セッションは、どの方法でも移行されません。",
+          "command": {
+            "title": "コマンドで",
+            "line": "ファイルやワークフローまで、すべて移行します。コーディングアシスタントかターミナルから"
+          },
+          "mcp": {
+            "title": "{{app}}を接続して",
+            "line": "MCPを通じて、ここにエージェントを作成します。ファイルとワークフローは含まれません"
+          },
+          "prompt": {
+            "title": "{{app}}に頼んで",
+            "line": "知っていることを書き出し、それをここに貼り付けます。ファイルとワークフローは含まれません"
+          }
+        },
+        "useRequest": "リクエストを貼り付けて、返信を持ってくる方法にする",
+        "backToMcp": "MCPに戻る",
+        "waitingMore": "続きを待っています…",
+        "arrivedMore": "{{app}}がまだ作成中かもしれません。あとから届いたエージェントもここに表示されます。",
+        "arrivedMoreAny": "AIアプリがまだ作成中かもしれません。あとから届いたエージェントもここに表示されます。",
+        "readHere": "ブラウザ内で読み込みます。確定するまで、ここでは何も変更されません。",
+        "request": {
+          "grok-bot": {
+            "lead": "ボットが持っているものをすべてJSONで書き出します。それをここに貼り付け、作成する前に確認できます。",
+            "copyStep": "ボットとのチャットに貼り付けてください",
+            "answerStep": "返信全体をここに貼り付けてください",
+            "answerPlaceholder": "ボットが返信したJSON"
+          },
+          "chatgpt-dots": {
+            "lead": "dotが持っているものをすべてファイルに書き出します。それをここにドロップし、作成する前に確認できます。",
+            "copyStep": "新しいチャットに貼り付けてください",
+            "answerStep": "作成されたファイルをここにドロップしてください"
+          },
+          "other": {
+            "copyStep": "もう一方のアプリで新しい会話を開き、貼り付けてください",
+            "answerStep": "返ってきたファイルをドロップするか、返信を貼り付けてください",
+            "answerPlaceholder": "返信、またはGitHubのリンク"
+          },
+          "computer": {
+            "lead": "{{app}}のエージェントが知っていることをファイルに書き出し、作成する前にあなたが確認します。",
+            "copyStep": "{{app}}のエージェントとの会話に、このリクエストを貼り付けてください",
+            "answerStep": "作成されたファイルをドロップするか、返信を貼り付けてください",
+            "answerPlaceholder": "{{app}}からの返信"
+          }
+        },
+        "workspace": {
+          "download": "もう一方のワークスペースのファイルをダウンロードしてください",
+          "where": "そちらで、設定 › インポートとエクスポート › ファイルをダウンロード。",
+          "open": "新しいタブで{{org}}を開く",
+          "drop": ".jsonをここにドロップしてください"
+        },
+        "lead": "アシスタントがこのコンピューターの{{app}}を読み取り、指定した場所にファイルを書き出します。作成する前に、すべて確認できます。",
+        "leadCommand": "コマンドがこのコンピューターの{{app}}を読み取り、指定した場所にファイルを書き出します。作成する前に、すべて確認できます。",
+        "pasteAssistant": "これをコーディングアシスタントに貼り付けてください",
+        "pasteTerminal": "これをターミナルに貼り付けてください",
+        "pastePowerShell": "これをPowerShellに貼り付けてください",
+        "promptLabel": "コーディングアシスタントへのリクエスト",
+        "commandLabel": "コマンド",
+        "copy": "リクエストをコピー",
+        "assistants": "Claude Code、Codex、またはこのコンピューターでコマンドを実行できるほかのアシスタント。",
+        "commandHelp": "保存先を尋ねてから、ファイルを書き出します。何も送信されません。",
+        "useCommand": "自分でコマンドを実行する",
+        "usePrompt": "アシスタントへのリクエストに戻る",
+        "os": {
+          "label": "このコンピューターのOS",
+          "unix": "MacまたはLinux",
+          "windows": "Windows"
+        },
+        "dropStep": "書き出されたファイルをここにドロップしてください",
+        "drop": "ファイルをここにドロップ",
+        "dropHelp": "選んだフォルダにある{{file}}",
+        "safe": "読み取りのみです。{{app}}のキー、パスワード、ログイン情報は読み取りません。",
+        "ready_other": "エージェント{{count}}体を移行できます",
+        "readyOther": "移行の準備ができました",
+        "others_other": "ほかにエージェント{{count}}体",
+        "routines_other": "ルーティン{{count}}件",
+        "notes_other": "メモリ{{count}}件",
+        "skills_other": "スキル{{count}}件",
+        "channels_other": "チャンネル{{count}}件",
+        "files_other": "Driveにコピーするエージェントのファイル{{count}}件",
+        "filesSize": "{{size}}。フォルダはワークスペース全体から見えます。",
+        "after": "あとで、それぞれワンクリックで",
+        "bring_other": "エージェント{{count}}体を移行",
+        "choose": "移行するものを選ぶ",
+        "arrivedTitle": "チームが到着しました",
+        "arrived_other": "{{names}}が到着しました。",
+        "arrivedOther_other": "{{count}}件が届きました。",
+        "copying": "ファイルをDriveにコピーしています",
+        "copyCount": "{{total}}件中{{done}}件",
+        "keepOpen": "完了するまで、このタブを開いたままにしてください。",
+        "missed_other": "{{count}}件は移行されませんでした。それぞれの理由はリストにあります。",
+        "see": "届いたものを見る"
+      },
       "otherName": "別のアプリ",
       "agenteschatName": "agentes.chat",
       "where": {
@@ -1287,13 +1389,105 @@
         "app_other": "{{who}}は{{label}}を使います。",
         "secret_other": "{{who}}は{{label}}を使います。これはファイルに含まれないため、エージェントがチャットで尋ねます。",
         "model_other": "{{who}}は{{label}}を使いますが、ここでは利用できません。",
-        "file_other": "{{who}}は{{label}}を使います。"
+        "file_other": "{{who}}は{{label}}を使います。",
+        "webhook_other": "{{who}}のルーティン{{label}}には、ここで新しいアドレスが割り当てられます。古いアドレスを呼び出していたサイトやアプリで、アドレスを変更してください。"
+      },
+      "say": {
+        "intro": "これは{{app}}から移行したワークフロー「{{title}}」です。",
+        "skillAbout": "{{app}}から移行したワークフロー「{{title}}」を、頼まれたときに実行します。",
+        "asked": "{{app}}では自動で始まっていましたが、ここでは頼まれたときに実行します。",
+        "webhook": "このルーティンのアドレスが呼び出されると始まります。届いた内容があなたへの入力です。",
+        "pr": "GitHubでプルリクエストが開かれると始まります。そのプルリクエストがあなたへの入力です。",
+        "prIn": "GitHubの{{repos}}でプルリクエストが開かれると始まります。そのプルリクエストがあなたへの入力です。別のリポジトリのものなら、何も投稿せずに終了してください。",
+        "text": "次のテキストから始めてください。「{{text}}」",
+        "keep": "（留意点：{{text}}）",
+        "ask": "これまでに得た内容を添えて、@{{handle}}に「{{task}}」と頼み、その回答を使ってください。",
+        "image": "画像を作成してください：{{prompt}}",
+        "video": "動画を作成してください：{{prompt}}",
+        "if": "「{{rule}}」の答えが「はい」なら、先に進んでください。",
+        "otherwise": "そうでなければ：",
+        "stop": "そうでなければ、何も投稿せずにここで終了してください。",
+        "approval": "先に進む前に、チャットであなたの責任者に承認を求めてください。「{{question}}」",
+        "approvalPlain": "先に進む前に、チャットであなたの責任者に承認を求めてください。",
+        "channel": "結果を#{{channel}}に投稿してください。",
+        "notify": "結果をあなたの責任者に送ってください。",
+        "file": "結果をファイルとしてDriveに保存してください。",
+        "githubComment": "結果をGitHubにコメントしてください。",
+        "githubDo": "GitHubで、結果を使って次のことをしてください：{{action}}。",
+        "pass": "終わったら、回答を@{{handle}}に渡してください：{{instruction}}",
+        "passPlain": "終わったら、回答を@{{handle}}に渡してください。"
+      },
+      "choose": {
+        "who": "移行するエージェント",
+        "with": "一緒に移行するもの",
+        "flows": "ワークフロー",
+        "agentOnly": "元のアプリの指示ごと",
+        "same": "同じものがすでにあります",
+        "of": {
+          "routine_other": "ルーティン{{count}}件中{{picked}}件",
+          "skill_other": "スキル{{count}}件中{{picked}}件",
+          "note_other": "メモリ{{count}}件中{{picked}}件",
+          "channel_other": "チャンネル{{count}}件中{{picked}}件"
+        },
+        "files_other": "Driveにコピーするファイル{{count}}件",
+        "paused_other": "{{count}}件は元のアプリと同じく一時停止のまま届きます",
+        "pausedOne": "一時停止のまま届きます",
+        "here_other": "{{count}}件はすでにここにあります",
+        "library": "ライブラリに入り、オンにしたエージェントが使えます",
+        "passes": "回答を{{names}}に渡します",
+        "webhook": "新しいアドレス",
+        "pr": "プルリクエストが開かれたとき",
+        "routine": "ルーティン",
+        "skill": "スキル",
+        "asked": "頼まれたときに実行",
+        "was": {
+          "schedule": "元のアプリのスケジュールは読み取れないため、ここでは頼まれたときに実行",
+          "webhook": "元のアプリではアドレスから起動、ここでは頼まれたときに実行",
+          "message": "元のアプリではメッセージで起動、ここでは頼まれたときに実行",
+          "github": "元のアプリではGitHubから起動、ここでは頼まれたときに実行",
+          "discord": "元のアプリではDiscordから起動、ここでは頼まれたときに実行",
+          "telegram": "元のアプリではTelegramから起動、ここでは頼まれたときに実行",
+          "slack": "元のアプリではSlackから起動、ここでは頼まれたときに実行",
+          "other": "元のアプリでは自動で起動、ここでは頼まれたときに実行"
+        },
+        "flowsLead": "ここでは、ワークフローはルーティンになります。トリガーがルーティンの実行タイミングになり、手順は依頼内容に入ります。",
+        "becomesRoutine": "{{agent}}が実行するルーティンになり、手順はその依頼内容に入ります。",
+        "becomesSkill": "頼まれたときに{{agent}}が使うスキルになり、手順はスキルの中に入ります。",
+        "postsIn": "#{{channel}}に投稿します。",
+        "step": {
+          "when": "ルーティンの実行タイミング",
+          "asked": "頼まれたとき",
+          "text": "テキストから開始",
+          "by": "{{name}}の依頼",
+          "image": "画像",
+          "video": "動画",
+          "if": "条件",
+          "stop": "続行、そうでなければ停止",
+          "else": "続行、そうでなければ：",
+          "approval": "チャットで承認を求める",
+          "channel": "#{{channel}}に投稿",
+          "notify": "結果をあなたに送る",
+          "file": "Driveに保存",
+          "github": "GitHubで",
+          "lost": {
+            "file": "元のアプリのファイル",
+            "slack": "Slackに投稿",
+            "discord": "Discordに投稿",
+            "telegram": "Telegramに投稿",
+            "messaging": "メッセージアプリのチャットに投稿"
+          },
+          "notHere": "移行されません"
+        },
+        "bringWith_other": "エージェント{{count}}体と{{more}}を移行",
+        "more_other": "ほか{{count}}件",
+        "notComing": "メッセージアプリとの接続（{{list}}）は移行されません。ここには接続先がないためです。"
       },
       "needDo": {
         "connection": "接続",
         "app": "接続",
         "model": "モデルを選ぶ",
-        "file": "Driveを開く"
+        "file": "Driveを開く",
+        "webhook": "ルーティンを開く"
       },
       "linkSkipped_other": "リンクの上限を超えたファイル{{count}}件",
       "linkSkippedHelp": "リンクから読み込めるのは200ファイル、8 MBまでです。残りを移行するには、フォルダをダウンロードしてここにドロップしてください。",
@@ -2544,6 +2738,16 @@
     }
   },
   "rightHand": {
+    "brain": {
+      "unusable": {
+        "title": "コンピューターが必要です",
+        "computerOnly": "{{owner}}のもの。{{computer}}でのみサインインしています。Lodiはアカウントとしてサインインしたプランで考えます。",
+        "noComputer": "{{owner}}のもの。コンピューターが必要ですが、ワークスペースには接続されたものがありません。",
+        "away": "{{owner}}のもの。{{computer}}上にありますが、離席中です。",
+        "connect": "コンピューターを接続",
+        "plans": "プランを見る"
+      }
+    },
     "label": "あなたの右腕",
     "labelCapitalized": "あなたの右腕",
     "unusable": {
@@ -2658,6 +2862,7 @@
     "sharedName": "{{name}}(共有)",
     "sharedPlace": "チャンネルや、自動で動く作業で使われます。この場所はワークスペース全体で共有されます。非公開のものはここに置かないでください。",
     "computerNoHome": "まだコンピューターがありません。このワークスペースに専用のコンピューターが追加されると使えるようになります。",
+    "computerNoHomeServer": "まだブラウザがありません。<guide>このサーバーをエージェントのコンピューターとして</guide>設定すると使えるようになります。",
     "addComputer": "コンピューターを追加",
     "computerOneUser": "ここではコンピューターを使えません。ワークスペースのコンピューターはすべてのエージェントを 1 人のユーザーとして動かすため、人ごとの場所を分けられません。インストーラーの --system オプションでセットアップした Linux サーバーなら分けられます。",
     "powers": {
@@ -3144,7 +3349,7 @@
       "gemini": {
         "title": "あなたのGeminiプラン",
         "tiers": "Google AI Pro、Google AI Ultra、またはGemini Enterprise",
-        "warning": "Googleによると、個人のGeminiプランを他のアプリ内で使うと、アカウントが停止されることがあります。"
+        "warning": "Googleによると、個人のGeminiプランを他のアプリ内で使うと、アカウントが停止されることがあります。このリスクを避けるには、Gemini APIキーまたはGemini Enterpriseを使ってください。"
       },
       "zen": {
         "title": "OpenCode",
@@ -4072,6 +4277,7 @@
     "seeNewer": "新しいリクエストを見る",
     "computerAway": "{{agent}}のコンピューターが今は応答していません。このリクエストは{{time}}まで開いています。少ししてからもう一度お試しください。",
     "computerPaused": "{{agent}}のコンピューターは所有者が一時停止しています。このリクエストは{{time}}まで開いています。",
+    "insecureContext": "このページは https で開かれていないため、ブラウザーはキーを保護できません。https://(または localhost)で開いてください。",
     "failed": "送信できませんでした。エージェントのコンピューターの電源は入っていますか？",
     "changed": "回答中にこのリクエストが変更されました。何も送信されていません。もう一度送信してください。",
     "empty": "値を入力してください。",
@@ -7425,6 +7631,9 @@
     }
   },
   "issues": {
+    "handedBy": "<0/>{{name}}から引き継ぎ",
+    "fromDm": "<0>{{name}}とのDM</0>から",
+    "fromDmText": "{{name}}とのDMから",
     "delete": {
       "action": "タスクを削除",
       "title": "タスク #{{number}} を削除しますか？",
@@ -7624,6 +7833,9 @@
       "label": "{{name}}の作業",
       "runningTitle": "{{name}}が作業中です",
       "waitingTitle": "{{name}}があなたを待っています",
+      "finishedTitle": "{{name}}が完了しました",
+      "finishedMeta": "{{when}} · {{name}}から引き継ぎ",
+      "answer": "回答する",
       "stalledTitle": "{{name}}は{{when}}に停止しました",
       "stalledText": "タスクはまだ{{name}}が担当していますが、実行中の処理はありません。",
       "started": "{{when}}に開始",
@@ -14898,6 +15110,7 @@
       "ui_automation_off": "UIオートメーションがオフです",
       "xcode_missing": "MacにXcodeがインストールされていません",
       "xcode_too_old": "このiOSにはXcodeが古すぎます",
+      "ios_behind_xcode": "この iPhone の iOS は Xcode の対象より古い",
       "device_support": "MacがiPhone用のツールを取得しています",
       "helper_missing": "テストヘルパーがまだ設定されていません",
       "helper_expired": "テストヘルパーの更新が必要です",
@@ -14926,6 +15139,7 @@
       "ui_automation_off": "UIオートメーションをオンにする",
       "xcode_missing": "Xcodeをインストール",
       "xcode_too_old": "Xcodeをアップデート",
+      "ios_behind_xcode": "iPhone をアップデート",
       "device_support": "Macの電源を入れたままにする",
       "helper_missing": "Macでアプリを開く",
       "helper_expired": "Macでアプリを開く",
@@ -15243,6 +15457,7 @@
       "helperText": "Macが7日ごとにビルドして更新します。XcodeでApple Account（無料）を使えば十分です。",
       "helperUntrustedText": "デベロッパ名をタップしてから「信頼」をタップします。",
       "teamLimitText": "自分で作ったアプリを1つiPhoneから削除してください（無料のApple Accountでは3つまで）。",
+      "iosBehind": "この iPhone は iOS {{ios}} で、この Mac の Xcode は iOS {{sdk}} 向けです。iPhone をアップデートしてください:設定 › 一般 › ソフトウェアアップデート。",
       "xcodeOld": "{{name}}はiOS {{version}}ですが、{{mac}}のXcodeが対応するのはiOS {{sdk}}までです。Xcode {{major}}をインストールしてから、ターミナルでこれを実行してください。",
       "xcodeOldAny": "{{name}}はiOS {{version}}で、{{mac}}のXcodeより新しいバージョンです。Xcode {{major}}をインストールしてから、ターミナルでこれを実行してください。",
       "uiRefusedText": "iPhoneがテストヘルパーのタップを拒否しました。ロックを解除し、求められたらパスコードを入力してください。続く場合は、設定 › デベロッパ › UIオートメーションを有効にするをオフにしてからオンにしてください。",
@@ -16509,6 +16724,21 @@
     "tomorrowAt": "明日 {{time}}"
   },
   "work": {
+    "handed": {
+      "lead": "<0/>{{name}}に引き継ぎ",
+      "working": "作業中",
+      "done": "{{duration}}で完了",
+      "waitingYou": "あなたの回答待ち",
+      "waiting": "回答待ち",
+      "waitingApprovalYou": "あなたの承認待ち",
+      "waitingApproval": "承認待ち",
+      "waitingComputer": "コンピューター待ち",
+      "paused": "プランの上限で一時停止中",
+      "queued": "順番待ち",
+      "failed": "完了しませんでした",
+      "stopped": "停止しました",
+      "step": "ステップ {{current}}/{{total}}"
+    },
     "duration": {
       "minutes_other": "{{count}}分",
       "hours_other": "{{count}}時間",
@@ -16585,6 +16815,9 @@
     "working": "バックグラウンドで作業中"
   },
   "chat": {
+    "request": {
+      "asksYou": "{{name}}からの質問"
+    },
     "speedFallback": {
       "text": "ChatGPTがこのアカウントまたはモデルでの高速を拒否したため、この返信は標準の速度で届きました。",
       "action": "エージェントを開く"

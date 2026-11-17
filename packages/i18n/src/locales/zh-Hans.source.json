@@ -2942,6 +2942,273 @@
   "onboarding.import.aiApp.paused": {
     "value": "Connect with MCP is off while this workspace is paused. Bring the agents this way for now."
   },
+  "onboarding.import.haveFileButton": {
+    "value": "I have a file or link"
+  },
+  "onboarding.import.sheet.title": {
+    "value": "Bring the team from {{app}}"
+  },
+  "onboarding.import.sheet.otherTitle": {
+    "value": "Bring them from another app"
+  },
+  "onboarding.import.sheet.workspaceTitle": {
+    "value": "Bring them from another workspace"
+  },
+  "onboarding.import.sheet.fileTitle": {
+    "value": "Bring them from a file or link"
+  },
+  "onboarding.import.sheet.fileLead": {
+    "value": "The file from any app we know. It is recognized on its own."
+  },
+  "onboarding.import.sheet.paths.lead": {
+    "value": "Choose how to bring them. You check everything before anything is made."
+  },
+  "onboarding.import.sheet.paths.best": {
+    "value": "the most complete"
+  },
+  "onboarding.import.sheet.paths.safe": {
+    "value": "{{app}}'s keys, passwords and sessions never come, whichever way you pick."
+  },
+  "onboarding.import.sheet.paths.command.title": {
+    "value": "With a command"
+  },
+  "onboarding.import.sheet.paths.command.line": {
+    "value": "Brings everything, files and workflows too. Through a coding assistant or the terminal"
+  },
+  "onboarding.import.sheet.paths.mcp.title": {
+    "value": "Connecting {{app}}"
+  },
+  "onboarding.import.sheet.paths.mcp.line": {
+    "value": "It creates the agents here through MCP. No files or workflows"
+  },
+  "onboarding.import.sheet.paths.prompt.title": {
+    "value": "Asking {{app}}"
+  },
+  "onboarding.import.sheet.paths.prompt.line": {
+    "value": "It writes down what it knows and you paste it here. No files or workflows"
+  },
+  "onboarding.import.sheet.useRequest": {
+    "value": "I'd rather paste the request and bring back the answer"
+  },
+  "onboarding.import.sheet.backToMcp": {
+    "value": "Back to MCP"
+  },
+  "onboarding.import.sheet.waitingMore": {
+    "value": "Waiting for the next ones…"
+  },
+  "onboarding.import.sheet.arrivedMore": {
+    "value": "{{app}} may still be creating them. Whoever comes later shows up here."
+  },
+  "onboarding.import.sheet.arrivedMoreAny": {
+    "value": "Your AI app may still be creating them. Whoever comes later shows up here."
+  },
+  "onboarding.import.sheet.readHere": {
+    "value": "Read in your browser. Nothing changes here until you confirm."
+  },
+  "onboarding.import.sheet.request.grok-bot.lead": {
+    "value": "The bot writes everything it has as JSON. You paste it here and check it before anything is made."
+  },
+  "onboarding.import.sheet.request.grok-bot.copyStep": {
+    "value": "Paste it in your chat with the bot"
+  },
+  "onboarding.import.sheet.request.grok-bot.answerStep": {
+    "value": "Paste its whole answer here"
+  },
+  "onboarding.import.sheet.request.grok-bot.answerPlaceholder": {
+    "value": "The JSON the bot answered"
+  },
+  "onboarding.import.sheet.request.chatgpt-dots.lead": {
+    "value": "Your dot writes everything it has to a file. You drop it here and check it before anything is made."
+  },
+  "onboarding.import.sheet.request.chatgpt-dots.copyStep": {
+    "value": "Paste it in a new chat"
+  },
+  "onboarding.import.sheet.request.chatgpt-dots.answerStep": {
+    "value": "Drop the file it makes here"
+  },
+  "onboarding.import.sheet.request.other.copyStep": {
+    "value": "Paste it in a new conversation in the other app"
+  },
+  "onboarding.import.sheet.request.other.answerStep": {
+    "value": "Drop the file it gives back, or paste its answer"
+  },
+  "onboarding.import.sheet.request.other.answerPlaceholder": {
+    "value": "The answer, or a GitHub link"
+  },
+  "onboarding.import.sheet.request.computer.lead": {
+    "value": "An agent of {{app}} writes down what it knows in a file, and you check it before anything is made."
+  },
+  "onboarding.import.sheet.request.computer.copyStep": {
+    "value": "In a chat with an agent of {{app}}, paste this request"
+  },
+  "onboarding.import.sheet.request.computer.answerStep": {
+    "value": "Drop the file it makes, or paste its answer"
+  },
+  "onboarding.import.sheet.request.computer.answerPlaceholder": {
+    "value": "{{app}}'s answer"
+  },
+  "onboarding.import.sheet.workspace.download": {
+    "value": "Download the other workspace's file"
+  },
+  "onboarding.import.sheet.workspace.where": {
+    "value": "There, in Settings › Import and export › Download the file."
+  },
+  "onboarding.import.sheet.workspace.open": {
+    "value": "Open {{org}} in a new tab"
+  },
+  "onboarding.import.sheet.workspace.drop": {
+    "value": "Drop the .json here"
+  },
+  "onboarding.import.sheet.lead": {
+    "value": "Your assistant reads {{app}} on this computer and writes a file where you choose. You check everything before anything is made."
+  },
+  "onboarding.import.sheet.leadCommand": {
+    "value": "The command reads {{app}} on this computer and writes a file where you choose. You check everything before anything is made."
+  },
+  "onboarding.import.sheet.pasteAssistant": {
+    "value": "Paste this in your coding assistant"
+  },
+  "onboarding.import.sheet.pasteTerminal": {
+    "value": "Paste this in a terminal"
+  },
+  "onboarding.import.sheet.pastePowerShell": {
+    "value": "Paste this in PowerShell"
+  },
+  "onboarding.import.sheet.promptLabel": {
+    "value": "Request for the coding assistant"
+  },
+  "onboarding.import.sheet.commandLabel": {
+    "value": "Command"
+  },
+  "onboarding.import.sheet.copy": {
+    "value": "Copy the request"
+  },
+  "onboarding.import.sheet.assistants": {
+    "value": "Claude Code, Codex or another one that runs commands on this computer."
+  },
+  "onboarding.import.sheet.commandHelp": {
+    "value": "It asks where to save and writes a file. Nothing is sent."
+  },
+  "onboarding.import.sheet.useCommand": {
+    "value": "I'd rather run the command myself"
+  },
+  "onboarding.import.sheet.usePrompt": {
+    "value": "Back to the request for the assistant"
+  },
+  "onboarding.import.sheet.os.label": {
+    "value": "This computer's system"
+  },
+  "onboarding.import.sheet.os.unix": {
+    "value": "Mac or Linux"
+  },
+  "onboarding.import.sheet.os.windows": {
+    "value": "Windows"
+  },
+  "onboarding.import.sheet.dropStep": {
+    "value": "Drop here the file it writes"
+  },
+  "onboarding.import.sheet.drop": {
+    "value": "Drop the file here"
+  },
+  "onboarding.import.sheet.dropHelp": {
+    "value": "{{file}}, in the folder you chose"
+  },
+  "onboarding.import.sheet.safe": {
+    "value": "Read only. Keys, passwords and sign-ins in {{app}} are never read."
+  },
+  "onboarding.import.sheet.ready": {
+    "value": {
+      "one": "{{count}} agent ready to come",
+      "other": "{{count}} agents ready to come"
+    }
+  },
+  "onboarding.import.sheet.readyOther": {
+    "value": "Ready to come"
+  },
+  "onboarding.import.sheet.others": {
+    "value": {
+      "one": "And {{count}} more agent",
+      "other": "And {{count}} more agents"
+    }
+  },
+  "onboarding.import.sheet.routines": {
+    "value": {
+      "one": "{{count}} routine",
+      "other": "{{count}} routines"
+    }
+  },
+  "onboarding.import.sheet.notes": {
+    "value": {
+      "one": "{{count}} memory",
+      "other": "{{count}} memories"
+    }
+  },
+  "onboarding.import.sheet.skills": {
+    "value": {
+      "one": "{{count}} skill",
+      "other": "{{count}} skills"
+    }
+  },
+  "onboarding.import.sheet.channels": {
+    "value": {
+      "one": "{{count}} channel",
+      "other": "{{count}} channels"
+    }
+  },
+  "onboarding.import.sheet.files": {
+    "value": {
+      "one": "{{count}} file of the agents, copied to the Drive",
+      "other": "{{count}} files of the agents, copied to the Drive"
+    }
+  },
+  "onboarding.import.sheet.filesSize": {
+    "value": "{{size}}. The whole workspace sees the folders."
+  },
+  "onboarding.import.sheet.after": {
+    "value": "Afterwards, one click each"
+  },
+  "onboarding.import.sheet.bring": {
+    "value": {
+      "one": "Bring the agent",
+      "other": "Bring the {{count}} agents"
+    }
+  },
+  "onboarding.import.sheet.choose": {
+    "value": "Choose what comes"
+  },
+  "onboarding.import.sheet.arrivedTitle": {
+    "value": "The team is here"
+  },
+  "onboarding.import.sheet.arrived": {
+    "value": {
+      "one": "{{names}} is here.",
+      "other": "{{names}} are here."
+    }
+  },
+  "onboarding.import.sheet.arrivedOther": {
+    "value": {
+      "one": "{{count}} item is here.",
+      "other": "{{count}} items are here."
+    }
+  },
+  "onboarding.import.sheet.copying": {
+    "value": "Copying the files to the Drive"
+  },
+  "onboarding.import.sheet.copyCount": {
+    "value": "{{done}} of {{total}}"
+  },
+  "onboarding.import.sheet.keepOpen": {
+    "value": "Keep this tab open until it ends."
+  },
+  "onboarding.import.sheet.missed": {
+    "value": {
+      "one": "{{count}} item didn't come. The list says why.",
+      "other": "{{count}} items didn't come. The list says why for each."
+    }
+  },
+  "onboarding.import.sheet.see": {
+    "value": "See what came"
+  },
   "onboarding.import.otherName": {
     "value": "Another app"
   },
@@ -3251,6 +3518,273 @@
       "other": "{{who}} use {{label}}."
     }
   },
+  "onboarding.import.need.webhook": {
+    "value": {
+      "one": "The routine {{label}}, of {{who}}, gets a new address here: change it in the site or app that called the old one.",
+      "other": "The routine {{label}}, of {{who}}, gets a new address here: change it in the site or app that called the old one."
+    }
+  },
+  "onboarding.import.say.intro": {
+    "value": "This is the workflow “{{title}}”, brought from {{app}}."
+  },
+  "onboarding.import.say.skillAbout": {
+    "value": "Runs the workflow “{{title}}”, brought from {{app}}, when someone asks."
+  },
+  "onboarding.import.say.asked": {
+    "value": "In {{app}} it started on its own. Here, it runs when someone asks."
+  },
+  "onboarding.import.say.webhook": {
+    "value": "It starts when this routine's address is called: what arrives is your input."
+  },
+  "onboarding.import.say.pr": {
+    "value": "It starts when a pull request is opened on GitHub: that pull request is your input."
+  },
+  "onboarding.import.say.prIn": {
+    "value": "It starts when a pull request is opened on GitHub in {{repos}}: that pull request is your input. If it is in another repository, stop without posting anything."
+  },
+  "onboarding.import.say.text": {
+    "value": "Start from this text: “{{text}}”"
+  },
+  "onboarding.import.say.keep": {
+    "value": "(Keep in mind: {{text}})"
+  },
+  "onboarding.import.say.ask": {
+    "value": "Ask @{{handle}}: “{{task}}”, with what you have so far, and use the answer."
+  },
+  "onboarding.import.say.image": {
+    "value": "Make an image: {{prompt}}"
+  },
+  "onboarding.import.say.video": {
+    "value": "Make a video: {{prompt}}"
+  },
+  "onboarding.import.say.if": {
+    "value": "If the answer to “{{rule}}” is yes, go on."
+  },
+  "onboarding.import.say.otherwise": {
+    "value": "Otherwise:"
+  },
+  "onboarding.import.say.stop": {
+    "value": "Otherwise, stop here without posting anything."
+  },
+  "onboarding.import.say.approval": {
+    "value": "Before going on, ask the person in charge of you for approval, in the chat: “{{question}}”"
+  },
+  "onboarding.import.say.approvalPlain": {
+    "value": "Before going on, ask the person in charge of you for approval, in the chat."
+  },
+  "onboarding.import.say.channel": {
+    "value": "Post the result in #{{channel}}."
+  },
+  "onboarding.import.say.notify": {
+    "value": "Send the result to the person in charge of you."
+  },
+  "onboarding.import.say.file": {
+    "value": "Save the result as a file in the Drive."
+  },
+  "onboarding.import.say.githubComment": {
+    "value": "Comment the result on GitHub."
+  },
+  "onboarding.import.say.githubDo": {
+    "value": "On GitHub, do this with the result: {{action}}."
+  },
+  "onboarding.import.say.pass": {
+    "value": "When you finish, pass your answer to @{{handle}}: {{instruction}}"
+  },
+  "onboarding.import.say.passPlain": {
+    "value": "When you finish, pass your answer to @{{handle}}."
+  },
+  "onboarding.import.choose.who": {
+    "value": "Who comes"
+  },
+  "onboarding.import.choose.with": {
+    "value": "What comes with them"
+  },
+  "onboarding.import.choose.flows": {
+    "value": "The workflows"
+  },
+  "onboarding.import.choose.agentOnly": {
+    "value": "With its instructions from there"
+  },
+  "onboarding.import.choose.same": {
+    "value": "Already here, the same"
+  },
+  "onboarding.import.choose.of.routine": {
+    "value": {
+      "one": "{{picked}} of {{count}} routine",
+      "other": "{{picked}} of {{count}} routines"
+    }
+  },
+  "onboarding.import.choose.of.skill": {
+    "value": {
+      "one": "{{picked}} of {{count}} skill",
+      "other": "{{picked}} of {{count}} skills"
+    }
+  },
+  "onboarding.import.choose.of.note": {
+    "value": {
+      "one": "{{picked}} of {{count}} memory",
+      "other": "{{picked}} of {{count}} memories"
+    }
+  },
+  "onboarding.import.choose.of.channel": {
+    "value": {
+      "one": "{{picked}} of {{count}} channel",
+      "other": "{{picked}} of {{count}} channels"
+    }
+  },
+  "onboarding.import.choose.files": {
+    "value": {
+      "one": "{{count}} file for the Drive",
+      "other": "{{count}} files for the Drive"
+    }
+  },
+  "onboarding.import.choose.paused": {
+    "value": {
+      "one": "One arrives paused, as it was there",
+      "other": "{{count}} arrive paused, as they were there"
+    }
+  },
+  "onboarding.import.choose.pausedOne": {
+    "value": "arrives paused"
+  },
+  "onboarding.import.choose.here": {
+    "value": {
+      "one": "One is already here",
+      "other": "{{count}} are already here"
+    }
+  },
+  "onboarding.import.choose.library": {
+    "value": "From the library, for whoever you turn it on for"
+  },
+  "onboarding.import.choose.passes": {
+    "value": "passes its answer to {{names}}"
+  },
+  "onboarding.import.choose.webhook": {
+    "value": "new address"
+  },
+  "onboarding.import.choose.pr": {
+    "value": "when a pull request is opened"
+  },
+  "onboarding.import.choose.routine": {
+    "value": "Routine"
+  },
+  "onboarding.import.choose.skill": {
+    "value": "Skill"
+  },
+  "onboarding.import.choose.asked": {
+    "value": "runs when someone asks"
+  },
+  "onboarding.import.choose.was.schedule": {
+    "value": "there it had a schedule we can't read, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.webhook": {
+    "value": "there it started from an address, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.message": {
+    "value": "there it started from a message, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.github": {
+    "value": "there it started on GitHub, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.discord": {
+    "value": "there it started on Discord, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.telegram": {
+    "value": "there it started on Telegram, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.slack": {
+    "value": "there it started on Slack, here it runs when someone asks"
+  },
+  "onboarding.import.choose.was.other": {
+    "value": "there it started on its own, here it runs when someone asks"
+  },
+  "onboarding.import.choose.flowsLead": {
+    "value": "Here a workflow becomes a routine: its trigger is when it runs, and its steps go in the request."
+  },
+  "onboarding.import.choose.becomesRoutine": {
+    "value": "Becomes a routine {{agent}} runs, with the steps in its request."
+  },
+  "onboarding.import.choose.becomesSkill": {
+    "value": "Becomes a skill {{agent}} uses when someone asks, with the steps in it."
+  },
+  "onboarding.import.choose.postsIn": {
+    "value": "Posts in #{{channel}}."
+  },
+  "onboarding.import.choose.step.when": {
+    "value": "when the routine runs"
+  },
+  "onboarding.import.choose.step.asked": {
+    "value": "When someone asks"
+  },
+  "onboarding.import.choose.step.text": {
+    "value": "Starts from the text"
+  },
+  "onboarding.import.choose.step.by": {
+    "value": "asked by {{name}}"
+  },
+  "onboarding.import.choose.step.image": {
+    "value": "Image"
+  },
+  "onboarding.import.choose.step.video": {
+    "value": "Video"
+  },
+  "onboarding.import.choose.step.if": {
+    "value": "If"
+  },
+  "onboarding.import.choose.step.stop": {
+    "value": "goes on, otherwise stops"
+  },
+  "onboarding.import.choose.step.else": {
+    "value": "goes on, otherwise:"
+  },
+  "onboarding.import.choose.step.approval": {
+    "value": "Asks for approval in the chat"
+  },
+  "onboarding.import.choose.step.channel": {
+    "value": "Posts in #{{channel}}"
+  },
+  "onboarding.import.choose.step.notify": {
+    "value": "Sends you the result"
+  },
+  "onboarding.import.choose.step.file": {
+    "value": "Saves to the Drive"
+  },
+  "onboarding.import.choose.step.github": {
+    "value": "On GitHub"
+  },
+  "onboarding.import.choose.step.lost.file": {
+    "value": "A file from there"
+  },
+  "onboarding.import.choose.step.lost.slack": {
+    "value": "Posts on Slack"
+  },
+  "onboarding.import.choose.step.lost.discord": {
+    "value": "Posts on Discord"
+  },
+  "onboarding.import.choose.step.lost.telegram": {
+    "value": "Posts on Telegram"
+  },
+  "onboarding.import.choose.step.lost.messaging": {
+    "value": "Posts in a messaging chat"
+  },
+  "onboarding.import.choose.step.notHere": {
+    "value": "doesn't come"
+  },
+  "onboarding.import.choose.bringWith": {
+    "value": {
+      "one": "Bring {{count}} agent and {{more}}",
+      "other": "Bring {{count}} agents and {{more}}"
+    }
+  },
+  "onboarding.import.choose.more": {
+    "value": {
+      "one": "{{count}} more item",
+      "other": "{{count}} more items"
+    }
+  },
+  "onboarding.import.choose.notComing": {
+    "value": "Messaging connections don't come ({{list}}): there's nothing to connect them to here."
+  },
   "onboarding.import.needDo.connection": {
     "value": "Connect"
   },
@@ -3262,6 +3796,9 @@
   },
   "onboarding.import.needDo.file": {
     "value": "Open the Drive"
+  },
+  "onboarding.import.needDo.webhook": {
+    "value": "Open routines"
   },
   "onboarding.import.linkSkipped": {
     "value": {
@@ -6563,6 +7100,24 @@
   "receipts.by.default": {
     "value": "Nobody was called, so {{name}} answered"
   },
+  "rightHand.brain.unusable.title": {
+    "value": "Needs a computer"
+  },
+  "rightHand.brain.unusable.computerOnly": {
+    "value": "{{owner}}'s, signed in on {{computer}} only. Lodi thinks with a plan signed in as an account."
+  },
+  "rightHand.brain.unusable.noComputer": {
+    "value": "{{owner}}'s. It needs a computer, and the workspace has none connected."
+  },
+  "rightHand.brain.unusable.away": {
+    "value": "{{owner}}'s, on {{computer}}, which is away."
+  },
+  "rightHand.brain.unusable.connect": {
+    "value": "Connect a computer"
+  },
+  "rightHand.brain.unusable.plans": {
+    "value": "See plans"
+  },
   "rightHand.label": {
     "value": "your right hand"
   },
@@ -6850,6 +7405,9 @@
   },
   "rightHand.computerNoHome": {
     "value": "No computer yet. It gets one when this workspace has a computer of its own."
+  },
+  "rightHand.computerNoHomeServer": {
+    "value": "No browser yet. Set up <guide>this server as the agents' computer</guide> to give it one."
   },
   "rightHand.addComputer": {
     "value": "Add a computer"
@@ -8057,7 +8615,7 @@
     "value": "Google AI Pro, Google AI Ultra or Gemini Enterprise"
   },
   "connectAi.plan.gemini.warning": {
-    "value": "Google says using a personal Gemini plan inside other apps can get the account suspended."
+    "value": "Google says using a personal Gemini plan inside other apps can get the account suspended. To avoid that risk, use a Gemini API key or Gemini Enterprise."
   },
   "connectAi.plan.zen.title": {
     "value": "OpenCode"
@@ -10334,6 +10892,9 @@
   },
   "secret.computerPaused": {
     "value": "{{agent}}'s computer is paused by its owner. This request stays open until {{time}}."
+  },
+  "secret.insecureContext": {
+    "value": "This page isn't open over https, so the browser won't lock the key. Open it at https:// (or localhost)."
   },
   "secret.failed": {
     "value": "Couldn't deliver it. Is the agent's computer on?"
@@ -14621,7 +15182,9 @@
   "agentPage.access.filters.ask": {
     "value": "Ask for approval"
   },
-  "agentPage.access.setAll": "Change all",
+  "agentPage.access.setAll": {
+    "value": "Change all"
+  },
   "agentPage.access.connectors": {
     "value": "{{org}}'s connectors"
   },
@@ -18700,6 +19263,15 @@
   "scopes.custom_write.description": {
     "value": "Use the write tools. Those marked sensitive always ask for approval."
   },
+  "issues.handedBy": {
+    "value": "handed by <0/>{{name}}"
+  },
+  "issues.fromDm": {
+    "value": "from <0>your DM with {{name}}</0>"
+  },
+  "issues.fromDmText": {
+    "value": "from your DM with {{name}}"
+  },
   "issues.delete.action": {
     "value": "Delete task"
   },
@@ -19224,6 +19796,15 @@
   },
   "issues.work.waitingTitle": {
     "value": "{{name}} is waiting for you"
+  },
+  "issues.work.finishedTitle": {
+    "value": "{{name}} finished it"
+  },
+  "issues.work.finishedMeta": {
+    "value": "{{when}} · handed by {{name}}"
+  },
+  "issues.work.answer": {
+    "value": "Answer"
   },
   "issues.work.stalledTitle": {
     "value": "{{name}} stopped {{when}}"
@@ -28892,7 +29473,9 @@
   "access.cellAsks": {
     "value": "{{agent}} in {{resource}}: {{level}}, sensitive actions ask for approval"
   },
-  "access.asksList": "Asks for approval: {{tools}}",
+  "access.asksList": {
+    "value": "Asks for approval: {{tools}}"
+  },
   "access.asksMore": {
     "value": {
       "one": "and {{count}} more",
@@ -35491,7 +36074,9 @@
   "mail.agent.onlyYou": {
     "value": "{{name}} uses this mailbox only for you, in your DM."
   },
-  "mail.agent.onlyYouAll": "{{name}} uses your mailboxes only for you, in your DM.",
+  "mail.agent.onlyYouAll": {
+    "value": "{{name}} uses your mailboxes only for you, in your DM."
+  },
   "mail.agent.remove": {
     "value": "Remove access"
   },
@@ -37975,6 +38560,9 @@
   "devices.reason.xcode_too_old": {
     "value": "Xcode is too old for this iOS"
   },
+  "devices.reason.ios_behind_xcode": {
+    "value": "This iPhone's iOS is older than Xcode's"
+  },
   "devices.reason.device_support": {
     "value": "The Mac is getting the iPhone tools"
   },
@@ -38052,6 +38640,9 @@
   },
   "devices.fix.xcode_too_old": {
     "value": "Update Xcode"
+  },
+  "devices.fix.ios_behind_xcode": {
+    "value": "Update the iPhone"
   },
   "devices.fix.device_support": {
     "value": "Keep the Mac on"
@@ -38877,6 +39468,9 @@
   },
   "devices.iphone.teamLimitText": {
     "value": "Remove an app you built yourself from the iPhone: a free Apple Account allows 3."
+  },
+  "devices.iphone.iosBehind": {
+    "value": "This iPhone runs iOS {{ios}} and Xcode on this Mac is for iOS {{sdk}}. Update the iPhone: Settings › General › Software Update."
   },
   "devices.iphone.xcodeOld": {
     "value": "{{name}} runs iOS {{version}} and Xcode on {{mac}} knows iOS {{sdk}} at most. Install Xcode {{major}}, then run this in Terminal."
@@ -42037,6 +42631,45 @@
   "format.tomorrowAt": {
     "value": "tomorrow {{time}}"
   },
+  "work.handed.lead": {
+    "value": "Handed to <0/>{{name}}"
+  },
+  "work.handed.working": {
+    "value": "working on it"
+  },
+  "work.handed.done": {
+    "value": "done in {{duration}}"
+  },
+  "work.handed.waitingYou": {
+    "value": "waiting for your answer"
+  },
+  "work.handed.waiting": {
+    "value": "waiting for an answer"
+  },
+  "work.handed.waitingApprovalYou": {
+    "value": "waiting for your approval"
+  },
+  "work.handed.waitingApproval": {
+    "value": "waiting for approval"
+  },
+  "work.handed.waitingComputer": {
+    "value": "waiting for the computer"
+  },
+  "work.handed.paused": {
+    "value": "paused at the plan's limit"
+  },
+  "work.handed.queued": {
+    "value": "in line"
+  },
+  "work.handed.failed": {
+    "value": "didn't finish"
+  },
+  "work.handed.stopped": {
+    "value": "stopped"
+  },
+  "work.handed.step": {
+    "value": "step {{current}} of {{total}}"
+  },
   "work.duration.minutes": {
     "value": {
       "one": "{{count}} min",
@@ -42234,6 +42867,9 @@
   },
   "work.working": {
     "value": "In the background"
+  },
+  "chat.request.asksYou": {
+    "value": "{{name}} asks you"
   },
   "chat.speedFallback.text": {
     "value": "ChatGPT refused Fast speed on this account or model, so this reply came at standard speed."

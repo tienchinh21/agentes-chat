@@ -130,6 +130,7 @@ export interface AppOptions {
  * - `/api/openapi.json`   OpenAPI 3.1 document; `/api/reference` interactive docs
  * - `/install`            the self-host installer, `install.sh` (`curl -fsSL <server>/install | sh`)
  * - `/i/<code>`           a new computer's installer with a connect link baked in (`/i/<code>/ps` for Windows)
+ * - `/migrate.sh`         runs `agentes-runner migrate` once, without installing (`/migrate.ps1` for Windows; ADR 0055)
  * - `/install/docker-compose.yml` the compose file of this release, which the setup downloads
  * - `/sw.js`              the web app's service worker (browser push, ADR 0071)
  * - everything else       web app (single-page app), when built
