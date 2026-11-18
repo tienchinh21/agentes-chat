@@ -418,6 +418,7 @@ export function accountRoutes(deps: AppDeps) {
                   .string()
                   .nullable()
                   .openapi({ description: "Its logo (`GET /api/host-look/logo`); null: none." }),
+                poweredBy: z.boolean().openapi({ description: "Its pages end with the powered-by line." }),
               })
               .nullable()
               .openapi({
@@ -454,6 +455,7 @@ export function accountRoutes(deps: AppDeps) {
             name: look.name,
             accent: look.accent,
             logoUrl: look.logo ? `${HOST_LOGO_PATH}?v=${look.logo.split("/").pop()}` : null,
+            poweredBy: look.poweredBy,
           },
         },
         200,

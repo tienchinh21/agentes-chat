@@ -38,6 +38,7 @@ import { useOpenAgentPanel } from "@/components/agent-panel-context";
 import { ConsultPairRow } from "@/components/ConsultGroup";
 import { DetailsLink } from "@/components/details-link";
 import { useOrg } from "@/components/org-context";
+import { SurfaceMark } from "@/components/SurfaceLink";
 import { SayWhy } from "@/components/tasks/TaskBits";
 import { useDirectory } from "@/hooks/useDirectory";
 import { useToast } from "@/lib/toast";
@@ -440,7 +441,7 @@ export function SurfaceViaMark({ via, person }: { via: SurfaceVia; person: strin
       aria-label={t(`surface.${kind}`, { surface })}
       title={t(`surface.${kind}Tip`, { person, surface })}
     >
-      <Icon name={via.forwarded ? "quote" : "message"} size={14} />
+      {via.forwarded ? <Icon name="quote" size={14} /> : <SurfaceMark name={via.surface} size={14} />}
     </span>
   );
 }

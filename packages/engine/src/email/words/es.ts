@@ -579,6 +579,7 @@ export const words: EmailWords = {
       button: "Desvincular",
       small: "Si fuiste tú, no tienes que hacer nada. Puedes desvincularlo cuando quieras en Configuración.",
       why: (surface) => `Recibiste este correo porque ${surface} se vinculó a tu cuenta de agentes.chat.`,
+      picture: "Tu asistente, ahora también en tu teléfono",
     },
     unlinked: {
       subject: (surface) => `${surface} se desvinculó de tu cuenta de agentes.chat`,
@@ -587,6 +588,25 @@ export const words: EmailWords = {
       body: (surface, display) => [{ b: display }, ` en ${surface} se desvinculó porque su identidad cambió.`],
       small: "Vincúlalo de nuevo en Configuración si fuiste tú.",
       why: (surface) => `Recibiste este correo porque ${surface} estaba vinculado a tu cuenta de agentes.chat.`,
+      picture: "Tu asistente, ya no en tu teléfono",
     },
+  },
+  supportReply: {
+    subject: "Una respuesta a tu solicitud de ayuda",
+    preheader: "Sobre la ayuda que pediste en agentes.chat.",
+    headline: "Una respuesta a tu solicitud de ayuda",
+    answers: {
+      received: "Recibimos tu solicitud y la estamos revisando.",
+      need_more: "Necesitamos saber más para ayudarte: qué estabas haciendo, qué esperabas y qué pasó.",
+      resolved: "Lo que reportaste ya está corregido.",
+      handed_over: "Una persona ya tiene tu solicitud y te va a responder.",
+    },
+    from: (host) =>
+      host
+        ? atHost("Respondido por quienes administran el servidor de agentes.chat", "en", host)
+        : "Respondido por agentes.chat.",
+    ai: "Un asistente de IA escribió esta respuesta.",
+    reply: (address) => ["Para responder, escribe a ", { mail: address }, "."],
+    why: "Recibiste este correo porque pediste ayuda en agentes.chat.",
   },
 };

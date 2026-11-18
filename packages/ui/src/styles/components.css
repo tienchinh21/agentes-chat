@@ -5961,8 +5961,10 @@ html:not([data-pointer]) .ac-seg__item:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
-/* Shown, not changed (a member reading an admin's setting): the choice stays readable, faded. */
-.ac-seg:has(.ac-seg__item:disabled) {
+/* Shown, not changed (a member reading an admin's setting): the choice stays readable, faded. One option that can't
+   be chosen fades alone, so the chosen one still reads as chosen. */
+.ac-seg[aria-disabled="true"],
+.ac-seg:not([aria-disabled]) .ac-seg__item:disabled {
   opacity: 0.65;
 }
 .ac-seg__item:disabled {

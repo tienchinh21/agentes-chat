@@ -77,7 +77,7 @@ describe("the system's lists", () => {
     expect(grouped).not.toContain("boxShadow");
     expect(grouped).toContain('list: { borderRadius: LIST_CORNER, borderCurve: "continuous", overflow: "hidden" },');
     expect(grouped).toContain("backgroundColor: c.separator,");
-    expect(grouped).toContain("<IconTile icon={icon} danger={danger} />");
+    expect(grouped).toContain("<IconTile icon={icon} danger={danger} mark={mark ?? null} />");
     expect(grouped).toContain('<Text variant="body" numberOfLines={1} style={[styles.shrink, { color: c.label2 }]}>');
     for (const mark of ["<Disclosure />", "<MenuMark />", "<CheckMark />"]) expect(grouped).toContain(mark);
     const light = appColors("light");

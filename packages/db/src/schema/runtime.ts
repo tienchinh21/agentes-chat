@@ -125,6 +125,11 @@ export const agentRuns = pgTable(
      * prompt caches stay valid). See docs/adr/0015-tool-gateway-and-approvals.md.
      */
     transcript: jsonb().$type<Record<string, unknown>>(),
+    /**
+     * Each claim's stage profile (the last `RUN_PROFILES_KEPT`), for the operator's work analytics. Its own column so
+     * analytics read it without decompressing the transcript; null on runs that ended before it existed.
+     */
+    profiles: jsonb().$type<unknown[]>(),
     /** Model calls made so far (capped by AGENT_MAX_TOOL_TURNS). */
     turns: integer().notNull().default(0),
     /**
@@ -346,7 +351,8 @@ export const agentRunSteps = pgTable(
   ],
 );
 
-export const usageKindEnum = pgEnum("usage_kind", ["agent", "router", "embedding", "summary"]);
+/** `image`: pictures made through the gateway (ADR 0197), billed like an agent's own calls when an agent asked. */
+export const usageKindEnum = pgEnum("usage_kind", ["agent", "router", "embedding", "summary", "image"]);
 
 /**
  * One row per model call, written by the Model Gateway only. Same numbers in
@@ -547,6 +553,11 @@ export interface ApprovalApprovers {
   requesterDecides: boolean;
   /** Only `userIds` decide it, admins too: someone else asked to act in that person's own mailbox. */
   required?: boolean;
+  /**
+   * An action in one person's own connection: listed only to `userIds` and to who is in its conversation, never to
+   * admins or the agent's owner for being them (ADR 0099 addendum).
+   */
+  personal?: boolean;
 }
 
 /**

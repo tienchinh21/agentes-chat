@@ -19,6 +19,7 @@ import {
   ne,
   or,
   queryTrace,
+  type SQL,
   schema,
   sql,
 } from "@agenteschat/db";
@@ -234,6 +235,7 @@ import {
   kickKeyLine,
   rateLimited,
 } from "./key-line";
+import { carriesLiveFile } from "./live/tools";
 import { answerNoTurn, deliverLive, listenLiveSteering, renderSteered } from "./live-steer";
 import {
   accountEverWorked,
@@ -368,6 +370,8 @@ import {
   EVERY_TOOL,
   isCore,
   isStableTool,
+  LIVE_FILE_TOOLS,
+  LIVE_FILES_GROUP,
   listsEveryTool,
   ON_DEMAND_FIND,
   ON_DEMAND_USE,
@@ -911,7 +915,7 @@ const CONTEXT_TOOLS: readonly string[] = [
 
 /** How long the first call waits for its pre-warm once the quiet window is over. */
 const PREWARM_WAIT_MS = 4000;
-/** A run's last claims whose stage profiles its transcript keeps (`profiles`): long work claims many times. */
+/** A run's last claims whose stage profiles it keeps (`agent_runs.profiles`): long work claims many times. */
 const RUN_PROFILES_KEPT = 10;
 /** How soon a quiet window that ends at once is told from one still running (no pre-warm then). */
 const PREWARM_PROBE_MS = 50;
@@ -1152,18 +1156,17 @@ export async function executeRun(deps: EngineDeps, runId: string, options: RunJo
     unregisterRunAbort(runId, abort);
     if (prof.stages.length > 0) {
       deps.onRunProfile?.({ runId, stages: prof.stages, total: prof.total() });
-      // Kept with the run, so the operator's work analytics can say where time went (`work-analytics.ts`). In its
-      // transcript, not as a step: steps are the run's trail, and its last one marks where a pause began (`whileHeld`).
+      // Kept with the run, so the operator's work analytics can say where time went (`work-analytics.ts`). In its own
+      // column, not as a step (steps are the run's trail, and its last one marks where a pause began, `whileHeld`) and
+      // not in the transcript (appending there would rewrite the whole TOASTed conversation on every claim).
       if (prof.run) {
         const brain = prof.brain.length > 0 ? { brain: prof.brain } : {};
         const kept = JSON.stringify([{ stages: prof.stages, total: prof.total(), ...brain }]);
-        const list = sql`coalesce(${agentRuns.transcript}->'profiles', '[]'::jsonb) || ${kept}::jsonb`;
+        const capped = (list: SQL) =>
+          sql`case when jsonb_array_length(${list}) > ${RUN_PROFILES_KEPT} then (${list}) - 0 else ${list} end`;
         await deps.db
           .update(agentRuns)
-          .set({
-            transcript: sql`jsonb_set(coalesce(${agentRuns.transcript}, '{}'::jsonb), '{profiles}',
-              case when jsonb_array_length(${list}) > ${RUN_PROFILES_KEPT} then (${list}) - 0 else ${list} end)`,
-          })
+          .set({ profiles: capped(sql`coalesce(${agentRuns.profiles}, '[]'::jsonb) || ${kept}::jsonb`) })
           .where(and(eq(agentRuns.orgId, prof.run.orgId), eq(agentRuns.id, prof.run.id)))
           .catch(() => {});
       }
@@ -1921,10 +1924,14 @@ async function executeRunInner(
   const judging: Promise<void> | null =
     needsContext && deps.toolsOnDemand && judge && granted.length > 0 && !every
       ? (async () => {
-          const [recent, keep] = await Promise.all([
+          const [recent, kept, live] = await Promise.all([
             recentMessages(),
             keptToolGroups(db, run, granted).catch(() => [] as string[]),
+            // Asked from inside a live file, one attached, or in a file's own conversation: its own tools come with
+            // it (ADR 0196 §6, ADR 0199).
+            carriesLiveFile(db, run.orgId, trigger?.meta, run.channelId).catch(() => false),
           ]);
+          const keep = live ? [...kept, LIVE_FILES_GROUP] : kept;
           const choice = await chooseToolGroups(judge, {
             orgId: run.orgId,
             agentId: agent.id,
@@ -2362,6 +2369,11 @@ async function executeRunInner(
         followUp: tools.some((t) => t.name === FOLLOW_UP_TOOL),
         work: workApplies && tools.some((t) => t.name === WORK_IN_BACKGROUND_TOOL),
         blocks: tools.some((t) => t.name === SHOW_BLOCK_TOOL),
+        // Granted is enough: on demand their group is one `use_tool` away (ADR 0196 §6). `image_search` is every
+        // agent's (no scope), so it says nothing about the Drive's.
+        ...(granted.some((t) => LIVE_FILE_TOOLS.has(t.name) && t.name !== "image_search" && !t.connectionId)
+          ? { liveFiles: { images: granted.some((t) => t.name === "generate_image" && !t.connectionId) } }
+          : {}),
         ...(deps.blockSpec ? { blockSpec: deps.blockSpec } : {}),
         choices: choicesApply && tools.some((t) => t.name === ASK_CHOICES_TOOL),
         // "What you can do" names the loaded groups: it waits for the judge.
@@ -2549,6 +2561,9 @@ async function executeRunInner(
               ...(deps.tools ? await grantedScopeKeys(db, run.orgId, agent.id) : []),
             ]),
           ].sort(),
+          // A session a person's own connection was offered in holds what it read: only their runs resume it
+          // (ADR 0099 addendum). Absent otherwise, so no other session's key changes.
+          ...[...new Set(granted.flatMap((t) => (t.ownerUserId ? [`personal:${t.ownerUserId}`] : [])))],
         ]),
       ),
       postedUpTo: context.messages.length,

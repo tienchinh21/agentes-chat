@@ -17,20 +17,20 @@ import {
   LINK_POLL_MS,
   newlyLinked,
   RENEW_BEFORE_MS,
+  surfaceMarkUrl,
   surfaceRowOf,
 } from "@agenteschat/client/lib/surface-links";
+import { formatPhone } from "@agenteschat/i18n/format";
 import { Alert, Button, Dialog, DialogBody, DialogFooter, Icon, PixelSpinner, QrCode, useNow } from "@agenteschat/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useApi } from "@/api/context";
-import { ConnectorIcon } from "@/components/ConnectorCatalog";
 import { Step } from "@/components/devices/Step";
 import { PrefRow } from "@/components/NoticePrefs";
 import { useOrg } from "@/components/org-context";
 import { useImageLoads } from "@/hooks/useImageLoads";
 import { useOpenParam } from "@/lib/open-param";
-import { surfaceMarkUrl } from "@/lib/surface";
 import { useToast } from "@/lib/toast";
 
 /** Refusals a fresh code gets past: the link ran out, was canceled, or its sender belongs to someone else. */
@@ -38,14 +38,29 @@ const NEW_CODE_FIXES = new Set(["surface.link_gone", "surface.code_gone", "surfa
 /** Refusals to make a code that a retry can't get past: the way out is elsewhere, so the dialog offers Close. */
 const MINT_FINAL = new Set(["surface.off", "surface.not_allowed", "surface.no_assistant", "surface.no_workspace"]);
 
-/** The surface's mark: the web's connector mark of that name when there is one, else a plain chat icon. */
-export function SurfaceMark({ name }: { name: string }) {
+/**
+ * The surface's mark as one of the kit's glyphs: the `Icon` box at `size`, in the text's color, the brand's logo
+ * inside the kit's 20 grid where its strokes sit (3 clear on each side), so it weighs what the glyphs beside it do. A
+ * plain chat glyph while the logo loads, or when the surface's name names no file.
+ */
+export function SurfaceMark({ name, size = 16 }: { name: string; size?: 14 | 16 }) {
   const url = surfaceMarkUrl(name);
   const loads = useImageLoads(url);
-  return loads && url ? (
-    <ConnectorIcon def={{ iconUrl: url, brandColor: null }} label={name} />
-  ) : (
-    <Icon name="message" size={16} />
+  const mask = `surface-mark-${useId().replace(/[^\w-]/g, "")}`;
+  if (!loads || !url) return <Icon name="message" size={size} />;
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="ac-icon"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <mask id={mask} style={{ maskType: "alpha" }}>
+        <image href={url} x="3" y="3" width="14" height="14" />
+      </mask>
+      <rect width="20" height="20" fill="currentColor" stroke="none" mask={`url(#${mask})`} />
+    </svg>
   );
 }
 
@@ -76,7 +91,10 @@ export function SurfacePrefRow() {
   const row = surfaceRowOf(links.data);
   if (row.kind === "hidden") return null;
   const { surface } = row;
-  const sender = row.kind === "active" ? [row.link.display, row.link.profileName].filter(Boolean) : [];
+  const sender =
+    row.kind === "active"
+      ? [row.link.display && formatPhone(row.link.display), row.link.profileName].filter(Boolean)
+      : [];
 
   return (
     <>
@@ -84,12 +102,16 @@ export function SurfacePrefRow() {
         id="notice-surface"
         lead={<SurfaceMark name={surface} />}
         label={surface}
-        hint={row.kind === "active" ? t("surface.row.hint", { assistant, surface }) : undefined}
+        hint={
+          row.kind === "active"
+            ? t("surface.row.hint", { assistant, surface })
+            : row.kind === "none"
+              ? t("surface.row.none", { assistant })
+              : undefined
+        }
         status={
           row.kind === "pending" ? (
             t("surface.row.pending")
-          ) : row.kind === "none" ? (
-            t("surface.row.none", { assistant })
           ) : sender.length > 0 ? (
             <span className="surface-sender__line">
               {sender.map((s, i) => (
@@ -289,7 +311,7 @@ export function SurfaceLinkDialog({ open, onClose }: { open: boolean; onClose: (
               <span className="small muted">{t("surface.link.sentBy")}</span>
               {pending.display && (
                 <bdi className="surface-sender__display" dir="auto">
-                  {pending.display}
+                  {formatPhone(pending.display)}
                 </bdi>
               )}
               {pending.profileName && (

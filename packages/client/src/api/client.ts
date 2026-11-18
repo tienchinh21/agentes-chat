@@ -10,6 +10,8 @@ import type { Wallpaper } from "../lib/wallpaper";
 import type { AudienceChoice } from "../lib/who-sees";
 import type { WikiAccess } from "../lib/wiki";
 import type { WorkAreaAnswer } from "../lib/work-area";
+import type { LiveApi } from "../live/api";
+import type { LiveRefInput } from "../live/types";
 import type {
   SecretToVaultInput,
   VaultConnectInput,
@@ -149,6 +151,7 @@ import type {
   FeedbackFile,
   FeedbackInput,
   FeedbackOffer,
+  FileConversationRef,
   ForeignMailbox,
   FormerAgent,
   GifKey,
@@ -345,6 +348,7 @@ import type {
   ToolDecision,
   TrashedArtifact,
   UndoAllResult,
+  UnreadFile,
   UnreadTask,
   UsageQueue,
   UsageReport,
@@ -1038,6 +1042,12 @@ export interface ApiClient {
          * `message.media_off` (GIFs or stickers off here) or `message.media_not_found`.
          */
         media?: PostMedia;
+        /**
+         * In a live file's conversation (ADR 0199): what the person had selected in the file (the composer's quote
+         * bar). The server adds the file's kind and title and stores `meta.liveRef`; 400 `message.live_ref` for
+         * another file or another conversation.
+         */
+        liveRef?: LiveRefInput;
       },
     ): Promise<Message>;
     reactions(orgId: string, messageId: string): Promise<ReactionCount[]>;
@@ -1102,11 +1112,15 @@ export interface ApiClient {
   connectors: {
     /** Connectors agentes.chat knows, with their scopes, plus the built-in scopes. */
     catalog(): Promise<ConnectorCatalog>;
-    /** The organization's connections (no secrets). */
-    list(orgId: string): Promise<Connection[]>;
-    connectWithKey(orgId: string, input: { connector: string; apiKey: string; label?: string }): Promise<Connection>;
-    /** Returns the provider URL to open; the server redirects back to `returnTo`. */
-    startOAuth(orgId: string, connector: string, input: { returnTo: string }): Promise<string>;
+    /** The team's connections and the person's own (no secrets). `others`: also everyone else's personal ones (who manages connectors gets them, as read-only rows). */
+    list(orgId: string, options?: { others?: boolean }): Promise<Connection[]>;
+    /** `personal`: the person's own connection, which any member adds (GitHub connects for the team only). */
+    connectWithKey(
+      orgId: string,
+      input: { connector: string; apiKey: string; label?: string; personal?: boolean },
+    ): Promise<Connection>;
+    /** Returns the provider URL to open; the server redirects back to `returnTo`. `personal`: the person's own. */
+    startOAuth(orgId: string, connector: string, input: { returnTo: string; personal?: boolean }): Promise<string>;
     /** The workspace's Composio calls this month and its cap (any member). */
     composioUsage(orgId: string): Promise<ComposioUsage>;
     /**
@@ -1124,8 +1138,18 @@ export interface ApiClient {
       outcome?: ConnectOutcome;
       returnTo?: string;
     }>;
-    /** Renames a connection, any kind (admins); its tools keep their names. 409 `connector.label_taken`. */
+    /**
+     * Renames a connection, any kind (the team's by admins, a personal one by its person); its tools keep their names.
+     * 409 `connector.label_taken`.
+     */
     rename(orgId: string, connectionId: string, label: string): Promise<Connection>;
+    /** Moves the person's own connection to the team (they must manage connectors). 409: the team already has it. */
+    moveToTeam(orgId: string, connectionId: string): Promise<Connection>;
+    /**
+     * "Tirar de um agente": every grant the agent has on the connection goes (its person, who manages connectors or
+     * agents, or the agent's owner). Any kind of connection, a mailbox aside.
+     */
+    takeOffAgent(orgId: string, connectionId: string, agentId: string): Promise<void>;
     disconnect(orgId: string, connectionId: string): Promise<void>;
   };
   githubApp: {
@@ -1353,9 +1377,13 @@ export interface ApiClient {
     saveSettings?(orgId: string, input: SkillSettings): Promise<SkillSettings>;
   };
   access: {
-    /** The agent's tool tree with each node's state. 404 while the backend doesn't have it. */
-    get(orgId: string, agentId: string): Promise<AgentAccess>;
-    set(orgId: string, agentId: string, input: AccessInput): Promise<AgentAccess>;
+    /**
+     * The agent's tool tree with each node's state. 404 while the backend doesn't have it. `others`: someone else's
+     * personal connection the agent holds comes too, with no scopes (it can only be taken off).
+     */
+    get(orgId: string, agentId: string, options?: { others?: boolean }): Promise<AgentAccess>;
+    /** Someone else's personal connection keeps what the agent holds unless `connectors[id]` is `false`. */
+    set(orgId: string, agentId: string, input: AccessInput, options?: { others?: boolean }): Promise<AgentAccess>;
   };
   /** The GitHub repositories an agent may use, in order (`owner/name` or `owner/*`); empty = every repository. */
   repositories: {
@@ -1395,7 +1423,8 @@ export interface ApiClient {
     ask(orgId: string, proposalId: string): Promise<Proposal>;
   };
   customConnectors: {
-    list(orgId: string): Promise<CustomServer[]>;
+    /** The team's servers and the person's own. `others`: also everyone else's personal ones (who manages connectors gets them, as read-only rows). */
+    list(orgId: string, options?: { others?: boolean }): Promise<CustomServer[]>;
     /**
      * Connects to an https MCP server: a new account, or with `connectionId` a new sign-in for that one
      * ("Reconectar"). Without `apiKey` the server tries OAuth (discovery + dynamic client registration); if the
@@ -1415,6 +1444,8 @@ export interface ApiClient {
         returnTo: string;
         connectionId?: string;
         headers?: RequestHeader[];
+        /** The person's own connection, which any member adds. */
+        personal?: boolean;
       },
     ): Promise<CustomConnectStart>;
     /** Lists the server's tools again; new ones come back unclassified. */
@@ -1521,6 +1552,8 @@ export interface ApiClient {
   };
   /** Boards and widgets (ADR 0135). */
   dashboards: DashboardsApi;
+  /** Spreadsheets, presentations and canvases edited together (ADR 0196), their pictures and Office previews. */
+  live: LiveApi;
   /** Missions (ADR 0029): long work by the agent's executor on a connected computer, in one thread. */
   missions: {
     /** Missions you can see (the Missões tab), most recently changed first, with the counts for the tabs. */
@@ -1820,6 +1853,11 @@ export interface ApiClient {
     page(orgId: string, filters?: ArtifactFilters, cursor?: string): Promise<ArtifactPage>;
     /** One artifact at `version` (default: latest), with content. */
     get(orgId: string, id: string, version?: number): Promise<ArtifactDetail>;
+    /**
+     * A live file's conversation (ADR 0199), made on first use: its channel and thread root, for the chat's routes.
+     * 404 for a file the person doesn't read, 400 `artifact.no_conversation` for a kind without one.
+     */
+    conversation(orgId: string, id: string): Promise<FileConversationRef>;
     /** Keeps a block in the Drive (ADR 0113). */
     keep(orgId: string, id: string): Promise<Artifact>;
     /** Sends what a person picked in a block to the agent that made it, as their own message. */
@@ -1849,11 +1887,14 @@ export interface ApiClient {
     versions(orgId: string, id: string): Promise<ArtifactVersion[]>;
     /** Short-lived signed URL for the stored file. */
     download(orgId: string, id: string, version?: number): Promise<{ url: string; expiresAt: string }>;
-    /** Same-origin URL of the file as an attachment, optionally converted (CSV, .patch, PDF). */
+    /**
+     * Same-origin URL of the file as an attachment, optionally converted (CSV, .patch, PDF, Word; a live file as Excel
+     * or PowerPoint, ADR 0198; a document as Markdown, ADR 0200).
+     */
     fileUrl(
       orgId: string,
       id: string,
-      options?: { version?: number; format?: "csv" | "patch" | "pdf" | "docx" },
+      options?: { version?: number; format?: "csv" | "patch" | "pdf" | "docx" | "xlsx" | "pptx" | "md" },
     ): string;
     create(
       orgId: string,
@@ -2013,6 +2054,8 @@ export interface ApiClient {
     unreadThreads(orgId: string): Promise<number>;
     /** The tasks whose conversation has a reply I haven't read, with the ones that mention me (ADR 0145). */
     unreadTasks?(orgId: string): Promise<UnreadTask[]>;
+    /** The live files whose conversation has a reply I haven't read, with the ones that mention me (ADR 0199). */
+    unreadFiles?(orgId: string): Promise<UnreadFile[]>;
   };
   /** "Trabalhando agora": agent runs in progress in the conversations you are in (any member). */
   working?: {
@@ -2028,7 +2071,8 @@ export interface ApiClient {
   mail: {
     /** Which ways in this server offers, and the IMAP presets. */
     providers(orgId: string): Promise<MailProviders>;
-    accounts(orgId: string): Promise<MailAccount[]>;
+    /** The person's own mailboxes and any left with no person. `others`: everyone else's too (who manages connectors). */
+    accounts(orgId: string, options?: { others?: boolean }): Promise<MailAccount[]>;
     /** Tests the login and both servers first; a `422` carries `MailConnectError` as its code. */
     connectImap(orgId: string, input: MailImapInput): Promise<MailAccount>;
     /**

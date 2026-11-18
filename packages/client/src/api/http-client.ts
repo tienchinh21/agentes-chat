@@ -3,7 +3,8 @@ import type { ChatPrefs } from "../lib/chat-look";
 import { humanCheckHeaders } from "../lib/human-check";
 import type { OnboardingStepId } from "../lib/onboarding";
 import { type LodiPrefs, lodiPrefsOf } from "../lib/right-hand-prefs";
-import { CLOUD_SERVER } from "../lib/server";
+import { CLOUD_SERVER, withoutTrailingSlashes } from "../lib/server";
+import { createLiveApi } from "../live/api";
 import { consultSeeds } from "../realtime/consults";
 import { steerStore } from "../realtime/steer";
 import type {
@@ -110,6 +111,7 @@ import type {
   EndpointModel,
   FeedbackFile,
   FeedbackOffer,
+  FileConversationRef,
   ForeignMailbox,
   FormerAgent,
   GifKey,
@@ -251,6 +253,7 @@ import type {
   ThreadPage,
   TrashedArtifact,
   UndoAllResult,
+  UnreadFile,
   UnreadTask,
   UsageQueue,
   UsageReport,
@@ -281,6 +284,8 @@ const filterQuery = (f: SearchFilterInput | undefined) =>
 
 const pageBody = (to: PageTarget) => (typeof to === "string" ? { url: to } : to);
 const org = (orgId: string) => `/api/app/organizations/${enc(orgId)}`;
+/** `?others=1`: a list that also holds everyone else's personal connections (who manages connectors gets them). */
+const othersQuery = (options?: { others?: boolean }) => (options?.others ? "?others=1" : "");
 /** The most agents one `POST …/agent-setup` takes (the server's `SETUP_AGENTS_MAX`). */
 const SETUP_AGENTS_PER_CALL = 200;
 
@@ -328,7 +333,7 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
   // agentes.chat itself, for its public answers (the desktop app's newest build): another origin, no cookie.
   const cloud = createRequester({ baseUrl: CLOUD_SERVER, ...(options.fetch ? { fetch: options.fetch } : {}) });
   /** Prefix for URLs the platform opens itself (file links); "" on the web. */
-  const base = (options.baseUrl ?? "").replace(/\/+$/, "");
+  const base = withoutTrailingSlashes(options.baseUrl ?? "");
   const nullOn = async <T>(status: number, run: () => Promise<T>): Promise<T | null> => {
     try {
       return await run();
@@ -379,6 +384,7 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
       markThreadRead: (orgId, threadId) => request<void>(`${org(orgId)}/threads/${enc(threadId)}/read`, { json: {} }),
       unreadThreads: async (orgId) => (await request<{ count: number }>(`${org(orgId)}/unread-threads`)).count,
       unreadTasks: async (orgId) => (await request<{ tasks: UnreadTask[] }>(`${org(orgId)}/unread-tasks`)).tasks,
+      unreadFiles: async (orgId) => (await request<{ files: UnreadFile[] }>(`${org(orgId)}/unread-files`)).files,
     },
     working: {
       list: async (orgId) => (await request<{ runs: WorkingRun[] }>(`${org(orgId)}/active-runs`)).runs,
@@ -392,7 +398,8 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
     },
     mail: {
       providers: (orgId) => request<MailProviders>(`${org(orgId)}/mail/providers`),
-      accounts: async (orgId) => (await request<{ accounts: MailAccount[] }>(`${org(orgId)}/mail/accounts`)).accounts,
+      accounts: async (orgId, options) =>
+        (await request<{ accounts: MailAccount[] }>(`${org(orgId)}/mail/accounts${othersQuery(options)}`)).accounts,
       connectImap: async (orgId, input) =>
         (await request<{ account: MailAccount }>(`${org(orgId)}/mail/accounts/imap`, { json: input })).account,
       connectComposio: (orgId, input) =>
@@ -1203,7 +1210,8 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
     },
     connectors: {
       catalog: () => request<ConnectorCatalog>("/api/app/connectors/catalog"),
-      list: async (orgId) => (await request<{ connections: Connection[] }>(`${org(orgId)}/connectors`)).connections,
+      list: async (orgId, options) =>
+        (await request<{ connections: Connection[] }>(`${org(orgId)}/connectors${othersQuery(options)}`)).connections,
       connectWithKey: (orgId, input) => request<Connection>(`${org(orgId)}/connectors`, { json: input }),
       startOAuth: async (orgId, connector, input) =>
         (
@@ -1221,6 +1229,13 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         ),
       rename: (orgId, connectionId, label) =>
         request<Connection>(`${org(orgId)}/connectors/${enc(connectionId)}`, { method: "PATCH", json: { label } }),
+      takeOffAgent: (orgId, connectionId, agentId) =>
+        request<void>(`${org(orgId)}/connectors/${enc(connectionId)}/agents/${enc(agentId)}`, { method: "DELETE" }),
+      moveToTeam: (orgId, connectionId) =>
+        request<Connection>(`${org(orgId)}/connectors/${enc(connectionId)}`, {
+          method: "PATCH",
+          json: { personal: false },
+        }),
       disconnect: (orgId, connectionId) =>
         request<void>(`${org(orgId)}/connectors/${enc(connectionId)}`, { method: "DELETE" }),
     },
@@ -1493,9 +1508,13 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         request<SkillSettings>(`${org(orgId)}/skill-settings`, { method: "PUT", json: input }),
     },
     access: {
-      get: (orgId, agentId) => request<AgentAccess>(`${org(orgId)}/agents/${enc(agentId)}/access`),
-      set: (orgId, agentId, input) =>
-        request<AgentAccess>(`${org(orgId)}/agents/${enc(agentId)}/access`, { method: "PUT", json: input }),
+      get: (orgId, agentId, options) =>
+        request<AgentAccess>(`${org(orgId)}/agents/${enc(agentId)}/access${othersQuery(options)}`),
+      set: (orgId, agentId, input, options) =>
+        request<AgentAccess>(`${org(orgId)}/agents/${enc(agentId)}/access${othersQuery(options)}`, {
+          method: "PUT",
+          json: input,
+        }),
     },
     invites: {
       createLink: (orgId, choices) => request<InviteLinkMade>(`${org(orgId)}/invite-links`, { json: choices ?? {} }),
@@ -1544,6 +1563,8 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         request<ArtifactPage>(`${org(orgId)}/artifacts`, { query: { ...artifactQuery(filters), cursor } }),
       get: (orgId, id, version) =>
         request<ArtifactDetail>(`${org(orgId)}/artifacts/${enc(id)}`, { query: { version } }),
+      conversation: (orgId, id) =>
+        request<FileConversationRef>(`${org(orgId)}/artifacts/${enc(id)}/conversation`, { method: "POST" }),
       keep: (orgId, id) => request<Artifact>(`${org(orgId)}/artifacts/${enc(id)}/keep`, { method: "POST" }),
       reply: (orgId, id, text, clientId) =>
         request<{ id: string }>(`${org(orgId)}/artifacts/${enc(id)}/reply`, {
@@ -1675,6 +1696,7 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         request<ThreadInfo>(`${org(orgId)}/threads/${enc(threadId)}/${action}`, { json: {} }),
     },
     dashboards: createDashboardsApi(request),
+    live: createLiveApi(request, { upload: files.upload, base }),
     missions: ((): HttpApi["missions"] => {
       const one = (orgId: string, missionId: string) => `${org(orgId)}/missions/${enc(missionId)}`;
       return {
@@ -1930,7 +1952,8 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         }),
     },
     customConnectors: {
-      list: async (orgId) => (await request<{ servers: CustomServer[] }>(`${org(orgId)}/connectors/custom`)).servers,
+      list: async (orgId, options) =>
+        (await request<{ servers: CustomServer[] }>(`${org(orgId)}/connectors/custom${othersQuery(options)}`)).servers,
       connect: (orgId, input) => request<CustomConnectStart>(`${org(orgId)}/connectors/custom`, { json: input }),
       refresh: (orgId, serverId) =>
         request<CustomServer>(`${org(orgId)}/connectors/custom/${enc(serverId)}/refresh`, { json: {} }),

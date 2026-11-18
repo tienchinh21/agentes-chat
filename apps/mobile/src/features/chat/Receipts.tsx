@@ -19,6 +19,7 @@ import { Disclosure, GroupedFooter, LineIcon, Text, useReducedMotion, useToast }
 import { router } from "@/ui/navigation";
 import { agoOf } from "../agents/logic";
 import { agoText } from "../agents/work";
+import { BUBBLE_PART_CORNERS, useBubblePart } from "../shared/bubble-part";
 import { useColors, useOrgId } from "../shared/hooks";
 import { SheetTitle } from "../shared/PromptForm";
 import { ActionList, copyText, tapHaptic } from "../shared/parts";
@@ -48,6 +49,7 @@ export function Receipts({
 }) {
   const { t } = useTranslation();
   const c = useColors();
+  const part = useBubblePart();
   const meId = useRowMeId();
   const dir = useRowDirectory();
   const sheet = useSheetIfAny();
@@ -96,17 +98,21 @@ export function Receipts({
     );
   };
   const start = groupStart(list);
+  // In a conversation of bubbles, a bubble of the message it came with (its fill, joined to it); else the card.
+  const frame = part
+    ? [styles.card, { backgroundColor: part.fill, borderWidth: 0 }, BUBBLE_PART_CORNERS, part.edge]
+    : [styles.card, { backgroundColor: c.raised, borderColor: c.line2 }];
   // What changes while it shows (undone from somewhere else) fades in; what is there when it mounts just shows.
   return (
     <View style={cardTop}>
       <LayoutAnimationConfig skipEntering>
         {layout === "one" ? (
-          <View style={[styles.one, styles.card, { backgroundColor: c.raised, borderColor: c.line2 }]}>
+          <View style={[styles.one, frame]}>
             <LineIcon name={receiptIcon((list[0] as AgentAction).kind)} size={15} color={c.muted} variant="small" />
             {row(rows[0] as ReceiptRow, "one")}
           </View>
         ) : (
-          <View style={[styles.group, styles.card, { backgroundColor: c.raised, borderColor: c.line2 }]}>
+          <View style={[styles.group, frame]}>
             <View style={styles.hd}>
               <Text variant="small" tone="muted" style={styles.fit}>
                 <Text variant="small" tone="ink" style={styles.bold}>

@@ -609,6 +609,8 @@ export const en = {
       button: "Unlink it",
       small: "If it was you, there's nothing to do. You can unlink it any time in Settings.",
       why: (surface: string) => `You got this email because ${surface} was linked to your agentes.chat account.`,
+      /** The picture's alt text: the assistant beside the phone. */
+      picture: "Your assistant, now on your phone too",
     },
     unlinked: {
       subject: (surface: string) => `${surface} was unlinked from your agentes.chat account`,
@@ -620,7 +622,28 @@ export const en = {
       ],
       small: "Link it again in Settings if it was you.",
       why: (surface: string) => `You got this email because ${surface} was linked to your agentes.chat account.`,
+      /** The picture's alt text: the assistant beside the phone, switched off. */
+      picture: "Your assistant, no longer on your phone",
     },
+  },
+  /** The answer of whoever runs the server to a member's request for help (ADR 0056). */
+  supportReply: {
+    subject: "An answer to your request for help",
+    preheader: "About the help you asked for on agentes.chat.",
+    headline: "An answer to your request for help",
+    /** Our own sentences, each under the word the operator API takes for it. */
+    answers: {
+      received: "We got your request and are looking into it.",
+      need_more: "We need to know more to help: what you were doing, what you expected and what happened instead.",
+      resolved: "What you reported is fixed.",
+      handed_over: "A person now has your request and will answer you.",
+    },
+    /** Who answers: agentes.chat, or the people who run a self-hosted server, named by its host. */
+    from: (host: string | null): Text =>
+      host ? atHost("Answered by the people who run the agentes.chat server", "at", host) : "Answered by agentes.chat.",
+    ai: "An AI assistant wrote this answer.",
+    reply: (address: string): Text => ["To answer, write to ", { mail: address }, "."],
+    why: "You got this email because you asked for help on agentes.chat.",
   },
 };
 

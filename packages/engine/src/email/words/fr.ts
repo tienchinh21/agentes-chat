@@ -600,6 +600,7 @@ export const words: EmailWords = {
       button: "Délier",
       small: "Si c'était toi, il n'y a rien à faire. Tu peux le délier à tout moment dans les Paramètres.",
       why: (surface) => `Tu reçois cet e-mail parce que ${surface} a été lié à ton compte agentes.chat.`,
+      picture: "Ton assistant, maintenant aussi sur ton téléphone",
     },
     unlinked: {
       subject: (surface) => `${surface} a été délié de ton compte agentes.chat`,
@@ -608,6 +609,26 @@ export const words: EmailWords = {
       body: (surface, display) => [{ b: display }, ` sur ${surface} a été délié parce que son identité a changé.`],
       small: "Lie-le à nouveau dans les Paramètres si c'était toi.",
       why: (surface) => `Tu reçois cet e-mail parce que ${surface} était lié à ton compte agentes.chat.`,
+      picture: "Ton assistant, plus sur ton téléphone",
     },
+  },
+  supportReply: {
+    subject: "Une réponse à votre demande d’aide",
+    preheader: "À propos de l’aide que vous avez demandée sur agentes.chat.",
+    headline: "Une réponse à votre demande d’aide",
+    answers: {
+      received: "Nous avons bien reçu votre demande et nous l’examinons.",
+      need_more:
+        "Il nous faut plus de détails pour vous aider : ce que vous faisiez, ce que vous attendiez et ce qui s’est passé.",
+      resolved: "Ce que vous avez signalé est corrigé.",
+      handed_over: "Une personne a maintenant votre demande et va vous répondre.",
+    },
+    from: (host) =>
+      host
+        ? atHost("Réponse des personnes qui gèrent le serveur agentes.chat", "sur", host)
+        : "Réponse d’agentes.chat.",
+    ai: "Un assistant IA a rédigé cette réponse.",
+    reply: (address) => ["Pour répondre, écrivez à ", { mail: address }, "."],
+    why: "Vous recevez cet e-mail car vous avez demandé de l’aide sur agentes.chat.",
   },
 };

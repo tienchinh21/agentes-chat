@@ -1,5 +1,6 @@
 import { ApiError, useUndoSurfaceLink } from "@agenteschat/client";
 import { errorCode, errorText } from "@agenteschat/client/lib/errors";
+import { formatPhone } from "@agenteschat/i18n/format";
 import { Button, Icon, Locked } from "@agenteschat/ui";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -91,7 +92,7 @@ export function SurfaceUndoPage({ token }: { token?: string }) {
   const undo = useUndoSurfaceLink();
   const done = undo.data;
   const gone = !token || errorCode(undo.error) === "surface.undo_gone";
-  const display = done?.display || t("surface.undo.sender");
+  const display = done?.display ? formatPhone(done.display) : t("surface.undo.sender");
   const [title, lead]: [string, string] = done
     ? done.unlinked
       ? [t("surface.undo.done", { surface: done.surface }), t("surface.undo.doneLead", { display })]

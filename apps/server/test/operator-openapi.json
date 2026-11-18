@@ -3,7 +3,7 @@
   "info": {
     "title": "agentes.chat operator API",
     "version": "test",
-    "description": "Workspace and account lookups, what a run did and why a message started one or none, what a workspace connected, recorded, asked and scheduled, what a person was notified of and reaches, the messages no run answered, the job queue, the emails queued to an address and what model calls spent, the times a member asked for help, one piece of what a workspace wrote read with a reason (the reveal door), workspace standing, billing holds and limits (ADR 0079), a workspace's logo and accent color (ADR 0193), the extra hostnames this server answers on with their look (ADR 0194), outside collaborators (ADR 0191), the events feed and review blocks, the workspaces' computers from an external provisioner, who may sign up (the waiting list and early-access invitations, ADR 0078), how new Claude sign-ins for all agents are made (ADR 0150), and how connectors are used (ADR 0103), for the people who run this instance (ADR 0056)."
+    "description": "Workspace and account lookups, what a run did and why a message started one or none, what a workspace connected, recorded, asked and scheduled, what a person was notified of and reaches, the messages no run answered, the job queue, the emails queued to an address and what model calls spent, the times a member asked for help, one piece of what a workspace wrote read with a reason and a member's support request answered by email (the reveal door), workspace standing, billing holds and limits (ADR 0079), a workspace's logo and accent color (ADR 0193), the extra hostnames this server answers on with their look (ADR 0194), outside collaborators (ADR 0191), the events feed and review blocks, the workspaces' computers from an external provisioner, who may sign up (the waiting list and early-access invitations, ADR 0078), how new Claude sign-ins for all agents are made (ADR 0150), and how connectors are used (ADR 0103), for the people who run this instance (ADR 0056)."
   },
   "servers": [
     {
@@ -651,7 +651,7 @@
           },
           "type": {
             "type": "string",
-            "description": "`user.signed_up`, `session.created`, `user.deletion_requested`, `user.deletion_canceled`, `user.deleted`, `organization.created`, `organization.deletion_requested`, `organization.deletion_canceled`, `organization.deleted`, `invitation.created`, `agent.created`, `agent.deleted`, `mail.sent`, `run.finished`, `run.hop_limit`, `task.finished`, `desktop_control.ended`, `content.viewed`, `support.requested`, `platform_ai.threshold`, `account.failure`, `surface.cap_reached`, `outside_access.granted`, `outside_access.denied` or `outside_access.ended` (ADR 0056 §5 lists each one's `data`; ADR 0191 the last three's). Ignore types you don't know: new ones keep v1."
+            "description": "`user.signed_up`, `session.created`, `user.deletion_requested`, `user.deletion_canceled`, `user.deleted`, `organization.created`, `organization.deletion_requested`, `organization.deletion_canceled`, `organization.deleted`, `invitation.created`, `agent.created`, `agent.deleted`, `mail.sent`, `run.finished`, `run.hop_limit`, `task.finished`, `desktop_control.ended`, `content.viewed`, `support.requested`, `support.replied`, `platform_ai.threshold`, `account.failure`, `surface.cap_reached`, `outside_access.granted`, `outside_access.denied` or `outside_access.ended` (ADR 0056 §5 lists each one's `data`; ADR 0191 the last three's). Ignore types you don't know: new ones keep v1."
           },
           "orgId": {
             "type": ["string", "null"],
@@ -3293,6 +3293,7 @@
                     "channel",
                     "dm",
                     "task_conversation",
+                    "file_conversation",
                     "message",
                     "run",
                     "task",
@@ -3300,7 +3301,7 @@
                     "computer",
                     "ai_account"
                   ],
-                  "description": "`user`: an account (by its id) or a member (by handle). `dm`: a direct conversation. `task_conversation`: the channel a task's conversation is in. `file`: a file in the Drive. `computer`: a connected computer. `ai_account`: a sign-in to an AI plan on a computer."
+                  "description": "`user`: an account (by its id) or a member (by handle). `dm`: a direct conversation. `task_conversation`: the channel a task's conversation is in. `file_conversation`: the channel a live file's conversation is in. `file`: a file in the Drive. `computer`: a connected computer. `ai_account`: a sign-in to an AI plan on a computer."
                 },
                 "id": {
                   "type": "string"
@@ -3542,11 +3543,11 @@
                 },
                 "name": {
                   "type": "string",
-                  "description": "A channel's name. A direct or a task's conversation's is made up."
+                  "description": "A channel's name. A direct, a task's or a file's conversation's is made up."
                 },
                 "kind": {
                   "type": "string",
-                  "description": "`channel`, `dm` or `task`."
+                  "description": "`channel`, `dm`, `task` or `file`."
                 },
                 "visibility": {
                   "type": "string",
@@ -6773,6 +6774,7 @@
               "public_channel",
               "administrator",
               "task_reader",
+              "file_reader",
               "shared_everyone",
               "shared_person",
               "shared_role",
@@ -6787,10 +6789,11 @@
               "not_joined",
               "not_channel_member",
               "not_task_reader",
+              "not_file_reader",
               "not_shared",
               "unknown"
             ],
-            "description": "What decided. Yes: `owner` (the agent's or the computer's), `audience_everyone`, `audience_person` (named in its audience), `audience_role` (holds a role of its audience), `workspace` (for the whole workspace: a task or a file outside any conversation, a workspace's computer nobody owns), `channel_member` (in the channel, or in the one the task or the file is in), `public_channel` (the task or the file is in one), `administrator`, `task_reader` (sees the task whose conversation it is), `shared_everyone`, `shared_person`, `shared_role` (the file's sharing), `granted_once` (a person let their agents use the computer for now). No: `not_a_member` (of the workspace), `account_closed` (blocked, or being deleted), `workspace_suspended`, `gone` (archived, deleted or removed), `no_permission` (no role of theirs lets them talk to agents), `owner_only`, `not_in_audience`, `not_joined` (a public channel they may join), `not_channel_member`, `not_task_reader`, `not_shared`. `unknown`: the server's own check answered, and no rule here explains it."
+            "description": "What decided. Yes: `owner` (the agent's or the computer's, or who made a file of the Drive itself), `audience_everyone`, `audience_person` (named in its audience), `audience_role` (holds a role of its audience), `workspace` (for the whole workspace: a task outside any conversation, a file of the Drive itself shared with everyone, a workspace's computer nobody owns), `channel_member` (in the channel, or in the one the task or the file is in), `public_channel` (the task or the file is in one), `administrator`, `task_reader` (sees the task whose conversation it is), `file_reader` (reads the live file whose conversation it is), `shared_everyone`, `shared_person`, `shared_role` (the file's sharing), `granted_once` (a person let their agents use the computer for now). No: `not_a_member` (of the workspace), `account_closed` (blocked, or being deleted), `workspace_suspended`, `gone` (archived, deleted or removed), `no_permission` (no role of theirs lets them talk to agents), `owner_only`, `not_in_audience`, `not_joined` (a public channel they may join), `not_channel_member`, `not_task_reader`, `not_file_reader`, `not_shared`. `unknown`: the server's own check answered, and no rule here explains it."
           }
         },
         "required": ["userId", "targetKind", "targetId", "allowed", "rule"]
@@ -6977,6 +6980,52 @@
         "required": ["kind", "id", "field", "purpose", "reason", "operator", "assistedByAi"],
         "additionalProperties": false
       },
+      "OperatorReplied": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "replies": {
+            "type": "integer",
+            "description": "How many replies this request now has, of the 3 it may get."
+          }
+        },
+        "required": ["requestId", "replies"]
+      },
+      "OperatorReplyRequest": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The support request answered: one of this workspace made in the last 90 days."
+          },
+          "template": {
+            "type": "string",
+            "enum": ["received", "need_more", "resolved", "handed_over"],
+            "description": "One of this server's own sentences, sent in the member's language: `received` (the request is being looked into), `need_more` (more details are needed), `resolved` (what they reported is fixed) or `handed_over` (a person now has the request). This or `text`, never both."
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Your own words, as plain text: a line break ends a paragraph, and nothing else in it is rendered or becomes a link. Kept nowhere but the email."
+          },
+          "operator": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "Who answers, as your own service names them. Kept in the `support.replied` event."
+          },
+          "assistedByAi": {
+            "type": "boolean",
+            "description": "Whether an AI assistant wrote the answer. The email and the workspace's audit entry say so."
+          }
+        },
+        "required": ["requestId", "operator", "assistedByAi"],
+        "additionalProperties": false
+      },
       "OperatorHost": {
         "type": "object",
         "properties": {
@@ -6995,6 +7044,10 @@
             "type": "boolean",
             "description": "It has a logo."
           },
+          "poweredBy": {
+            "type": "boolean",
+            "description": "Its pages before sign-in end with the powered-by line."
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -7004,7 +7057,7 @@
             "format": "date-time"
           }
         },
-        "required": ["host", "name", "accent", "logo", "createdAt", "updatedAt"]
+        "required": ["host", "name", "accent", "logo", "poweredBy", "createdAt", "updatedAt"]
       },
       "OperatorHostLook": {
         "type": "object",
@@ -7037,6 +7090,10 @@
             },
             "required": ["contentType", "base64"],
             "description": "Its logo, checked by its bytes, metadata removed; shown at the sign-in page's lockup height. Null: the name alone. Left out: left as it is."
+          },
+          "poweredBy": {
+            "type": "boolean",
+            "description": "Its pages before sign-in end with a line linking to the software's site. Left out: left as it is (true on a new host)."
           }
         },
         "required": ["name"]
@@ -10227,11 +10284,11 @@
           {
             "schema": {
               "type": "string",
-              "enum": ["channel", "dm", "task"],
-              "description": "`channel`, `dm` (a direct conversation) or `task` (a task's conversation). Absent: all of them."
+              "enum": ["channel", "dm", "task", "file"],
+              "description": "`channel`, `dm` (a direct conversation), `task` (a task's conversation) or `file` (a live file's conversation). Absent: all of them."
             },
             "required": false,
-            "description": "`channel`, `dm` (a direct conversation) or `task` (a task's conversation). Absent: all of them.",
+            "description": "`channel`, `dm` (a direct conversation), `task` (a task's conversation) or `file` (a live file's conversation). Absent: all of them.",
             "name": "kind",
             "in": "query"
           },
@@ -12498,6 +12555,106 @@
           },
           "429": {
             "description": "Past the door's own limits",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reveal/orgs/{orgId}/replies": {
+      "post": {
+        "tags": ["Operator"],
+        "summary": "Answer a member's support request at the address of their account",
+        "description": "Only with `OPERATOR_API_REVEAL_TOKEN`. An email to the address the request's account has now, in that account's language: one of this server's own sentences (`template`) or your own words (`text`, plain text of at most 2000 characters). No argument names an address, a name or a subject. The email says that this server answers, that an AI assistant wrote it when `assistedByAi`, and where to write back when `SUPPORT_EMAIL` is set. A reply reads nothing: a request can be answered after the 30 days in which it opens content, for the 90 days its words are kept (403 `reveal.request_old` after that). Its member must still be one (`reveal.requester`). A request of another workspace and one nobody has answer the same 404. In one transaction with the email's job, the reply is recorded: a `support.replied` event and an entry in the workspace's own audit log (`operator.support_replied`), each with the request, the template or the word `text`, how long your words were and `assistedByAi`. Never the words: they are in the email's job alone, and leave it once the email is sent or given up. At most 3 replies to one request (429 `reveal.limit_request`) and 60 from this server in 24 hours (`reveal.limit_day`), counted from those events; a call counts toward the door's 30 a minute (`reveal.limit_minute`). A server that sends no email answers 409 `reveal.no_email`.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "orgId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OperatorReplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorReplied"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request: both or neither of `template` and `text`, or a `text` that says nothing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not the reveal token, the door is closed, the request is too old or its member is gone",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such record in this workspace",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "This server sends no email (`reveal.no_email`)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Past the replies' own limits, or the door's",
             "content": {
               "application/json": {
                 "schema": {

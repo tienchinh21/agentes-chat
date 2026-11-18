@@ -1,4 +1,5 @@
-import { and, type Database, eq, gt, isNull, rowsOf, schema, sql } from "@agenteschat/db";
+import { and, type Database, type Executor, eq, gt, isNull, rowsOf, schema, sql } from "@agenteschat/db";
+import { othersPersonalTools } from "./agent-audit";
 import { requireAgentDetails } from "./audience";
 import { recordAudit } from "./audit";
 import { readableChannelIds, requireChannelAccess } from "./channels";
@@ -70,6 +71,12 @@ export const REVEAL_STUCK_MS = 60 * 60_000;
 /** The door's own bounds, for an instance with nothing in front of it: calls a minute, and reads of one workspace a day. */
 export const REVEAL_PER_MINUTE = { limit: 30, windowMs: 60_000 } as const;
 export const REVEAL_PER_WORKSPACE_DAY = 100;
+/** The sentences a reply to a support request can say in core's own words (`operatorReply`). */
+export const REPLY_TEMPLATES = ["received", "need_more", "resolved", "handed_over"] as const;
+export type ReplyTemplate = (typeof REPLY_TEMPLATES)[number];
+/** A reply's bounds: how many one request gets, and how many the instance sends in a day. */
+export const REPLIES_PER_REQUEST = 3;
+export const REPLIES_PER_DAY = 60;
 
 const DAY_MS = 86_400_000;
 
@@ -129,6 +136,16 @@ function checkShape(input: RevealInput) {
 }
 
 const refused = (code: string, message: string) => new ForbiddenError(message, `reveal.${code}`);
+
+/** One answer for a record of another workspace, a deleted one and one nobody has. */
+export const noSuchRecord = () => new NotFoundError("No such record in this workspace");
+
+/** Who made a support request is still a member the app lets in: not gone, blocked or being deleted. */
+export async function requireRequester(db: Executor, orgId: string, userId: string) {
+  if (!(await getMembership(db, userId, orgId))) {
+    throw refused("requester", "Who asked is no longer a member of this workspace");
+  }
+}
 
 /** The app's own check, asked as a question: its refusal is a no, anything else it throws is not an answer. */
 async function passes(check: () => Promise<unknown>) {
@@ -270,11 +287,12 @@ const findStep: Find = async (db, orgId, { id, seq, field }) => {
     direct: boolean;
     confidential: boolean;
     kind: string;
+    name: string | null;
     failed: boolean;
     result_failed: boolean;
     narrated: boolean;
   }>(
-    await db.execute(sql`select r.agent_id, r.channel_id, s.kind,
+    await db.execute(sql`select r.agent_id, r.channel_id, s.kind, s.data->>'name' as name,
         ${directOf("r.channel_id", "r.trigger_message_id")} as direct,
         ${confidentialRun} as confidential,
         (s.kind = 'error' or (s.kind = 'tool_result' and s.data->'isError' = 'true'::jsonb)) as failed,
@@ -293,7 +311,10 @@ const findStep: Find = async (db, orgId, { id, seq, field }) => {
     confidential: s.confidential,
     has: has ?? s.failed,
     failure: field === "error" ? s.failed : field === "input" && s.result_failed,
-    seenBy: (userId) => readsRunsOf(db, orgId, userId, s.agent_id, s.channel_id),
+    // A call in someone else's own connection shows them its name alone (`getRun`).
+    seenBy: async (userId) =>
+      (await readsRunsOf(db, orgId, userId, s.agent_id, s.channel_id)) &&
+      !(s.name && (await othersPersonalTools(db, orgId, id, userId)).has(s.name)),
     ofRun: (run) => id === run.id,
     text: async () => {
       const [step] = await db
@@ -427,7 +448,7 @@ const findConnection: Find = async (db, orgId, { id, field }) => {
   if (!column) return null;
   const where = and(eq(cc.id, id), eq(cc.orgId, orgId), isNull(cc.revokedAt));
   const [c] = await db
-    .select({ has: filled(column) })
+    .select({ has: filled(column), owner: cc.ownerUserId })
     .from(cc)
     .where(where);
   if (!c) return null;
@@ -436,7 +457,9 @@ const findConnection: Find = async (db, orgId, { id, field }) => {
     confidential: false,
     has: c.has,
     failure: false,
-    seenBy: (userId) => passes(() => requirePermission(db, userId, orgId, "read")),
+    // A person's own connection is opened by that person alone (ADR 0099 addendum).
+    seenBy: async (userId) =>
+      c.owner ? c.owner === userId : passes(() => requirePermission(db, userId, orgId, "read")),
     ofRun: () => false,
     text: async () => {
       const text = (await db.select({ text: column }).from(cc).where(where))[0]?.text ?? null;
@@ -565,9 +588,7 @@ async function checkFault(db: Database, orgId: string, input: RevealInput, found
 /** `member_request`: the request is this workspace's and young, its member is still one, and reads the record now. */
 async function checkMemberRequest(db: Database, orgId: string, input: RevealInput, found: Found, now: Date) {
   const request = await openRequest(db, orgId, input.requestId ?? "", now);
-  if (!(await getMembership(db, request.userId, orgId))) {
-    throw refused("requester", "Who asked is no longer a member of this workspace");
-  }
+  await requireRequester(db, orgId, request.userId);
   if (!(await found.seenBy(request.userId))) {
     throw refused("not_visible", "Who asked can't read this in the app");
   }
@@ -617,7 +638,7 @@ export async function operatorReveal(
   if (found && !found.has && anError) {
     throw new ConflictError("Nothing failed there: it holds no error", "reveal.no_error");
   }
-  if (!found?.has) throw new NotFoundError("No such record in this workspace");
+  if (!found?.has) throw noSuchRecord();
 
   const { member, facts } =
     input.purpose === "fault"

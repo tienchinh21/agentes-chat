@@ -2038,6 +2038,48 @@
       "when": 1794952626821,
       "tag": "0295_handed_for_user",
       "breakpoints": true
+    },
+    {
+      "idx": 293,
+      "version": "7",
+      "when": 1794963495178,
+      "tag": "0296_run_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 294,
+      "version": "7",
+      "when": 1794964106130,
+      "tag": "0297_operator_events_covering",
+      "breakpoints": true
+    },
+    {
+      "idx": 295,
+      "version": "7",
+      "when": 1794984191596,
+      "tag": "0298_host_powered_by",
+      "breakpoints": true
+    },
+    {
+      "idx": 296,
+      "version": "7",
+      "when": 1794984291596,
+      "tag": "0299_personal_connections",
+      "breakpoints": true
+    },
+    {
+      "idx": 297,
+      "version": "7",
+      "when": 1794994291596,
+      "tag": "0300_live_files",
+      "breakpoints": true
+    },
+    {
+      "idx": 298,
+      "version": "7",
+      "when": 1795004291596,
+      "tag": "0301_drive_files_shared",
+      "breakpoints": true
     }
   ]
 }

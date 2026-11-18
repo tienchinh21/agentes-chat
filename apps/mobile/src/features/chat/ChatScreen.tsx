@@ -8,10 +8,12 @@ import {
   channelsQuery,
   type DirectMessage,
   dmsQuery,
+  fileConversationOf,
   heldTakeoversHere,
   inMainTimeline,
   keys,
   type LiveConsult,
+  type LiveKind,
   type LiveRun,
   MESSAGES_PAGE,
   type Message,
@@ -30,6 +32,7 @@ import {
   useAgentsBrowserHandoffs,
   useAiStatus,
   useApi,
+  useArtifact,
   useChannelThreads,
   useConsultations,
   useCreateMission,
@@ -67,7 +70,7 @@ import {
 import { errorText, sendFailureOf, sendNeedsEdit } from "@agenteschat/client/lib/errors";
 import { mentionsReader, offersEveryone } from "@agenteschat/client/lib/everyone";
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_MB } from "@agenteschat/client/lib/files";
-import { capitalize } from "@agenteschat/client/lib/format";
+import { capitalize, joinNames } from "@agenteschat/client/lib/format";
 import { issueTakenOf, issueWorkOf, taskConversationOf } from "@agenteschat/client/lib/issues";
 import { workIsOver } from "@agenteschat/client/lib/long-work";
 import { supersededBrainNotices } from "@agenteschat/client/lib/machine-outages";
@@ -133,11 +136,9 @@ import {
   useReanimatedKeyboardAnimation,
 } from "react-native-keyboard-controller";
 import Animated, {
-  Easing,
   FadeIn,
   FadeInDown,
   FadeOut,
-  Keyframe,
   LayoutAnimationConfig,
   useAnimatedRef,
   useAnimatedStyle,
@@ -145,6 +146,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { scheduleOnRN } from "react-native-worklets";
 import { frameClock } from "@/agent/clock";
 import { useStillWhileScrolling } from "@/agent/live";
 import { StickerStageContext } from "@/agent/StickerCanvas";
@@ -164,8 +166,8 @@ import {
   type HeaderAction,
   Icon,
   LineIcon,
-  motion,
   PressScale,
+  RISE_IN,
   type SendHow,
   Text,
   useReducedMotion,
@@ -184,6 +186,8 @@ import { isLocalMedia, LOCAL_FILES, type LocalFile, localFilesOf } from "../file
 import { rememberLocalCopy } from "../files/source";
 import { uploadPart } from "../files/upload-part";
 import { chatHref, consultationHref, notificationHref } from "../links/logic";
+import { FileOrigin, LiveQuoteBar } from "../live-files/talk/AboutLine";
+import { dropTalkAbout, useTalkAbout } from "../live-files/talk/store";
 import { MissionCardView } from "../missions/cards";
 import { isOpenMission } from "../missions/logic";
 import { PushOfferLine } from "../push/PushOfferLine";
@@ -218,7 +222,7 @@ import { ChannelPicker } from "./ChannelPicker";
 import { ChannelWelcome } from "./ChannelWelcome";
 import { ChatPeek, usePullPastEnd } from "./ChatPeek";
 import { ChatSkeleton } from "./ChatSkeleton";
-import { ChatWallpaper, WallpaperBand, WallpaperUnder } from "./ChatWallpaper";
+import { ChatWallpaper, DOCK_FADE, WallpaperBand, WallpaperUnder } from "./ChatWallpaper";
 import { type OpenedMessages, OpenedMessagesContext } from "./ClippedMessage";
 import { ConversationSwitcher } from "./ConversationSwitcher";
 import { takeComposerRequest, useComposerRequest } from "./composer-request";
@@ -229,6 +233,7 @@ import { EventLine } from "./EventLine";
 import { FirstDay } from "./FirstDay";
 import { HeaderPill } from "./HeaderPill";
 import { IssueTakenLine } from "./issue-work";
+import { useKeyboardTruth } from "./keyboard-truth";
 import { browsingRuns, WorkingLine } from "./LiveRows";
 import { type LiveTyping, useChatLive, useLiveTyping } from "./live";
 import {
@@ -302,6 +307,8 @@ type Row =
       newTurn?: boolean;
     })
   | { kind: "marker"; key: string; text: string }
+  /** A live file's conversation (ADR 0199): where the file was made, at its top. */
+  | { kind: "origin"; key: string; artifactId: string; fileKind: LiveKind }
   /** A run in line for its computer (`conversationWaits`): no live row of its own, this one for all its messages. */
   | { kind: "wait"; key: string; wait: ConversationWait }
   /** An agent's browser card: its live run in the browser, or (no run row) a take over held here. */
@@ -336,15 +343,11 @@ const DIVIDER_KEY = "unseen-divider";
 const OFFLINE_AFTER_MS = 1200;
 /** "Conectado de novo" stays this long. */
 const BACK_ONLINE_MS = 1600;
-const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);
 /**
- * A row that just arrived at the bottom rises 6pt into place (`--dur-base`, as on the web), on the strong ease-out
- * every entrance uses; only while it is fresh: history, a jump and a row scrolled back into view never do.
+ * A row that just arrived at the bottom rises 6pt into place (`RISE_IN`: `--dur-base`, as on the web, on the strong
+ * ease-out every entrance uses); only while it is fresh: history, a jump and a row scrolled back into view never do.
  */
-const ENTER = new Keyframe({
-  0: { opacity: 0, transform: [{ translateY: 6 }] },
-  100: { opacity: 1, transform: [{ translateY: 0 }], easing: EASE_OUT },
-}).duration(motion.base);
+const ENTER = RISE_IN;
 const FRESH_MS = 800;
 /** How close to the end a scroll has to stop for a list held at a long message's start to follow again. */
 const READ_RELEASE_PX = 24;
@@ -359,6 +362,8 @@ const KEYBOARD_GAP = 8;
 const COMPOSER_INPUT_ID = "chat-composer";
 /** How long the conversation is held in place after something opens over it and after it closes (ms). */
 const HOLD_MS = 900;
+/** iOS, where the system's word on the keyboard settles the dock (`useKeyboardTruth`). */
+const IOS = Platform.OS === "ios";
 /** Holding a message opens the system's menu where there is one (iOS); elsewhere, the app's sheet. */
 const NATIVE_MENU = Platform.OS === "ios";
 /**
@@ -734,9 +739,12 @@ function Chat({
     if (isThread && threadId) {
       const root = list.find((m) => m.id === threadId);
       const replies = list.filter((m) => m.id !== threadId);
-      // A task's conversation (ADR 0145): its root stands for the task, one screen back; only the replies show.
-      const head: Row[] =
-        root && !taskConversationOf(root.meta)
+      // A task's conversation (ADR 0145): its root stands for the task, one screen back; only the replies show. A
+      // live file's (ADR 0199) the same, under where the file was made.
+      const file = root ? fileConversationOf(root.meta) : null;
+      const head: Row[] = file
+        ? [{ kind: "origin", key: "origin", artifactId: file.artifactId, fileKind: file.kind }]
+        : root && !taskConversationOf(root.meta)
           ? [
               { kind: "marker", key: "started", text: startedText },
               // The root as it started the thread (its mission card is pinned above already).
@@ -1143,10 +1151,19 @@ function Chat({
     setQuote(m);
     setReplyAt(Date.now());
   }, []);
+  // In a live file's conversation (ADR 0199), what the person had selected in the file (the quote over the field)
+  // rides on the next message as `meta.liveRef`, once.
+  const about = useTalkAbout(isThread ? channelId : "");
+  const takeAbout = (): Record<string, unknown> => {
+    if (!about) return {};
+    dropTalkAbout(channelId);
+    return { liveRef: about };
+  };
   const takeQuote = (files: ArtifactRef[] = []) => {
-    if (!quote) return files.length > 0 ? localMeta(null, "", files) : undefined;
+    const liveRef = takeAbout();
+    if (!quote) return files.length > 0 ? { ...localMeta(null, "", files), ...liveRef } : about ? liveRef : undefined;
     setQuote(null);
-    return localMeta(quote, dir.nameOf(quote.author), files);
+    return { ...localMeta(quote, dir.nameOf(quote.author), files), ...liveRef };
   };
   const qc = useQueryClient();
   const voiceRefused = useCallback(
@@ -1465,6 +1482,7 @@ function Chat({
     if (files.length === 0) return;
     const replyTo = quote;
     if (replyTo) setQuote(null);
+    const liveRef = takeAbout();
     const clientId = newClientId();
     const local: Message = {
       id: `local-${clientId}`,
@@ -1476,6 +1494,7 @@ function Chat({
       agentRunId: null,
       meta: {
         ...localMeta(replyTo, replyTo ? dir.nameOf(replyTo.author) : "", []),
+        ...liveRef,
         [LOCAL_FILES]: files.map(
           (f): LocalFile => ({
             uri: f.uri,
@@ -1821,15 +1840,22 @@ function Chat({
   const rootWork = issueWorkOf(root?.meta);
   // A task's conversation (ADR 0145): "Conversa da tarefa", the task under it.
   const rootTask = taskConversationOf(root?.meta);
+  // A live file's (ADR 0199): "Canvas conversation", who took part under it (the file's name until someone writes).
+  const rootFile = fileConversationOf(root?.meta);
+  const fileTalk = useArtifact(orgId, rootFile?.artifactId ?? null).data?.conversation;
   const title = isThread
     ? rootTask
       ? t("issues.conversation.title")
-      : rootWork
-        ? t("issues.open", { number: rootWork.number, title: rootWork.title })
-        : info
-          ? // A thread on a GIF or a sticker has no words of its own to title it (ADR 0091).
-            threadTitle(info) || previewOf(root ? textOrMedia(t, root.body, root.meta) : "") || t("mobile.chat.thread")
-          : ""
+      : rootFile
+        ? t(`live.conversation.title.${rootFile.kind}`)
+        : rootWork
+          ? t("issues.open", { number: rootWork.number, title: rootWork.title })
+          : info
+            ? // A thread on a GIF or a sticker has no words of its own to title it (ADR 0091).
+              threadTitle(info) ||
+              previewOf(root ? textOrMedia(t, root.body, root.meta) : "") ||
+              t("mobile.chat.thread")
+            : ""
     : dm
       ? dm.with.name
       : channel
@@ -1839,28 +1865,32 @@ function Chat({
   const subtitle = isThread
     ? rootTask
       ? `#${rootTask.number} · ${rootTask.title}`
-      : info
-        ? info.channelKind === "dm"
-          ? // A DM's channel name is internal ("dm-…"): the thread says who it is with.
-            t(
-              mission
-                ? "mobile.chat.missionWith"
-                : info.state === "closed"
-                  ? "mobile.chat.closedThreadWith"
-                  : "mobile.chat.threadWith",
-              { name: dm?.with.name ?? "" },
-            )
-          : t(
-              mission
-                ? "mobile.chat.missionIn"
-                : info.state === "closed"
-                  ? "mobile.chat.closedThreadIn"
-                  : "mobile.chat.threadIn",
-              {
-                channel: info.channelName,
-              },
-            )
-        : undefined
+      : rootFile
+        ? fileTalk?.participants.length
+          ? joinNames(fileTalk.participants.map(dir.nameOf).filter(Boolean), t)
+          : rootFile.title || undefined
+        : info
+          ? info.channelKind === "dm"
+            ? // A DM's channel name is internal ("dm-…"): the thread says who it is with.
+              t(
+                mission
+                  ? "mobile.chat.missionWith"
+                  : info.state === "closed"
+                    ? "mobile.chat.closedThreadWith"
+                    : "mobile.chat.threadWith",
+                { name: dm?.with.name ?? "" },
+              )
+            : t(
+                mission
+                  ? "mobile.chat.missionIn"
+                  : info.state === "closed"
+                    ? "mobile.chat.closedThreadIn"
+                    : "mobile.chat.threadIn",
+                {
+                  channel: info.channelName,
+                },
+              )
+          : undefined
     : dmAgentId
       ? rightHand
         ? `${t("rightHand.label")} · ${t("rightHand.actsAsYou")}`
@@ -2237,7 +2267,9 @@ function Chat({
     ? rootTask
       ? // One line on the phone: the tip after "·" in the web's placeholder doesn't fit.
         t("issues.comment")
-      : t("mobile.chat.reply")
+      : rootFile
+        ? t(`mobile.live.talk.placeholder.${rootFile.kind}`)
+        : t("mobile.chat.reply")
     : dm
       ? // One line on the phone: the right hand's "nada muda sem você" doesn't fit beside its name.
         t("mobile.chat.messageTo", { name: dm.with.name })
@@ -2363,6 +2395,8 @@ function Chat({
           return dayLine(when.day(item.iso));
         case "marker":
           return dayLine(item.text);
+        case "origin":
+          return <FileOrigin artifactId={item.artifactId} kind={item.fileKind} />;
         case "wait":
           return <QueueWaitRow channelId={channelId} wait={item.wait} />;
         case "unseen":
@@ -2479,10 +2513,16 @@ function Chat({
   const cancelQuote = useCallback(() => setQuote(null), []);
   const quoteName = quote ? dir.nameOf(quote.author) : null;
   const canAttach = pending.length < MAX_PENDING;
-  // Whom it answers, over the field.
+  const dropAbout = useCallback(() => dropTalkAbout(channelId), [channelId]);
+  // Whom it answers, over the field; in a live file's conversation, else what the person had selected in the file.
   const composerBanner = useMemo(
-    () => (quoteName !== null ? <QuoteBar name={quoteName} onCancel={cancelQuote} /> : undefined),
-    [quoteName, cancelQuote],
+    () =>
+      quoteName !== null ? (
+        <QuoteBar name={quoteName} onCancel={cancelQuote} />
+      ) : about ? (
+        <LiveQuoteBar liveRef={about} onDrop={dropAbout} />
+      ) : undefined,
+    [quoteName, cancelQuote, about, dropAbout],
   );
   // Photos and files waiting to go, inside the field over their caption.
   const composerAttachments = useMemo(
@@ -2521,36 +2561,25 @@ function Chat({
   // On iOS the keyboard library moves what rides the keyboard (the composer's dock) when a move starts and while
   // the keyboard is dragged, and never when the move ends, while the list takes its room from the start and the
   // end. A last event that wasn't the final state left the box up at the keyboard's height over a list that had
-  // gone back down. The end of every move has the last word for both.
+  // gone back down. The end of every move has the last word for both; then, on iOS, the system's own
+  // (`useKeyboardTruth`: its notifications settle the dock, and a doubt looks at them again a moment later).
   const keyboardAt = useReanimatedKeyboardAnimation();
+  const lookAtKeyboard = useKeyboardTruth(keyboardAt);
   useKeyboardHandler(
     {
       onEnd: (e) => {
         "worklet";
         keyboardAt.height.value = -e.height;
         keyboardAt.progress.value = e.progress;
+        if (IOS) scheduleOnRN(lookAtKeyboard);
       },
     },
-    [],
+    [lookAtKeyboard],
   );
-  // And the system's own word once the keyboard is fully shown or gone: a drag down that let go mid-way could end with
-  // no final move at all, the dock left floating over the conversation with the keyboard gone (seen on a phone). The
-  // system tells JS when the keyboard finished hiding or showing; that settles both. On iOS only: there the system's
-  // height is the library's (the keyboard's frame), while Android's leaves out the navigation bar the library counts
-  // edge to edge, so a late event sank the box that far behind the keys; and there the library ends every move itself.
+  // Back on this screen (a pushed screen or a sheet closed over it): where the keyboard really is.
   useEffect(() => {
-    if (Platform.OS !== "ios") return;
-    const settle = (height: number) => {
-      keyboardAt.height.value = -height;
-      keyboardAt.progress.value = height > 0 ? 1 : 0;
-    };
-    const hide = Keyboard.addListener("keyboardDidHide", () => settle(0));
-    const show = Keyboard.addListener("keyboardDidShow", (e) => settle(e.endCoordinates.height));
-    return () => {
-      hide.remove();
-      show.remove();
-    };
-  }, [keyboardAt]);
+    if (focused) lookAtKeyboard();
+  }, [focused, lookAtKeyboard]);
   // Read while laying out the box: at the conversation's end and following it (not held where the person reads).
   const followingEnd = useRef(true);
   followingEnd.current = atEnd && !readHold;
@@ -2570,6 +2599,7 @@ function Chat({
     // Only what is drawn from it redraws (`DockHeight`); the waiting requests look again at their band's new bottom.
     dock.set(height);
     watchList();
+    lookAtKeyboard();
     // The dock grew under the conversation (who is working, the reply bar, a taller field) while it follows its end.
     // The libraries cover only part of it: the keyboard's scroll view shifts the list by the grown inset only when it
     // rests at its end, and with the keyboard up the list learns the new inset without following it. A message just
@@ -2596,8 +2626,9 @@ function Chat({
   // opens, only `OPEN_DRAW_DISTANCE`: opening at its end, the list takes its whole reach at once, and two screens of
   // rows were drawn before the first showed.
   const { height: windowHeight } = useWindowDimensions();
-  // How far down the fade under the header stays solid: the status bar's share of it.
-  const topFadeSolid = headerHeight > 0 ? Math.min(1, insets.top / (headerHeight + 28)) : 0;
+  // How far down the fade under the header stays solid: through the status bar and the bar (a message scrolled up
+  // showed through the bar's pill and between its buttons), fading out in the 28 points under it.
+  const topFadeSolid = headerHeight > 0 ? Math.min(1, headerHeight / (headerHeight + 28)) : 0;
   const lift = Math.max(0, bottomPad - KEYBOARD_GAP);
   const showList = !loading && !(rows.length === 0 && runs.length === 0);
   // The conversation starts below the clear bar by our own padding, on both platforms (the pinned card, when there
@@ -2888,7 +2919,9 @@ function Chat({
     still.settle();
     releaseAtEnd();
     hideDay();
-  }, [releaseAtEnd, hideDay, still]);
+    // Letting go of the list can let go of the keyboard too (dragged down, or back up with no word from the system).
+    lookAtKeyboard();
+  }, [releaseAtEnd, hideDay, still, lookAtKeyboard]);
   const openPinsHere = useLatest(openPins);
   const goToPinHere = useLatest(goToPin);
   // Before the conversation's start: the older pages' row (a spinner while one loads, the way to ask again when one
@@ -3145,8 +3178,8 @@ function Chat({
             ) : (
               <LinearGradient
                 pointerEvents="none"
-                colors={[c.bg, c.bg, withOpacity(c.bg, 0.86), withOpacity(c.bg, 0)]}
-                locations={[0, topFadeSolid, Math.max(0.62, topFadeSolid), 1]}
+                colors={[c.bg, c.bg, withOpacity(c.bg, 0)]}
+                locations={[0, topFadeSolid, 1]}
                 style={[styles.topFade, { height: headerHeight + 28 }]}
               />
             )
@@ -3204,12 +3237,11 @@ function Chat({
                     lift={lift}
                   />
                 ) : (
-                  <LinearGradient
-                    pointerEvents="none"
-                    colors={[withOpacity(c.bg, 0), withOpacity(c.bg, 0.9), c.bg]}
-                    locations={[0, 0.3, 1]}
-                    style={StyleSheet.absoluteFill}
-                  />
+                  // A short fade at the box's top (`DOCK_FADE`), then the page: its first line never sits over words.
+                  <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+                    <LinearGradient colors={[withOpacity(c.bg, 0), c.bg]} style={styles.dockFade} />
+                    <View style={[styles.grow, { backgroundColor: c.bg }]} />
+                  </View>
                 )}
                 <Connection status={realtime} />
                 {banner && !org?.deletion ? <NoAiBanner banner={banner} /> : null}
@@ -4031,6 +4063,7 @@ const ChannelPill = memo(function ChannelPill({
 const styles = StyleSheet.create({
   // The counted buttons side by side, first in the bar's group (`barLead`).
   barLead: { flexDirection: "row", alignItems: "center" },
+  dockFade: { height: DOCK_FADE },
   topFade: { position: "absolute", top: 0, left: 0, right: 0 },
   // Under the agent's words, like a card on its message.
   browserRow: { paddingRight: 16 },

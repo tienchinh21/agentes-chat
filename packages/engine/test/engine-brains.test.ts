@@ -8,6 +8,8 @@ import {
   orgTopic,
 } from "@agenteschat/adapters";
 import { and, eq, schema } from "@agenteschat/db";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   activeRunsIn,
   addChannelMember,
@@ -30,10 +32,13 @@ import {
   computerBrainUnavailable,
   computerMediaNote,
   computerQueue,
+  connectorScope,
   consultationWait,
   createAgent,
   createAgentRuns,
+  createApiKeyConnection,
   createChannel,
+  createConnectorToolSource,
   createCredential,
   createJobHandlers,
   createMissionEngine,
@@ -58,6 +63,7 @@ import {
   MAX_COMPUTER_DROPS,
   MAX_EARLY_COMPUTER_DROPS,
   type MachineStatus,
+  mcpSessionOver,
   notePlanLimit,
   OUTAGE_PARK,
   openDm,
@@ -570,6 +576,73 @@ test("people taking turns keep one session; a repository added to the agent's ac
   expect(seen[3]?.session?.resume).toBe(false);
   expect(seen[3]?.session?.id).not.toBe(seen[2]?.session?.id);
   expect(systems[3]).toContain("acme/web");
+});
+
+test("a session a person's own connection was offered in is resumed only by that person's runs", async () => {
+  let connectors: ToolSource | null = null;
+  const later: ToolSource = { name: "connectors", tools: (ctx) => connectors?.tools(ctx) ?? Promise.resolve([]) };
+  f = await setup({ toolSources: [later], askAgent: true });
+  await computerAgent(f, { audienceMode: "everyone" });
+  const walter = await addMember(f.db, f.org.id, "member", "walter");
+  const bia = await addMember(f.db, f.org.id, "member", "bia");
+  for (const u of [walter, bia]) await addChannelMember(f.db, f.owner.id, f.org.id, f.general.id, { userId: u.id });
+  const deps = { db: f.db, keyWrappers: [f.keyWrapper], publicUrl: "https://chat.example.com" };
+  const mine = await createApiKeyConnection(deps, walter.id, f.org.id, {
+    connector: "linear",
+    apiKey: "lin_api_FAKE_walter_1234",
+    personal: true,
+  });
+  // The agent is the workspace owner's, on their computer, and holds Walter's own Linear, scope by scope: the same
+  // grant rows whoever asks.
+  await f.db.insert(schema.agentScopes).values(
+    ["issues.read", "issues.write"].map((scope) => ({
+      orgId: f.org.id,
+      agentId: f.agent.id,
+      connectionId: mine.id,
+      scope: connectorScope("linear", scope),
+    })),
+  );
+  connectors = createConnectorToolSource({
+    ...deps,
+    connect: async () => {
+      const server = new McpServer({ name: "fake-linear", version: "1" });
+      server.registerTool("list_issues", { description: "List issues", inputSchema: {} }, async () => ({
+        content: [{ type: "text", text: "ENG-1: salary review" }],
+      }));
+      const [client, transport] = InMemoryTransport.createLinkedPair();
+      await server.connect(transport);
+      return mcpSessionOver(client);
+    },
+  });
+  const { brain, seen } = scriptedComputerBrain(() => [
+    { type: "usage", input: 40, output: 5, source: "plan", model: "claude-sonnet-5-5" },
+    { type: "done", text: "ok" },
+  ]);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  const say = async (userId: string, body: string, threadId?: string) => {
+    const m = await postPersonMessage({ db: f.db, pubsub: f.pubsub }, userId, f.org.id, f.general.id, {
+      body,
+      ...(threadId ? { threadId } : {}),
+    });
+    await drainOutbox(f.db, handlers);
+    return m;
+  };
+  const question = await say(walter.id, "@dev what is in my Linear?");
+  expect(seen[0]?.tools.map((t) => t.name)).toContain("linear_list_issues");
+  await say(walter.id, "@dev and the next one?", question.id);
+  expect(seen[1]?.session).toMatchObject({ id: seen[0]?.session?.id, resume: true });
+  // Someone else asks in the same thread: a session of their own, never the one that read his Linear.
+  await say(bia.id, "@dev what did you read there?", question.id);
+  expect(seen[2]?.session?.resume).toBe(false);
+  expect(seen[2]?.session?.id).not.toBe(seen[0]?.session?.id);
+  await say(f.owner.id, "@dev and you?", question.id);
+  expect(seen[3]?.session?.id).not.toBe(seen[0]?.session?.id);
+  // Runs nobody's connection was offered in keep sharing one session, as before.
+  expect(seen[3]?.session).toMatchObject({ id: seen[2]?.session?.id, resume: true });
 });
 
 test("a mission's main session goes on after an edit to the instructions, and its next turn reads them", async () => {

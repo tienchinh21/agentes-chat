@@ -35,6 +35,7 @@ import {
 import { withAlpha } from "@/ui/palette";
 import { useFontScale } from "@/ui/text-scale";
 import { leadBox } from "@/ui/type-scale";
+import { useBubblePart } from "./bubble-part";
 import { useColors } from "./hooks";
 
 /**
@@ -488,13 +489,18 @@ const styles = StyleSheet.create({
 
 /**
  * A raised, neutral surface (the cards inside messages): raised background, the e1 shadow (e2 for what
- * asks for you: an approval) and lit top edge.
+ * asks for you: an approval) and lit top edge. Under someone else's words in a conversation of bubbles, the bubble's
+ * own fill and no shadow (`BubblePartContext`): the card is a bubble of that message.
  */
 export function useSurface(elevation: "e1" | "e2" = "e1") {
   const { colors, shadows } = useTheme();
+  const part = useBubblePart();
   return useMemo(
-    () => ({ backgroundColor: colors.raised, boxShadow: `${shadows[elevation]}, ${shadows.top}` }),
-    [colors.raised, shadows, elevation],
+    () =>
+      part
+        ? { backgroundColor: part.fill, ...part.edge }
+        : { backgroundColor: colors.raised, boxShadow: `${shadows[elevation]}, ${shadows.top}` },
+    [part, colors.raised, shadows, elevation],
   );
 }
 

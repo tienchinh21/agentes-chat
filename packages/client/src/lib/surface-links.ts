@@ -1,4 +1,5 @@
 import type { SurfaceLink, SurfaceLinkCode, SurfaceLinks } from "../api/types";
+import { CONNECTOR_MARK } from "./connected";
 import { capitalize } from "./format";
 
 /** What the outside chat surface's settings row shows (ADR 0187). `surface` is the server's name for it. */
@@ -52,4 +53,13 @@ export function newlyLinked(data: SurfaceLinks | null | undefined, before: reado
 /** The surface's name for a message's `via` (its id, the name lower-cased): the server's when it matches, else the id. */
 export function surfaceViaName(id: string, name: string | null | undefined, locale?: string): string {
   return name && name.toLowerCase() === id.toLowerCase() ? name : capitalize(id, locale);
+}
+
+/**
+ * The connector mark named like the surface (`/connectors/<name>.svg`, a one-color brand icon), or null when its name
+ * can't name one. The name is the operator's own, so the file may not exist: the apps load it before showing it.
+ */
+export function surfaceMarkUrl(name: string): string | null {
+  const url = `/connectors/${name.trim().toLowerCase()}.svg`;
+  return CONNECTOR_MARK.test(url) ? url : null;
 }

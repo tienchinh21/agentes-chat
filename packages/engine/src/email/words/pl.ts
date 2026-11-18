@@ -636,6 +636,7 @@ export const words: EmailWords = {
       button: "Odłącz",
       small: "Jeśli to Ty, nic nie musisz robić. Możesz to odłączyć w każdej chwili w Ustawieniach.",
       why: (surface) => `Otrzymujesz tego e-maila, bo ${surface} połączono z Twoim kontem agentes.chat.`,
+      picture: "Twój asystent, teraz także w telefonie",
     },
     unlinked: {
       subject: (surface) => `${surface} odłączono od Twojego konta agentes.chat`,
@@ -644,6 +645,25 @@ export const words: EmailWords = {
       body: (surface, display) => [{ b: display }, ` w ${surface} odłączono, bo zmieniła się tożsamość.`],
       small: "Połącz ponownie w Ustawieniach, jeśli to Ty.",
       why: (surface) => `Otrzymujesz tego e-maila, bo ${surface} było połączone z Twoim kontem agentes.chat.`,
+      picture: "Twój asystent, już nie w telefonie",
     },
+  },
+  supportReply: {
+    subject: "Odpowiedź na twoją prośbę o pomoc",
+    preheader: "W sprawie twojej prośby o pomoc w agentes.chat.",
+    headline: "Odpowiedź na twoją prośbę o pomoc",
+    answers: {
+      received: "Dostaliśmy twoją prośbę i już się nią zajmujemy.",
+      need_more: "Żeby pomóc, musimy wiedzieć więcej: jakie były twoje kroki, jaki miał być wynik i co się stało.",
+      resolved: "Zgłoszony problem został naprawiony.",
+      handed_over: "Twoją prośbą zajmuje się teraz człowiek, który ci odpowie.",
+    },
+    from: (host) =>
+      host
+        ? atHost("Odpowiedź od osób, które prowadzą serwer agentes.chat pod", "adresem", host)
+        : "Odpowiedź od agentes.chat.",
+    ai: "Tę odpowiedź napisał asystent AI.",
+    reply: (address) => ["Aby odpowiedzieć, napisz na ", { mail: address }, "."],
+    why: "Otrzymujesz tę wiadomość w odpowiedzi na twoją prośbę o pomoc w agentes.chat.",
   },
 };

@@ -585,6 +585,7 @@ export const words: EmailWords = {
       button: "Ontkoppelen",
       small: "Was jij het wel? Dan hoef je niets te doen. Je kunt het altijd ontkoppelen in Instellingen.",
       why: (surface) => `Je krijgt deze e-mail omdat ${surface} aan je agentes.chat-account is gekoppeld.`,
+      picture: "Je assistent, nu ook op je telefoon",
     },
     unlinked: {
       subject: (surface) => `${surface} is ontkoppeld van je agentes.chat-account`,
@@ -593,6 +594,25 @@ export const words: EmailWords = {
       body: (surface, display) => [{ b: display }, ` op ${surface} is ontkoppeld omdat de identiteit is veranderd.`],
       small: "Koppel het opnieuw in Instellingen als jij het was.",
       why: (surface) => `Je krijgt deze e-mail omdat ${surface} aan je agentes.chat-account gekoppeld was.`,
+      picture: "Je assistent, niet meer op je telefoon",
     },
+  },
+  supportReply: {
+    subject: "Een antwoord op je hulpvraag",
+    preheader: "Over de hulp die je vroeg op agentes.chat.",
+    headline: "Een antwoord op je hulpvraag",
+    answers: {
+      received: "We hebben je vraag ontvangen en kijken ernaar.",
+      need_more: "We hebben meer informatie nodig om je te helpen: wat je deed, wat je verwachtte en wat er gebeurde.",
+      resolved: "Wat je meldde is opgelost.",
+      handed_over: "Een persoon heeft je vraag nu en geeft je antwoord.",
+    },
+    from: (host) =>
+      host
+        ? atHost("Beantwoord door de beheerders van de agentes.chat-server", "op", host)
+        : "Beantwoord door agentes.chat.",
+    ai: "Een AI-assistent schreef dit antwoord.",
+    reply: (address) => ["Wil je antwoorden? Schrijf naar ", { mail: address }, "."],
+    why: "Je krijgt deze e-mail omdat je om hulp vroeg op agentes.chat.",
   },
 };

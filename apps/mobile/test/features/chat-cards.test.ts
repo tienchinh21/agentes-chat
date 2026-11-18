@@ -26,7 +26,7 @@ describe("a reply's tools sit last", () => {
           "<SavedTools",
           "<NoAiCard message={m} />",
           // The foot is the reply's last part: only the double tap's one-time hint and its 👍 over the row follow it.
-          "{foot}\n          </RowPartContext.Provider>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>\n    </>\n  );\n}\n",
+          "{foot}\n          </RowParts>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>\n    </>\n  );\n}\n",
         ]),
       ),
     ).toBe(true);
@@ -44,7 +44,7 @@ describe("a reply's tools sit last", () => {
     const row = source("MessageRow.tsx");
     const [toolsAt, footAt] = at(row, [
       "<SavedTools\n",
-      "{foot}\n          </RowPartContext.Provider>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>\n    </>\n  );\n}\n",
+      "{foot}\n          </RowParts>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>\n    </>\n  );\n}\n",
     ]);
     const last = row.slice(toolsAt, footAt);
     for (const card of [
@@ -71,10 +71,13 @@ describe("a reply's tools sit last", () => {
 describe("agents it asked first: one pair row right before the reply, never inside it", () => {
   test("saved: the row sits before the reply's own row (which then shows its face and name), none in its body", () => {
     const row = source("MessageRow.tsx");
-    expect(ascending(at(row, ["const grouped = groupedIn && !pair;", "{pair}\n      {quote && !inBubble"]))).toBe(true);
+    // The pair, then what the message is about in a live file (ADR 0199) and its quote, then the reply's own row.
+    expect(
+      ascending(at(row, ["const grouped = groupedIn && !pair;", "{pair}\n      {liveRef ? (", "{quote && !inBubble"])),
+    ).toBe(true);
     const [bodyAt, endAt] = at(row, [
       "<View style={[styles.body, { gap: rhythm.part }]}>",
-      "{foot}\n          </RowPartContext.Provider>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>",
+      "{foot}\n          </RowParts>\n          {hintNode}\n        </View>\n        {popNode}\n      </Pressable>",
     ]);
     expect(row.slice(bodyAt, endAt)).not.toContain("Consult");
   });

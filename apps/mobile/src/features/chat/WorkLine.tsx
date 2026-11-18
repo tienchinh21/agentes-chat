@@ -18,6 +18,7 @@ import { useOrg } from "@/providers/org";
 import { Button, haptics, LineIcon, PixelOrbit, Text, useToast } from "@/ui";
 import { router } from "@/ui/navigation";
 import { chatHref } from "../links/logic";
+import { BUBBLE_PART_CORNERS, useBubblePart } from "../shared/bubble-part";
 import { useColors, useOrgId } from "../shared/hooks";
 import { tapHaptic, useSurface } from "../shared/parts";
 import { RowPartContext, useCardTop } from "./look";
@@ -101,6 +102,7 @@ function Line({
 }) {
   const c = useColors();
   const surface = useSurface();
+  const part = useBubblePart();
   const cardTop = useCardTop();
   const inBody = useContext(RowPartContext) !== null;
   const line = useLine(work, inUpdatesThread);
@@ -172,7 +174,12 @@ function Line({
     <View
       style={[
         styles.line,
-        inBody ? [styles.inBody, { backgroundColor: c.raised, borderColor: c.line2 }] : surface,
+        // In a conversation of bubbles, a bubble of the message that handed it (its fill, joined to it).
+        inBody && part
+          ? [styles.inBody, { borderWidth: 0 }, surface, BUBBLE_PART_CORNERS]
+          : inBody
+            ? [styles.inBody, { backgroundColor: c.raised, borderColor: c.line2 }]
+            : surface,
         cardTop,
       ]}
       accessibilityRole="summary"

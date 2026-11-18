@@ -950,6 +950,8 @@ export async function accountDeletionPlan(db: Executor, userId: string): Promise
         inArray(connectorConnections.orgId, left),
         eq(connectorConnections.createdByUserId, userId),
         isNull(connectorConnections.revokedAt),
+        // Their own connections go with them.
+        isNull(connectorConnections.ownerUserId),
       ),
     );
   const databases = await db

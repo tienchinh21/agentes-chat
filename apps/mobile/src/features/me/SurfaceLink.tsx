@@ -16,19 +16,30 @@ import {
   LINK_POLL_MS,
   newlyLinked,
   type SurfaceRow,
+  surfaceMarkUrl,
   surfaceRowOf,
 } from "@agenteschat/client/lib/surface-links";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Linking, StyleSheet, View } from "react-native";
+import { serverUrl } from "@/lib/server";
 import { useAppActive } from "@/lib/useAppActive";
 import { useOrg } from "@/providers/org";
 import { Button, GroupedList, GroupedRow, haptics, Sheet, Text, useToast } from "@/ui";
+import { iconUri } from "../connectors/logic";
 import { confirmAction } from "../settings/parts";
 import { useColors, useNow } from "../shared/hooks";
 import { MONO } from "../shared/parts";
-import { codeIsStale, codeLeftText, linkAssistant, linkRanOut, linkStep, surfaceRowText } from "./surface";
+import {
+  codeIsStale,
+  codeLeftText,
+  linkAssistant,
+  linkRanOut,
+  linkStep,
+  surfaceRowText,
+  surfaceSenderText,
+} from "./surface";
 
 /**
  * The outside chat surface's row in Notificações (ADR 0187), only where this account may link it: none opens the
@@ -66,10 +77,12 @@ export function SurfaceLinkRow() {
         <GroupedRow
           media
           icon="chat"
+          mark={iconUri(serverUrl(), surfaceMarkUrl(row.surface))}
           label={row.surface}
           labelLines={0}
           {...(text.sub ? { sub: text.sub, subLines: 0 } : {})}
           {...(text.below ? { belowText: text.below } : {})}
+          {...(text.hint ? { hint: { name: t("common.about", { label: row.surface }), text: text.hint } } : {})}
           {...(text.value ? { value: text.value } : {})}
           disabled={remove.isPending}
           {...(row.kind === "active"
@@ -327,6 +340,7 @@ function ConfirmStep({
       onError: (e) => (errorCode(e) === "surface.link_gone" ? fresh() : setError(errorText(t, e))),
     });
   };
+  const sender = surfaceSenderText(link);
   return (
     <View style={styles.col}>
       <Text variant="title">{t("surface.link.confirmTitle", { surface })}</Text>
@@ -334,14 +348,14 @@ function ConfirmStep({
         <Text variant="small" tone="muted">
           {t("surface.link.sentBy")}
         </Text>
-        {link.display ? (
+        {sender.display ? (
           <Text variant="body" selectable style={styles.strong}>
-            {link.display}
+            {sender.display}
           </Text>
         ) : null}
-        {link.profileName ? (
+        {sender.profileName ? (
           <Text variant="body" tone="ink2" selectable>
-            {link.profileName}
+            {sender.profileName}
           </Text>
         ) : null}
       </View>

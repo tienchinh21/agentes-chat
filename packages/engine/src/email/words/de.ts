@@ -589,6 +589,7 @@ export const words: EmailWords = {
       small:
         "Wenn du das warst, musst du nichts tun. Du kannst die Verknüpfung jederzeit in den Einstellungen aufheben.",
       why: (surface) => `Du erhältst diese E-Mail, weil ${surface} mit deinem agentes.chat-Konto verknüpft wurde.`,
+      picture: "Dein Assistent, jetzt auch auf deinem Handy",
     },
     unlinked: {
       subject: (surface) => `${surface} wurde von deinem agentes.chat-Konto getrennt`,
@@ -600,6 +601,26 @@ export const words: EmailWords = {
       ],
       small: "Verknüpfe es in den Einstellungen neu, wenn du das warst.",
       why: (surface) => `Du erhältst diese E-Mail, weil ${surface} mit deinem agentes.chat-Konto verknüpft war.`,
+      picture: "Dein Assistent, nicht mehr auf deinem Handy",
     },
+  },
+  supportReply: {
+    subject: "Eine Antwort auf deine Hilfeanfrage",
+    preheader: "Zu der Hilfe, um die du auf agentes.chat gebeten hast.",
+    headline: "Eine Antwort auf deine Hilfeanfrage",
+    answers: {
+      received: "Wir haben deine Anfrage erhalten und sehen sie uns an.",
+      need_more:
+        "Wir brauchen mehr Angaben, um dir zu helfen: was du gemacht hast, was du erwartet hast und was stattdessen passiert ist.",
+      resolved: "Was du gemeldet hast, ist behoben.",
+      handed_over: "Eine Person hat deine Anfrage jetzt übernommen und antwortet dir.",
+    },
+    from: (host) =>
+      host
+        ? atHost("Beantwortet von den Betreibern des agentes.chat-Servers", "auf", host)
+        : "Beantwortet von agentes.chat.",
+    ai: "Ein KI-Assistent hat diese Antwort geschrieben.",
+    reply: (address) => ["Zum Antworten schreib an ", { mail: address }, "."],
+    why: "Du erhältst diese E-Mail, weil du auf agentes.chat um Hilfe gebeten hast.",
   },
 };

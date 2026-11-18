@@ -3,7 +3,7 @@ import { type PubSub, type RateLimiter, retryInSeconds } from "@agenteschat/adap
 import { and, asc, type Database, desc, type Executor, eq, gt, lte, or, type SQL, schema, sql } from "@agenteschat/db";
 import { CODE_ALPHABET, newConfirmationCode } from "../codes";
 import { sha256 } from "../crypto";
-import { emailLocale, queueEmail } from "../email";
+import { emailAssistant, emailLocale, queueEmail } from "../email";
 import { ConflictError, ForbiddenError, isUniqueViolation, NotFoundError, TooManyError } from "../errors";
 import { publishUserEvent } from "../events";
 import { recordOperatorEvent } from "../operator-events";
@@ -261,6 +261,7 @@ export async function unlinkExternal(
           key: `surface-unlinked:${active.id}`,
           to: [user.email],
           template: {
+            assistant: await emailAssistant(tx, active.orgId),
             kind: "surface_unlinked",
             locale: emailLocale(user.locale),
             surface: surface.name,
@@ -348,6 +349,7 @@ async function queueLinkedEmail(tx: Executor, publicUrl: string, link: SurfaceLi
     key: `surface-linked:${sha256(token)}`,
     to: [row.email],
     template: {
+      assistant: await emailAssistant(tx, link.orgId),
       kind: "surface_linked",
       locale: emailLocale(row.locale),
       surface: surface.name,

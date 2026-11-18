@@ -1,6 +1,7 @@
 import type { PubSub } from "@agenteschat/adapters";
 import { and, asc, type Database, desc, eq, gte, inArray, isNull, lt, schema, sql } from "@agenteschat/db";
 import { MODEL_TIERS, type ModelTier } from "@agenteschat/providers";
+import { othersPersonalTools } from "./agent-audit";
 import { getAgent } from "./agents";
 import { decidableBySql } from "./approvals";
 import { audienceSql, listsAllAgents } from "./audience";
@@ -350,8 +351,8 @@ export async function agentDetail(db: Database, actorId: string, orgId: string, 
   const since = monthStartUtc(now);
   const [usage] = await db
     .select({
-      // What its budget paid: its own calls, as `agentBudgetsThisMonth` counts them.
-      cost: sql<string>`coalesce(sum(${usageRecords.costNanoUsd}) filter (where ${usageRecords.kind} = 'agent'), 0)`,
+      // What its budget paid: its own calls and pictures, as `agentBudgetsThisMonth` counts them.
+      cost: sql<string>`coalesce(sum(${usageRecords.costNanoUsd}) filter (where ${usageRecords.kind} in ('agent', 'image')), 0)`,
       tokens: sql<string>`coalesce(sum(${usageRecords.inputTokens} + ${usageRecords.outputTokens} + ${usageRecords.cacheReadTokens} + ${usageRecords.cacheWriteTokens}), 0)`,
     })
     .from(usageRecords)
@@ -474,6 +475,20 @@ export async function setAgentChannels(
   const inIt = new Set(current.map((c) => c.id));
   const adding = found.filter((c) => !inIt.has(c.id));
   if (adding.some((c) => c.kind === "dm")) throw new ValidationError("A direct conversation keeps its participants");
+  // An agent joins a live file's conversation only when it may work on the file (`admitFileAgents`, ADR 0199 §2).
+  if (adding.some((c) => c.kind === "file")) {
+    throw new ValidationError(
+      "An agent joins a file's conversation when someone there names it",
+      "channel.file_conversation",
+    );
+  }
+  // And a task's only through a mention there (ADR 0145, `admitTaskAgents`).
+  if (adding.some((c) => c.kind === "task")) {
+    throw new ValidationError(
+      "An agent joins a task's conversation when someone there names it",
+      "channel.task_conversation",
+    );
+  }
   const actorIn = new Set(mine.map((c) => c.id));
   const removing = current.filter(
     (c) => c.kind === "channel" && !wanted.has(c.id) && (actorIn.has(c.id) || c.visibility === "public" || admin),
@@ -808,12 +823,30 @@ export async function getRun(db: Database, actorId: string, orgId: string, runId
     .from(agentRunSteps)
     .where(eq(agentRunSteps.runId, runId))
     .orderBy(asc(agentRunSteps.seq));
-  return { run: summary, steps };
+  const hidden = await othersPersonalTools(db, orgId, runId, actorId);
+  // A call still running has no audit row yet: its step says whose connection it goes through.
+  const running = new Set(
+    steps.flatMap((s) =>
+      s.kind === "tool_call" && typeof s.data.personalOf === "string" && s.data.personalOf !== actorId
+        ? [String(s.data.toolUseId)]
+        : [],
+    ),
+  );
+  if (hidden.size === 0 && running.size === 0) return { run: summary, steps };
+  return {
+    run: summary,
+    steps: steps.map((s) =>
+      (s.kind === "tool_call" || s.kind === "tool_result") &&
+      (hidden.has(String(s.data.name)) || running.has(String(s.data.toolUseId)))
+        ? { ...s, data: { toolUseId: s.data.toolUseId, name: s.data.name, isError: s.data.isError } }
+        : s,
+    ),
+  };
 }
 
 /**
  * Usage of the organization since `since` (default: this month): totals by
- * kind (agent, router, embedding, summary) and per agent with budgets.
+ * kind (agent, router, embedding, summary, image) and per agent with budgets.
  */
 export async function usageReport(db: Database, actorId: string, orgId: string, options: { since?: Date } = {}) {
   await requirePermission(db, actorId, orgId, "view_usage");

@@ -129,9 +129,11 @@ describe("the conversation's rows", () => {
   });
 
   test("a new row rises in on the strong ease-out", () => {
-    const chat = src("features/chat/ChatScreen.tsx");
-    expect(chat).toContain("const EASE_OUT = Easing.bezier(0.23, 1, 0.32, 1);");
-    expect(chat).toContain("100: { opacity: 1, transform: [{ translateY: 0 }], easing: EASE_OUT },");
+    // The app's one rise (`RISE_IN`), also the voice take's line and bar.
+    expect(src("features/chat/ChatScreen.tsx")).toContain("const ENTER = RISE_IN;");
+    const entrances = src("ui/entrances.ts");
+    expect(entrances).toContain("100: { opacity: 1, transform: [{ translateY: 0 }], easing: motion.easeOut },");
+    expect(src("ui/theme.tsx")).toContain("easeOut: Easing.bezier(0.23, 1, 0.32, 1),");
   });
 });
 

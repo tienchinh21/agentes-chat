@@ -191,6 +191,8 @@ export interface GroupedRowProps {
   belowText?: string;
   /** A rounded tile with this icon on the left. */
   icon?: IconName;
+  /** On `icon`'s tile in its place: a brand's one-color logo at this address, in the icon's box and color. */
+  mark?: string | null;
   /** Anything else on the left (an organization's tile). */
   leading?: ReactNode;
   /** What `leading` says when it is words (an account's place in an order): VoiceOver reads it before the label. */
@@ -275,6 +277,7 @@ function Row({
   below,
   belowText,
   icon,
+  mark,
   leading,
   leadingSaid,
   value,
@@ -322,7 +325,7 @@ function Row({
       {icon ? (
         <View style={styles.lead}>
           {/* The system Settings' 30-point tile, in the 36 column: 11 from the row's top and bottom. */}
-          <IconTile icon={icon} danger={danger} />
+          <IconTile icon={icon} danger={danger} mark={mark ?? null} />
         </View>
       ) : null}
       {leading ? <View style={styles.lead}>{leading}</View> : null}

@@ -1863,6 +1863,8 @@ async function ownPastSteps(
         -- What a run of a confidential thread called may repeat what it read there (ADR 0190).
         and not ${confidentialThreadSql(sql`r.org_id`, sql`r.thread_root_id`)}
         and s.kind = 'tool_call'
+        -- A call in a person's own connection, input and all, is theirs alone: never another run's to read.
+        and coalesce(s.data->>'personal', '') <> 'true'
         and coalesce(s.data->>'name', '') not in (${sql.join(
           STEP_NOISE.map((n) => sql`${n}`),
           sql`, `,

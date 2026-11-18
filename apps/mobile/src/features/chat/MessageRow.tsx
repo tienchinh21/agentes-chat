@@ -5,6 +5,7 @@ import {
   keys,
   type Message,
   type MessageReceipt,
+  messageLiveRef,
   type ReplyRef,
   type RunConsultation,
   type ScreenKind,
@@ -69,6 +70,7 @@ import Animated, {
   LinearTransition,
   withTiming,
 } from "react-native-reanimated";
+import { serverUrl } from "@/lib/server";
 import { readValueSync, STORED, writeValueSync } from "@/lib/storage";
 import { useOrg } from "@/providers/org";
 import {
@@ -80,6 +82,7 @@ import {
   Icon,
   InkOrbit,
   LineIcon,
+  MarkIcon,
   PressScale,
   ProviderLogo,
   Text,
@@ -97,18 +100,21 @@ import { StretchCard } from "../ai/StretchCard";
 import { UsagePauseCard, UsageWaitCancel } from "../ai/UsagePauseCard";
 import { HandoffCard } from "../browser/HandoffCard";
 import { TrailCard } from "../browser/TrailCard";
+import { iconUri } from "../connectors/logic";
 import { DeviceWait } from "../devices/DeviceWait";
 import { deviceWaitOf } from "../devices/logic";
 import { WaitToolOffAction } from "../devices/ToolOneClick";
 import { localFilesOf } from "../files/local-files";
 import { LocalFiles, MessageFiles } from "../files/MessageFiles";
 import { consultationHref, routineHref } from "../links/logic";
+import { MessageAbout } from "../live-files/talk/AboutLine";
 import { surfaceTagText } from "../me/surface";
 import { DecisionCard, MissionCard, PlanCard, ReviewCard, SetupFailedCard } from "../missions/cards";
 import { AwayPill, BrainWait } from "../outages/WaitCard";
 import { SettingsProposals } from "../right-hand/SettingsCard";
 import { ReplyChips, TeamCard } from "../right-hand/TeamCard";
 import { TeamWeek } from "../right-hand/TeamWeekCard";
+import { type BubbleHead, BubbleHeadContext, type BubblePart, BubblePartContext } from "../shared/bubble-part";
 import { AgentFace, Face, withAgentFaces } from "../shared/Face";
 import { useColors, useOrgId, useWhen } from "../shared/hooks";
 import { agentLook } from "../shared/logic";
@@ -149,7 +155,7 @@ import {
 } from "./logic";
 import { liftedEdge, lookRows, RowPartContext, useRhythm, useRowLook } from "./look";
 import { MessageText } from "./MessageText";
-import { QuoteAbove, QuotePlate } from "./QuoteLine";
+import { aboveInset, QuoteAbove, QuotePlate } from "./QuoteLine";
 import { ReachLines } from "./ReachLines";
 import { Receipts } from "./Receipts";
 import {
@@ -486,6 +492,8 @@ function RowBody({
         : undefined;
   const solidInk = bubbled && look.tone === "strong" ? ON_SOLID : undefined;
   const quote = replyOf(meta);
+  // About part of a live file (ADR 0199): its line over the message, a tap shows that part in the file.
+  const liveRef = messageLiveRef(m);
   const myHandle = useRowMyHandle();
   const mentionsMe = !mine && mentionsReader({ body, meta }, myHandle);
 
@@ -629,6 +637,7 @@ function RowBody({
                 </Text>
               </View>
             ) : null}
+            {liveRef ? <MessageAbout liveRef={liveRef} messageId={m.id} end /> : null}
             {/* With no words there is no bubble to hold it. */}
             {quote && (!body || choiceReply) ? (
               <View style={styles.meEnd}>
@@ -704,7 +713,15 @@ function RowBody({
           hint={t("apps.viaTip", { person: name, name: via.name })}
         />
       ) : null}
-      {surfaceTag ? <Tag icon="chat" label={surfaceTag.label} hint={surfaceTag.hint} wrap /> : null}
+      {surfaceTag ? (
+        <Tag
+          icon="chat"
+          lead={<MarkIcon uri={iconUri(serverUrl(), surfaceTag.mark)} fallback="chat" size={12} color={c.muted} />}
+          label={surfaceTag.label}
+          hint={surfaceTag.hint}
+          wrap
+        />
+      ) : null}
       {routine ? (
         // The tag opens the routine (Rotinas, as on the web); "Ver relatório" beside it unfolds the report.
         <Tag
@@ -839,11 +856,32 @@ function RowBody({
   // A DM's bubbles name nobody (`look.names` off): a card that comes alone (a question, the browser) carries no name
   // line either, unless a tag has something to say.
   const nameLine = !grouped && !(bubbled && !look.names && !tagged);
-  const nameOrWords = Boolean(inBubble || nameLine || pinLine || reportOpened || opener || words);
+  // In bubbles, a message that is only a request (an approval, a question, a secret) is a bubble of its own: its name
+  // line goes inside the card, at its top, and its time at the card's end (`BubbleHeadContext`), not on a line of the
+  // other looks above it.
+  const askAlone =
+    bubbled &&
+    nameLine &&
+    !body &&
+    !media &&
+    !words &&
+    !voiceOf(meta) &&
+    [approvalId, question, secret].filter(Boolean).length === 1;
+  const bubbleHead = askAlone ? { who: who(true), time: when.time(m.createdAt) } : null;
+  const nameOrWords = Boolean(inBubble || (nameLine && !askAlone) || pinLine || reportOpened || opener || words);
+  // In bubbles, the cards under these words are bubbles of the same message: its fill, 3 points under it, joined
+  // (`BubblePartContext`, `BUBBLE_JOIN`).
+  const bubblePart = bubbled ? { fill: otherFill, edge: bubbleEdge } : null;
+  const partTop = bubbled && (body || media) ? BUBBLE_JOIN - rhythm.part : cardTop;
   return (
     <>
       {pair}
-      {quote && !inBubble ? <QuoteAbove look={look} reply={quote} onJump={onQuote} gap={rowGap} /> : null}
+      {liveRef ? (
+        <View style={[styles.aboutAbove, { paddingLeft: aboveInset(look), marginTop: rowGap }]}>
+          <MessageAbout liveRef={liveRef} messageId={m.id} />
+        </View>
+      ) : null}
+      {quote && !inBubble ? <QuoteAbove look={look} reply={quote} onJump={onQuote} gap={liveRef ? 0 : rowGap} /> : null}
       <Pressable
         onPress={onTap}
         onLongPress={press}
@@ -854,8 +892,9 @@ function RowBody({
           bubbled && lookRows.bubblesRow,
           compact && lookRows.compactRow,
           rowFrame(rhythm.block, rowGap),
-          // On the quote it answers, its plate never over it.
+          // On the quote it answers (or the line about a file's part), its plate never over it.
           quoteAbove && styles.replied,
+          liveRef !== null && styles.replied,
           // A mention of me: the row's tint says it, with round corners; no accent bar on its left edge. In bubbles the
           // bubble says it.
           mentionsMe && !inBubble && { backgroundColor: `${c.amber}17`, borderRadius: 14 },
@@ -882,7 +921,7 @@ function RowBody({
           </View>
         ) : null}
         <View style={[styles.body, { gap: rhythm.part }]}>
-          <RowPartContext.Provider value={cardTop}>
+          <RowParts top={partTop} part={bubblePart} head={bubbleHead}>
             {nameOrWords ? (
               <View>
                 {inBubble ? (
@@ -918,7 +957,7 @@ function RowBody({
                   </>
                 ) : (
                   <>
-                    {nameLine ? who(false) : null}
+                    {nameLine && !askAlone ? who(false) : null}
                     {pinLine}
                     {reportOpened}
                     {openerPart}
@@ -975,7 +1014,7 @@ function RowBody({
             ) : null}
             {cards}
             {/* Its tools after its words, what it changed and its cards: the same place live, kept and saved. Left
-                open, they come back open (`keptOpen`). */}
+            open, they come back open (`keptOpen`). */}
             {kept ? (
               <TurnTools
                 items={opened?.lines ?? kept.items}
@@ -997,8 +1036,8 @@ function RowBody({
               />
             ) : null}
             {/* What waits for a person's click comes last, after the words and the tools. Each card with work of its
-                own before it knows it has nothing to show (queries, the directory, a clock) is drawn only on a
-                message that carries it: under every agent's message, a scroll paid for all of them on each row. */}
+            own before it knows it has nothing to show (queries, the directory, a clock) is drawn only on a
+            message that carries it: under every agent's message, a scroll paid for all of them on each row. */}
             {isAgent && noAiCardOf(meta) ? <NoAiCard message={m} /> : null}
             {isAgent && stretchCardOf(meta) ? <StretchCard message={m} /> : null}
             {isAgent && costlyProposalOf(meta) ? <CostlyProposalCard message={m} /> : null}
@@ -1025,7 +1064,7 @@ function RowBody({
             {secret ? <SecretCard key={`${secret.id}:${secret.status}`} request={secret} /> : null}
             {missionDecision}
             {foot}
-          </RowPartContext.Provider>
+          </RowParts>
           {hintNode}
         </View>
         {popNode}
@@ -1277,11 +1316,11 @@ function Tag({
   );
 }
 
-/** Beside the time of my own message written on the outside chat surface: its glyph, the words read aloud. */
-function SurfaceMark({ tag, color }: { tag: { label: string; hint: string }; color: string }) {
+/** Beside the time of my own message written on the outside chat surface: its logo, the words read aloud. */
+function SurfaceMark({ tag, color }: { tag: { label: string; hint: string; mark: string | null }; color: string }) {
   return (
     <View accessible accessibilityLabel={tag.label} accessibilityHint={tag.hint}>
-      <Icon name="chat" size={12} color={color} />
+      <MarkIcon uri={iconUri(serverUrl(), tag.mark)} fallback="chat" size={12} color={color} />
     </View>
   );
 }
@@ -1447,6 +1486,34 @@ const BUBBLE_RUN: Record<RunPosition, { borderTopRightRadius?: number; borderBot
   end: { borderTopRightRadius: 6, borderBottomRightRadius: BUBBLE_CUT },
 };
 
+/**
+ * A row's parts' context: how far a card stands off what is above it (`RowPartContext`), and in bubbles that it is a
+ * bubble of this message (`BubblePartContext`) and, for a request alone, the message's name and time
+ * (`BubbleHeadContext`).
+ */
+function RowParts({
+  top,
+  part,
+  head,
+  children,
+}: {
+  top: number;
+  part: BubblePart | null;
+  head: BubbleHead | null;
+  children: ReactNode;
+}) {
+  return (
+    <RowPartContext.Provider value={top}>
+      <BubblePartContext.Provider value={part}>
+        <BubbleHeadContext.Provider value={head}>{children}</BubbleHeadContext.Provider>
+      </BubblePartContext.Provider>
+    </RowPartContext.Provider>
+  );
+}
+
+/** How far under a bubble its cards sit in `bubbles`: one group of the same message, as a run of bubbles. */
+const BUBBLE_JOIN = 3;
+
 /** Anyone else's bubble in `bubbles`: the same, on the left. */
 const OTHER_RUN: Record<RunPosition, { borderTopLeftRadius?: number; borderBottomLeftRadius?: number }> = {
   solo: {},
@@ -1467,6 +1534,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   replied: { marginTop: 0, paddingTop: QUOTE_GAP },
+  aboutAbove: { paddingRight: 16 },
   avslot: { width: MSG_AVATAR, alignItems: "center", paddingTop: 2 },
   body: { flex: 1, minWidth: 0 },
   // A long pick wraps: the check stays on its first line.
