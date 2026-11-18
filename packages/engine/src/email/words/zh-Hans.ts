@@ -201,6 +201,7 @@ export const words: EmailWords = {
     preheader: "在“成员”中批准或拒绝。在你回复之前，什么都不会发生。",
     headline: "有一个加入请求等你处理",
     body: (org) => ["对方打开了 ", { b: org }, " 的邀请链接，并请求加入。"],
+    outside: (by) => ["对方为 ", { b: by }, " 工作，申请以外部协作者身份加入。不占用你套餐的席位，你可以随时移除。"],
     note: "只批准你认识的人。除非你在页面上选择其他角色，否则对方会以成员身份加入。",
     approve: "批准",
     deny: "拒绝",
@@ -484,6 +485,26 @@ export const words: EmailWords = {
         return `${routines > 0 ? `${a}和${r}` : a}已就绪。只差一个 agentes.chat 套餐了。`;
       },
       why: () => "你收到这封邮件，是因为 agentes.chat 上的这个工作区是你的。此类提醒只发送两次。",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} 已关联到你的 agentes.chat 账号`,
+      preheader: "你的助手现在会在那里回复你。如果不是你，请解除关联。",
+      headline: (surface) => `${surface} 已关联`,
+      body: (surface, display, org) => [{ b: display }, `（${surface}）现在可以和你在 `, { b: org }, " 的助手对话。"],
+      notYou: "不是你？请解除关联。来自那里的消息会立即不再进入你的账号。",
+      button: "解除关联",
+      small: "如果是你本人，无需任何操作。你可以随时在设置中解除关联。",
+      why: (surface) => `你收到这封邮件，是因为 ${surface} 关联到了你的 agentes.chat 账号。`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} 已与你的 agentes.chat 账号解除关联`,
+      preheader: "对方的身份已变更。如果是你，请在设置中重新关联。",
+      headline: (surface) => `${surface} 已解除关联`,
+      body: (surface, display) => [{ b: display }, `（${surface}）因身份变更已解除关联。`],
+      small: "如果是你，请在设置中重新关联。",
+      why: (surface) => `你收到这封邮件，是因为 ${surface} 曾关联到你的 agentes.chat 账号。`,
     },
   },
 };

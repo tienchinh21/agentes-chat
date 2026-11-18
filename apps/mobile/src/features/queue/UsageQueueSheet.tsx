@@ -2,6 +2,7 @@ import { type UsageQueueClosedRow, type UsageQueueRow, useCancelUsageQueue, useU
 import { relativeTime } from "@agenteschat/client/lib/format";
 import { agentGrammar } from "@agenteschat/client/lib/grammar";
 import {
+  usageQueueChain,
   usageQueueResuming,
   usageQueueShared,
   usageQueueSkippedWhere,
@@ -60,11 +61,17 @@ export function UsageQueueSheet({ agentId, tab: initialTab = "queued" }: { agent
   const skipped = queue.closed.length;
   // The switch only when both lists have something: otherwise the one that does.
   const tab: UsageQueueTab = waiting === 0 ? "skipped" : skipped === 0 ? "queued" : chosen;
-  const shared = usageQueueShared(
-    t,
-    queue.plan,
-    queue.sharedWith.flatMap((id) => dir.anyAgent(id)?.name ?? []),
-  );
+  // Behind the ⓘ: every account of its order at its limit (the title's time is the first reset), then who shares the line.
+  const shared = [
+    usageQueueChain(t, queue),
+    usageQueueShared(
+      t,
+      queue.plan,
+      queue.sharedWith.flatMap((id) => dir.anyAgent(id)?.name ?? []),
+    ),
+  ]
+    .filter(Boolean)
+    .join(" ");
   const resuming = usageQueueResuming(queue);
   const queuedList = (
     <>
@@ -244,9 +251,7 @@ function SkippedRow({ row, agentId, now }: { row: UsageQueueClosedRow; agentId: 
           {t("usageQueue.answeredAnyway")}
         </Text>
       ) : row.mayAnswer ? (
-        <View style={styles.ghostActs}>
-          <AnswerAnywayButton runId={row.runId} agentId={agentId} closed={row.closed} />
-        </View>
+        <AnswerAnywayButton runId={row.runId} agentId={agentId} closed={row.closed} />
       ) : null}
     </View>
   );

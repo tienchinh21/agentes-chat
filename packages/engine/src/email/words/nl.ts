@@ -236,6 +236,11 @@ export const words: EmailWords = {
     preheader: "Keur het goed of weiger het in Leden. Er gebeurt niets tot je antwoordt.",
     headline: "Er wacht een verzoek om lid te worden",
     body: (org) => ["Diegene opende de uitnodigingslink van ", { b: org }, " en vraagt om lid te worden."],
+    outside: (by) => [
+      "Diegene werkt voor ",
+      { b: by },
+      " en vraagt om lid te worden als externe medewerker. Diegene neemt geen plek in je abonnement in, en je kunt diegene altijd verwijderen.",
+    ],
     note: "Keur alleen mensen goed die je verwacht. Ze worden lid, tenzij je op de pagina een andere rol kiest.",
     approve: "Goedkeuren",
     deny: "Weigeren",
@@ -563,6 +568,31 @@ export const words: EmailWords = {
       },
       why: () =>
         "Je krijgt deze e-mail omdat deze werkruimte op agentes.chat van jou is. We sturen maar twee van deze berichten.",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} is gekoppeld aan je agentes.chat-account`,
+      preheader: "Je assistent antwoordt je daar nu. Was jij het niet? Ontkoppel het.",
+      headline: (surface) => `${surface} is gekoppeld`,
+      body: (surface, display, org) => [
+        { b: display },
+        ` op ${surface} praat nu met je assistent in `,
+        { b: org },
+        ".",
+      ],
+      notYou: "Was jij het niet? Ontkoppel het. Berichten van daar bereiken je account dan meteen niet meer.",
+      button: "Ontkoppelen",
+      small: "Was jij het wel? Dan hoef je niets te doen. Je kunt het altijd ontkoppelen in Instellingen.",
+      why: (surface) => `Je krijgt deze e-mail omdat ${surface} aan je agentes.chat-account is gekoppeld.`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} is ontkoppeld van je agentes.chat-account`,
+      preheader: "De identiteit is veranderd. Koppel het opnieuw in Instellingen als jij het was.",
+      headline: (surface) => `${surface} is ontkoppeld`,
+      body: (surface, display) => [{ b: display }, ` op ${surface} is ontkoppeld omdat de identiteit is veranderd.`],
+      small: "Koppel het opnieuw in Instellingen als jij het was.",
+      why: (surface) => `Je krijgt deze e-mail omdat ${surface} aan je agentes.chat-account gekoppeld was.`,
     },
   },
 };

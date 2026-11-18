@@ -221,6 +221,10 @@ export const words: EmailWords = {
     preheader: "멤버 페이지에서 승인하거나 거절하세요. 답하기 전에는 아무 일도 일어나지 않아요.",
     headline: "참여 요청이 기다리고 있어요",
     body: (org) => [{ b: org }, "의 초대 링크를 열고 참여를 요청했어요."],
+    outside: (by) => [
+      { b: by },
+      "의 외부 협력자로 참여를 요청했어요. 요금제 자리를 차지하지 않으며, 언제든지 내보낼 수 있어요.",
+    ],
     note: "아는 사람만 승인하세요. 페이지에서 다른 역할을 고르지 않으면 멤버로 참여해요.",
     approve: "승인",
     deny: "거절",
@@ -521,6 +525,31 @@ export const words: EmailWords = {
         return `${routines > 0 ? `${a}와 ${r}` : a}가 준비됐어요. 이제 agentes.chat 요금제만 있으면 돼요.`;
       },
       why: () => "agentes.chat의 이 워크스페이스가 내 것이어서 이 메일을 보내 드렸어요. 이런 알림은 두 번만 보내요.",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface}이(가) agentes.chat 계정에 연결되었습니다`,
+      preheader: "이제 어시스턴트가 그곳에서 답합니다. 본인이 아니라면 연결을 해제하세요.",
+      headline: (surface) => `${surface} 연결됨`,
+      body: (surface, display, org) => [
+        { b: display },
+        `(${surface})이(가) 이제 `,
+        { b: org },
+        "의 어시스턴트와 대화합니다.",
+      ],
+      notYou: "본인이 아닌가요? 연결을 해제하세요. 그곳에서 보낸 메시지가 바로 계정에 닿지 않게 됩니다.",
+      button: "연결 해제",
+      small: "본인이라면 아무것도 하지 않아도 됩니다. 언제든 설정에서 연결을 해제할 수 있습니다.",
+      why: (surface) => `${surface}이(가) agentes.chat 계정에 연결되어 이 이메일을 보내드립니다.`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface}이(가) agentes.chat 계정에서 연결 해제되었습니다`,
+      preheader: "신원이 바뀌었습니다. 본인이라면 설정에서 다시 연결하세요.",
+      headline: (surface) => `${surface} 연결 해제됨`,
+      body: (surface, display) => [{ b: display }, `(${surface})은(는) 신원이 바뀌어 연결이 해제되었습니다.`],
+      small: "본인이라면 설정에서 다시 연결하세요.",
+      why: (surface) => `${surface}이(가) agentes.chat 계정에 연결되어 있었기 때문에 이 이메일을 보내드립니다.`,
     },
   },
 };

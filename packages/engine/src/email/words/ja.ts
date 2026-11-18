@@ -221,6 +221,10 @@ export const words: EmailWords = {
     preheader: "メンバーページで承認または却下してください。返答するまで何も起こりません。",
     headline: "参加リクエストがあなたの対応を待っています",
     body: (org) => [{ b: org }, " の招待リンクを開いた人が、参加をリクエストしました。"],
+    outside: (by) => [
+      { b: by },
+      " の外部協力者として参加をリクエストしました。プランの席は使わず、いつでも削除できます。",
+    ],
     note: "心当たりのある人だけを承認してください。ページで別のロールを選ばない限り、メンバーとして参加します。",
     approve: "承認",
     deny: "却下",
@@ -544,6 +548,32 @@ export const words: EmailWords = {
       },
       why: () =>
         "agentes.chatのこのワークスペースはあなたのものであるため、このメールをお送りしています。このお知らせは2回だけです。",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} が agentes.chat アカウントに連携されました`,
+      preheader: "これからはアシスタントがそちらで返信します。心当たりがなければ連携を解除してください。",
+      headline: (surface) => `${surface} が連携されました`,
+      body: (surface, display, org) => [
+        { b: display },
+        `（${surface}）が `,
+        { b: org },
+        " のアシスタントと話せるようになりました。",
+      ],
+      notYou:
+        "心当たりがありませんか？連携を解除してください。そこからのメッセージはすぐにアカウントに届かなくなります。",
+      button: "連携を解除",
+      small: "ご自身で行った場合は何もする必要はありません。連携はいつでも設定から解除できます。",
+      why: (surface) => `${surface} が agentes.chat アカウントに連携されたため、このメールをお送りしています。`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} と agentes.chat アカウントの連携が解除されました`,
+      preheader: "相手側の ID が変わりました。ご自身なら設定からもう一度連携してください。",
+      headline: (surface) => `${surface} の連携が解除されました`,
+      body: (surface, display) => [{ b: display }, `（${surface}）は ID が変わったため連携が解除されました。`],
+      small: "ご自身なら設定からもう一度連携してください。",
+      why: (surface) => `${surface} が agentes.chat アカウントに連携されていたため、このメールをお送りしています。`,
     },
   },
 };

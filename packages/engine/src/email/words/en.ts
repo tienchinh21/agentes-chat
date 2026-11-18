@@ -257,6 +257,12 @@ export const en = {
     preheader: "Approve or deny it in Members. Nothing happens until you answer.",
     headline: "A request to join is waiting",
     body: (org: string): Text => ["They opened ", { b: org }, "'s invitation link and asked to join."],
+    /** In place of `body` for an outside collaborator's request (ADR 0191): `by`, who they work for. */
+    outside: (by: string): Text => [
+      "They ask to join as an outside collaborator for ",
+      { b: by },
+      ". They take no seat in your plan, and you can remove them at any time.",
+    ],
     note: "Approve only people you expect. They join as a member unless you pick another role on the page.",
     approve: "Approve",
     deny: "Deny",
@@ -585,6 +591,35 @@ export const en = {
         return `Ready to go: ${routines > 0 ? `${a} and ${r}` : a}. All that's missing is an agentes.chat plan.`;
       },
       why: () => "You got this email because this workspace on agentes.chat is yours. We send two of these, then stop.",
+    },
+  },
+  /** An outside chat surface linked to the account (ADR 0187), or unlinked by it. */
+  surface: {
+    linked: {
+      subject: (surface: string) => `${surface} was linked to your agentes.chat account`,
+      preheader: "Your assistant answers you there now. If it wasn't you, unlink it.",
+      headline: (surface: string) => `${surface} was linked`,
+      body: (surface: string, display: string, org: string): Text => [
+        { b: display },
+        ` on ${surface} now talks to your assistant in `,
+        { b: org },
+        ".",
+      ],
+      notYou: "Not you? Unlink it. Messages from there stop reaching your account at once.",
+      button: "Unlink it",
+      small: "If it was you, there's nothing to do. You can unlink it any time in Settings.",
+      why: (surface: string) => `You got this email because ${surface} was linked to your agentes.chat account.`,
+    },
+    unlinked: {
+      subject: (surface: string) => `${surface} was unlinked from your agentes.chat account`,
+      preheader: "Its identity changed. Link it again in Settings if it was you.",
+      headline: (surface: string) => `${surface} was unlinked`,
+      body: (surface: string, display: string): Text => [
+        { b: display },
+        ` on ${surface} was unlinked because its identity changed.`,
+      ],
+      small: "Link it again in Settings if it was you.",
+      why: (surface: string) => `You got this email because ${surface} was linked to your agentes.chat account.`,
     },
   },
 };

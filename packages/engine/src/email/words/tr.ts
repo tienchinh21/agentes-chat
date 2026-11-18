@@ -237,6 +237,11 @@ export const words: EmailWords = {
     preheader: "Üyeler sayfasında onaylayın ya da reddedin. Siz yanıt verene kadar hiçbir şey olmaz.",
     headline: "Bir katılma isteği bekliyor",
     body: (org) => ["Biri ", { b: org }, " davet bağlantısını açıp katılmak istedi."],
+    outside: (by) => [
+      "Bu kişi ",
+      { b: by },
+      " için çalışıyor ve harici çalışan olarak katılmak istiyor. Planınızda yer kaplamaz ve istediğiniz zaman çıkarabilirsiniz.",
+    ],
     note: "Yalnızca beklediğiniz kişileri onaylayın. Sayfada başka bir rol seçmezseniz üye olarak katılırlar.",
     approve: "Onayla",
     deny: "Reddet",
@@ -560,6 +565,31 @@ export const words: EmailWords = {
       },
       why: () =>
         "Bu e-postayı, agentes.chat'teki bu çalışma alanı sana ait olduğu için aldın. Bu bildirimden yalnızca iki tane gönderiyoruz.",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} agentes.chat hesabına bağlandı`,
+      preheader: "Asistanın artık sana orada yanıt veriyor. Sen değilsen bağlantıyı kaldır.",
+      headline: (surface) => `${surface} bağlandı`,
+      body: (surface, display, org) => [
+        { b: display },
+        ` (${surface}) artık `,
+        { b: org },
+        " içinde asistanınla konuşuyor.",
+      ],
+      notYou: "Sen değil misin? Bağlantıyı kaldır. Oradan gelen mesajlar hesabına hemen ulaşmaz olur.",
+      button: "Bağlantıyı kaldır",
+      small: "Sensen yapman gereken bir şey yok. Bağlantıyı istediğin zaman Ayarlar'dan kaldırabilirsin.",
+      why: (surface) => `Bu e-postayı ${surface} agentes.chat hesabına bağlandığı için aldın.`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} agentes.chat hesabından ayrıldı`,
+      preheader: "Kimliği değişti. Sensen Ayarlar'dan yeniden bağla.",
+      headline: (surface) => `${surface} ayrıldı`,
+      body: (surface, display) => [{ b: display }, ` (${surface}) kimliği değiştiği için ayrıldı.`],
+      small: "Sensen Ayarlar'dan yeniden bağla.",
+      why: (surface) => `Bu e-postayı ${surface} agentes.chat hesabına bağlı olduğu için aldın.`,
     },
   },
 };

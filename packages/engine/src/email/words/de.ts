@@ -237,6 +237,11 @@ export const words: EmailWords = {
     preheader: "Gib die Anfrage unter Mitglieder frei oder lehne sie ab. Bis du antwortest, passiert nichts.",
     headline: "Eine Beitrittsanfrage wartet",
     body: (org) => ["Die Person hat den Einladungslink von ", { b: org }, " geöffnet und möchte beitreten."],
+    outside: (by) => [
+      "Diese Person arbeitet für ",
+      { b: by },
+      " und möchte als externe Person beitreten. Sie belegt keinen Platz in deinem Tarif, und du kannst sie jederzeit entfernen.",
+    ],
     note: "Gib nur Personen frei, die du erwartest. Sie treten als Mitglied bei, außer du wählst auf der Seite eine andere Rolle.",
     approve: "Freigeben",
     deny: "Ablehnen",
@@ -565,6 +570,36 @@ export const words: EmailWords = {
       },
       why: () =>
         "Du bekommst diese E-Mail, weil dieser Workspace auf agentes.chat dir gehört. Wir senden nur zwei solche Hinweise.",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} wurde mit deinem agentes.chat-Konto verknüpft`,
+      preheader: "Dein Assistent antwortet dir jetzt dort. Wenn du das nicht warst, heb die Verknüpfung auf.",
+      headline: (surface) => `${surface} wurde verknüpft`,
+      body: (surface, display, org) => [
+        { b: display },
+        ` auf ${surface} spricht jetzt mit deinem Assistenten in `,
+        { b: org },
+        ".",
+      ],
+      notYou:
+        "Das warst nicht du? Heb die Verknüpfung auf. Nachrichten von dort erreichen dein Konto dann sofort nicht mehr.",
+      button: "Verknüpfung aufheben",
+      small:
+        "Wenn du das warst, musst du nichts tun. Du kannst die Verknüpfung jederzeit in den Einstellungen aufheben.",
+      why: (surface) => `Du erhältst diese E-Mail, weil ${surface} mit deinem agentes.chat-Konto verknüpft wurde.`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} wurde von deinem agentes.chat-Konto getrennt`,
+      preheader: "Die Identität hat sich geändert. Verknüpfe es in den Einstellungen neu, wenn du das warst.",
+      headline: (surface) => `${surface} wurde getrennt`,
+      body: (surface, display) => [
+        { b: display },
+        ` auf ${surface} wurde getrennt, weil sich die Identität geändert hat.`,
+      ],
+      small: "Verknüpfe es in den Einstellungen neu, wenn du das warst.",
+      why: (surface) => `Du erhältst diese E-Mail, weil ${surface} mit deinem agentes.chat-Konto verknüpft war.`,
     },
   },
 };

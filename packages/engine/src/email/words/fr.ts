@@ -249,6 +249,11 @@ export const words: EmailWords = {
       { b: org },
       " et demande à rejoindre l’espace de travail.",
     ],
+    outside: (by) => [
+      "Cette personne travaille pour ",
+      { b: by },
+      " et demande à rejoindre en tant que collaborateur externe. Elle n’occupe aucune place dans votre offre, et vous pouvez la retirer à tout moment.",
+    ],
     note: "N’approuvez que les personnes que vous attendez. Elles rejoignent l’espace en tant que membre, sauf si vous choisissez un autre rôle sur la page.",
     approve: "Approuver",
     deny: "Refuser",
@@ -578,6 +583,31 @@ export const words: EmailWords = {
       },
       why: () =>
         "Vous recevez cet e-mail parce que cet espace de travail sur agentes.chat est le vôtre. Nous n’envoyons que deux rappels comme celui-ci.",
+    },
+  },
+  surface: {
+    linked: {
+      subject: (surface) => `${surface} a été lié à ton compte agentes.chat`,
+      preheader: "Ton assistant te répond là-bas maintenant. Si ce n'était pas toi, délie-le.",
+      headline: (surface) => `${surface} a été lié`,
+      body: (surface, display, org) => [
+        { b: display },
+        ` sur ${surface} parle maintenant à ton assistant dans `,
+        { b: org },
+        ".",
+      ],
+      notYou: "Ce n'était pas toi ? Délie-le. Les messages venus de là n'atteignent plus ton compte, tout de suite.",
+      button: "Délier",
+      small: "Si c'était toi, il n'y a rien à faire. Tu peux le délier à tout moment dans les Paramètres.",
+      why: (surface) => `Tu reçois cet e-mail parce que ${surface} a été lié à ton compte agentes.chat.`,
+    },
+    unlinked: {
+      subject: (surface) => `${surface} a été délié de ton compte agentes.chat`,
+      preheader: "Son identité a changé. Lie-le à nouveau dans les Paramètres si c'était toi.",
+      headline: (surface) => `${surface} a été délié`,
+      body: (surface, display) => [{ b: display }, ` sur ${surface} a été délié parce que son identité a changé.`],
+      small: "Lie-le à nouveau dans les Paramètres si c'était toi.",
+      why: (surface) => `Tu reçois cet e-mail parce que ${surface} était lié à ton compte agentes.chat.`,
     },
   },
 };
