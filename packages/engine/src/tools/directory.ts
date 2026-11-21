@@ -384,7 +384,7 @@ const CORE_TOOLS: ReadonlySet<string> = new Set(["read_wiki_page", "search_wiki"
 
 /**
  * Tools of the core groups that few runs use (token-trim B3): a group of their own, loaded on demand like any other.
- * Never what the agent reaches for on its own (react, ask_user, request_permission, remember, save_how_to,
+ * Never what the agent reaches for on its own (react, ask_user, say_now, request_permission, remember, save_how_to,
  * update_memory, forget, update_skill, search_context, the web, ask_agent, tell_agent, follow_up,
  * work_in_background, post_message, send_dm, post_update, show_block, the skill and wiki readers).
  */
@@ -395,6 +395,7 @@ export const RARE_TOOLS: ReadonlySet<string> = new Set([
   "send_sticker",
   "read_skill_file",
   "find_agent",
+  "read_agent",
   "get_my_usage",
   "set_status",
   "set_reply_style",
@@ -443,6 +444,10 @@ export const LIVE_FILE_TOOLS: ReadonlySet<string> = new Set([
   "generate_image",
   // Pictures from the web to put in a live file (ADR 0196 §8): no scope, like the web's other tools.
   "image_search",
+  // Comments on a picture, a video or a PDF (ADR 0208), listed only in such a file's conversation.
+  "look_at_comment",
+  "comment_on_file",
+  "resolve_comment",
 ]);
 export const LIVE_FILES_GROUP = "files";
 

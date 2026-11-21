@@ -28,7 +28,8 @@ export const AudienceChoice = z
 
 /**
  * What a person had selected in a live file (ADR 0196 §6, ADR 0199): a sheet's range, a slide, canvas shapes, a
- * canvas comment's pin (world units), a document's quoted words and block.
+ * canvas comment's pin (world units), a document's quoted words and block; on a picture, a video or a PDF (ADR 0208)
+ * the comment's mark, moment, page, the version it was made on and the app's two pictures of it.
  */
 export const LiveSelection = z
   .object({
@@ -47,6 +48,23 @@ export const LiveSelection = z
       .optional()
       .openapi({ description: "A document's quoted words (kept to 200 characters)." }),
     block: z.string().max(64).optional().openapi({ description: "A document's block id." }),
+    mark: z
+      .object({
+        x: z.number().min(0).max(1),
+        y: z.number().min(0).max(1),
+        w: z.number().min(0).max(1).optional(),
+        h: z.number().min(0).max(1).optional(),
+      })
+      .optional()
+      .openapi({ description: "A point (no `w`, `h`) or an area of the picture, frame or page, in fractions." }),
+    time: z.number().min(0).max(86_400).optional().openapi({ description: "A video's moment, in seconds." }),
+    page: z.number().int().min(1).optional().openapi({ description: "A PDF's page, from 1." }),
+    version: z.number().int().min(1).optional().openapi({ description: "The file's version the mark was made on." }),
+    crop: z.uuid().optional().openapi({ description: "The app's picture of what was marked (`…/marks`)." }),
+    frame: z
+      .uuid()
+      .optional()
+      .openapi({ description: "The app's picture of the whole picture, frame or page with the mark drawn." }),
   })
   .openapi("LiveSelection");
 
@@ -54,7 +72,10 @@ export const LiveSelection = z
 export const LiveRef = z
   .object({
     artifactId: z.string(),
-    kind: z.string().openapi({ description: "The live file's kind: `spreadsheet`, `slides`, `canvas`, `document`." }),
+    kind: z.string().openapi({
+      description:
+        "What the file is: a live file's kind (`spreadsheet`, `slides`, `canvas`, `document`) or an uploaded `image`, `video` or `pdf` (ADR 0208).",
+    }),
     title: z.string(),
     selection: LiveSelection.optional(),
   })
@@ -413,6 +434,14 @@ export const AgentAudience = z
   })
   .openapi("AgentAudience");
 
+/** "Quem pode editar" (ADR 0085, addendum of 2026-11-17): who edits an agent besides its owner and who manages it. */
+export const AgentEditors = z
+  .object({
+    userIds: z.array(z.string()).max(500),
+    roleIds: z.array(z.uuid()).max(100),
+  })
+  .openapi("AgentEditors");
+
 /** How much an agent asks before acting (ADR 0173). */
 export const ApprovalsLevel = z.enum(["always", "risky", "never"]).openapi("ApprovalsLevel", {
   description:
@@ -476,6 +505,10 @@ export const PlanWindow = z.object({
   label: z.string().optional().openapi({ description: "`other`: the provider's name for it." }),
   usedPercent: z.number().openapi({ description: "0–100." }),
   resetsAt: z.string().optional(),
+  at: z
+    .string()
+    .optional()
+    .openapi({ description: "When this window was last read, where that is before the reading's `at`." }),
 });
 
 export const PlanUsage = z
@@ -513,6 +546,10 @@ export const FormerAgent = z
     role: z.string(),
     appearance: AgentAppearance.nullable(),
     deleted: z.boolean().openapi({ description: "Deleted for good; false: archived (an admin may still delete it)." }),
+    canManage: z.boolean().optional().openapi({
+      description:
+        "An archived one: whether the current person manages it (ADR 0085, addendum of 2026-11-17: `manage_agents` where it reaches), so brings it back or deletes it for good. Absent once deleted.",
+    }),
   })
   .openapi("FormerAgent");
 
@@ -568,9 +605,29 @@ export const Agent = z
     audience: AgentAudience,
     audienceMode: z.enum(["everyone", "people", "owner"]),
     canTalk: z.boolean().openapi({ description: "Whether the current person can talk to it (mentions, DMs)." }),
+    canManage: z.boolean().openapi({
+      description:
+        "Whether the current person manages it (ADR 0085, addendum of 2026-11-17): `manage_agents` where it reaches (owners and administrators every agent, anyone else the agents whose audience takes them and the ones with no owner). Everything about it, its apps, budget and owner included.",
+    }),
+    canEdit: z.boolean().openapi({
+      description:
+        "Whether the current person edits how it works: its instructions, role, skills and routines. Its owner, who manages it, and who its `editors` name.",
+    }),
+    canManageRoutines: z.boolean().openapi({
+      description:
+        "Whether the current person sets up its routines: who edits it, and `manage_routines` where it reaches.",
+    }),
+    editors: AgentEditors.openapi({
+      description:
+        '"Quem pode editar": who edits it besides its owner and who manages it. Empty for who doesn\'t see how it works.',
+    }),
     seesDetails: z.boolean().openapi({
       description:
-        "Whether the current person sees how it works: its owner, who manages agents, and whoever it answers. Without it `instructions` is empty and its tools, memory, usage and activity answer 403 `agent.details_hidden`.",
+        "Whether the current person sees how it works: who edits it (`canEdit`) and whoever it answers. Without it `instructions` is empty and its tools, memory, usage and activity answer 403 `agent.details_hidden`.",
+    }),
+    listed: z.boolean().optional().openapi({
+      description:
+        "Whether the current person's lists and pickers name it: every agent with `view_all_agents` or `manage_agents`, but a private one (it answers only its owner) only for who sees how it works (`seesDetails`). False: it stays out of every list; its messages and its public card still show. Absent (older servers): true.",
     }),
     appearance: AgentAppearance.nullable().openapi({ description: "Its look; null = the default." }),
     mediaReplies: z.boolean().openapi({
@@ -1036,22 +1093,16 @@ export const BrainUnavailable = z.enum([
   "runner_old",
   "tool_off",
   "not_installed",
-  "outdated",
   "not_reported",
   "system",
   "cant_start",
 ]);
-
-export const CodexVersionRequirement = z
-  .object({ detected: z.string(), minimum: z.string() })
-  .openapi("CodexVersionRequirement");
 
 export const BrainOption = z
   .object({
     kind: BrainKind,
     available: z.boolean(),
     reason: BrainUnavailable.optional().openapi({ description: "Why it can't be chosen now (computer brains)." }),
-    codexVersion: CodexVersionRequirement.optional(),
     models: z.array(
       z.object({
         value: z.string().openapi({ description: "What is stored and passed to the CLI (`opus`, `gpt-…`)." }),

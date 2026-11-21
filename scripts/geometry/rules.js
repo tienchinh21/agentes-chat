@@ -55,7 +55,7 @@
     const el = worded(labelOrEl);
     const classes = (typeof el.className === "string" ? el.className : (el.className?.baseVal ?? ""))
       .split(/\s+/)
-      .filter((c) => c && !/^(ac-captop|ac-iconline|ac-actrow|is-|has-)/.test(c))
+      .filter((c) => c && !/^(ac-captop|ac-iconline|ac-actrow|ac-tail|is-|has-)/.test(c))
       .slice(0, 3);
     return el.tagName.toLowerCase() + classes.map((c) => `.${c}`).join("");
   };
@@ -840,7 +840,17 @@
         if (!seen(el) || el.children.length !== 1 || ownText(el)) continue;
         const icon = el.firstElementChild;
         if (icon.tagName.toLowerCase() !== "svg" || !seen(icon)) continue;
-        const a = el.getBoundingClientRect();
+        // A plate drawn by `::before` (a glyph's, a pair of icons' in a row of actions) is what shows, not the box.
+        const box = el.getBoundingClientRect();
+        const before = getComputedStyle(el, "::before");
+        const drawn = before.content !== "none" && before.position === "absolute";
+        const inset = (side) => (drawn ? parseFloat(before[side]) || 0 : 0);
+        const a = {
+          left: box.left + inset("left"),
+          right: box.right - inset("right"),
+          top: box.top + inset("top"),
+          bottom: box.bottom - inset("bottom"),
+        };
         const b = icon.getBoundingClientRect();
         const dx = (a.left + a.right - b.left - b.right) / 2;
         const dy = (a.top + a.bottom - b.top - b.bottom) / 2;
@@ -1511,7 +1521,9 @@
      */
     clip(out) {
       for (const el of document.body.querySelectorAll("*")) {
-        if (!seen(el) || el.closest("svg")) continue;
+        // Inside a row `content-visibility` skips (a conversation's rows before their first frame), the row keeps its
+        // placeholder height while its content is measured whole, spilling over the rows below: nothing a person sees.
+        if (!seen(el) || el.closest("svg") || !el.checkVisibility({ contentVisibilityAuto: true })) continue;
         const s = style(el);
         const reach = { top: 0, bottom: 0, left: 0, right: 0 };
         for (const l of outerShadows(s.boxShadow)) {
@@ -2153,9 +2165,12 @@
     },
     /**
      * Buttons side by side stand 8 apart (rule 8): two plated ones, or two icon buttons' plates (a glyph's plate is its
-     * box less its air, `.ac-btn--glyph`). A ghost with words reads by its words (`.ac-acts`), and the parts of one
+     * box less its air, `.ac-btn--glyph`). In a row of actions (`.ac-acts`) two icon buttons' plates meet, and two
+     * small ones' glyphs stand 8 apart as an icon and its words do, their boxes only touching; on touch their plates
+     * stand 8 apart. A ghost with words reads by its words (`.ac-acts`), and the parts of one
      * control (a split button, a segmented control, a token's ×, an event pill's actions, a message's bar) are drawn
-     * as one, and so are the strips of format toggles: the composer's and the wiki editor's.
+     * as one, and so are the strips of format toggles (the composer's and the wiki editor's) and the composer's own
+     * tools, 4 apart.
      */
     btngap(out) {
       const kind = (el) => {
@@ -2172,7 +2187,7 @@
       // The canvas's tool strips and the spreadsheet's, the document's and the slides' toolbars (ADR 0196) are drawn
       // as one too, like the format bars.
       const ONE =
-        ".ac-split,.ac-seg,.ac-token,.ac-eventpill,.ac-msg__actions,.ac-formatbar,.wiki-bar,.cnv-bar,.cnv-dock,.cnv-zoom,.sheet-tools,.sl-tools,[role=menu],[role=menubar],svg";
+        ".ac-split,.ac-seg,.ac-token,.ac-eventpill,.ac-msg__actions,.ac-formatbar,.ac-composer__tools,.wiki-bar,.cnv-bar,.cnv-dock,.cnv-zoom,.sheet-tools,.sl-tools,[role=menu],[role=menubar],svg";
       for (const row of document.body.querySelectorAll("*")) {
         if (!seen(row) || row.closest(ONE) || !isRow(style(row))) continue;
         const kids = flow(row);
@@ -2182,8 +2197,24 @@
           if (!k || k !== kind(b)) continue;
           const [ra, rb] = [plateOf(a), plateOf(b)];
           if (!sameLine(ra, rb)) continue;
-          const gap = rb.left - ra.right;
-          if (Math.abs(gap - 8) > 0.5)
+          let gap = rb.left - ra.right;
+          let want = 8;
+          if (k === "icon" && row.matches(".ac-acts") && !matchMedia("(pointer: coarse)").matches) {
+            const [ga, gb] = [a, b].map((el) => el.querySelector("svg")?.getBoundingClientRect());
+            const small = a.matches(".ac-btn--sm") && b.matches(".ac-btn--sm") && ga && gb;
+            // Two targets that overlap would leave a click between the glyphs to whichever is on top. A `::before` that
+            // takes clicks and reaches past its box is part of its button's target.
+            const reach = (el, side) => {
+              const s = getComputedStyle(el, "::before");
+              return s.content === "none" || s.pointerEvents === "none" ? 0 : Math.max(0, -parseFloat(s[side]) || 0);
+            };
+            const touch =
+              b.getBoundingClientRect().left - a.getBoundingClientRect().right - reach(a, "right") - reach(b, "left");
+            if (small && touch > -0.5) [gap, want] = [gb.left - ga.right, 8];
+            else if (small) [gap, want] = [touch, 0];
+            else want = 0;
+          }
+          if (Math.abs(gap - want) > 0.5)
             out.push({
               rule: "btngap",
               node: b,
@@ -2537,6 +2568,63 @@
         const need = word + parseFloat(style(name).paddingRight) + parseFloat(s.columnGap) + group;
         if (right - name.getBoundingClientRect().left >= need + 1)
           out.push({ ...base, side: "under", px: +(mid - line.bottom).toFixed(1) });
+      }
+    },
+    /**
+     * A wrapping row keeps one start edge: when one of its lines starts at the row's start with room to spare, no other
+     * line is pushed away from it, by an auto margin (a time left, a status floating at the end under buttons) or by
+     * the row ending its lines at the end (buttons under "Mudar quando perguntar"). A line set in by a fixed margin (an
+     * outcome on its item's words) and rows that end or centre every line are left alone, and so is a control under
+     * words alone: a row's own control at its end (a settings row's switch, a member's role), as `endline` places it.
+     */
+    strayend(out) {
+      // The computed value keeps "auto" where the resolved one is already in pixels.
+      const auto = (el) => {
+        try {
+          return String(el.computedStyleMap().get("margin-left")) === "auto";
+        } catch {
+          return false;
+        }
+      };
+      const control = (el) => el.matches(CONTROL) || !!el.querySelector(CONTROL);
+      for (const row of document.body.querySelectorAll("*")) {
+        // A settings row's end (its value, its control) is `endline`'s: at the row's end, under the name or not.
+        if (!seen(row) || row.matches(".settings-row")) continue;
+        const s = style(row);
+        if (!s.display.includes("flex") || s.flexDirection !== "row" || s.flexWrap !== "wrap" || s.direction === "rtl")
+          continue;
+        const toEnd = ["flex-end", "end", "right"].includes(s.justifyContent);
+        if (!toEnd && !["normal", "flex-start", "start", "left"].includes(s.justifyContent)) continue;
+        const kids = flow(row);
+        if (kids.length < 2) continue;
+        const r = row.getBoundingClientRect();
+        const start = r.left + parseFloat(s.borderLeftWidth) + parseFloat(s.paddingLeft);
+        const end = r.right - parseFloat(s.borderRightWidth) - parseFloat(s.paddingRight);
+        const lines = [];
+        for (const kid of kids) {
+          const k = kid.getBoundingClientRect();
+          const line = lines.find((l) => sameLine(l.box, k));
+          if (line) line.kids.push([kid, k]);
+          else lines.push({ box: k, kids: [[kid, k]] });
+        }
+        if (lines.length < 2) continue;
+        const firstOf = (line) => line.kids[0];
+        const lastOf = (line) => line.kids[line.kids.length - 1];
+        const anchored = lines.filter((l) => firstOf(l)[1].left <= start + 2 && lastOf(l)[1].right < end - 2);
+        if (!anchored.length) continue;
+        const acts = anchored.some((l) => l.kids.some(([kid]) => control(kid)));
+        for (const line of lines) {
+          const [kid, k] = firstOf(line);
+          if (k.left > start + 2 && (toEnd || auto(kid)) && (acts || !control(kid)))
+            out.push({
+              rule: "strayend",
+              node: kid,
+              el: sig(kid),
+              box: sig(row),
+              px: +(k.left - start).toFixed(1),
+              text: words(kid),
+            });
+        }
       }
     },
   };

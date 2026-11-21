@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { accountCodeAad } from "@agenteschat/adapters/machine-protocol";
@@ -20,9 +20,11 @@ import {
 } from "../../runner/accounts";
 import {
   AGY_CHAT_AGENT,
+  AGY_KEYCHAIN,
   AGY_PLANTED,
   AGY_SIGN_IN_FILE,
   agyAuthOf,
+  agyKeychain,
   agyRuntimeDir,
   agySignInOf,
   dropAgySignIns,
@@ -75,8 +77,11 @@ test("command line: headless stream-json in the sandbox; work takes edits, plan 
   expect(work.slice(0, 4)).toEqual(["-p", "oi", "--output-format", "stream-json"]);
   expect(work.join(" ")).toContain("--sandbox --disable-slash-commands --mode accept-edits");
   expect(work.join(" ")).toContain("--model gemini-4-argon-high");
-  // A slug names its thinking level: no `--effort` beside it.
+  // A slug names its thinking level: no `--effort` beside it, the extra one (`xhigh`) included.
   expect(work).not.toContain("--effort");
+  const extra = antigravityTurnArgs({ prompt: "oi", model: "gemini-4-neon-xhigh", chat: FIRST, effort: "max" });
+  expect(extra.join(" ")).toContain("--model gemini-4-neon-xhigh");
+  expect(extra).not.toContain("--effort");
   expect(work.join(" ")).toContain(`--conversation ${FIRST}`);
   expect(antigravityTurnArgs({ prompt: "oi", effort: "xhigh" }).join(" ")).toContain("--effort high");
   const plan = antigravityTurnArgs({ prompt: "oi", profile: "plan" }).join(" ");
@@ -119,6 +124,48 @@ test("the account's home: what a turn planted goes, our settings, our server alo
   expect(agent).toContain("tools: []");
   expect(agent).toContain("subagent: false");
 });
+
+test("macOS: each Gemini account signs in to a keychain of its own in its folder, made once and unlocked before every run", () => {
+  const home = tempDir("agy-keychain-");
+  dirs.push(home);
+  const runs: string[][] = [];
+  const fake = (args: string[]) => {
+    runs.push(args);
+    if (args[0] === "create-keychain") writeFileSync(args[3] as string, "");
+  };
+  const file = path.join(home, AGY_KEYCHAIN);
+  agyKeychain(home, fake);
+  agyKeychain(home, fake);
+  expect(runs).toEqual([
+    ["create-keychain", "-p", "", file],
+    ["set-keychain-settings", file],
+    ["unlock-keychain", "-p", "", file],
+  ]);
+  // A `security` that fails leaves the CLI its own secrets file: never a thrown turn.
+  expect(() =>
+    agyKeychain(path.join(home, "other"), () => {
+      throw new Error("security: failed");
+    }),
+  ).not.toThrow();
+});
+
+test.skipIf(process.platform !== "darwin")(
+  "macOS: the account's keychain is the default one under its HOME, apart from the computer user's",
+  () => {
+    const home = tempDir("agy-keychain-");
+    dirs.push(home);
+    agyKeychain(home);
+    agyKeychain(home);
+    const security = (...args: string[]) =>
+      spawnSync("/usr/bin/security", args, { env: { HOME: home, PATH: "/usr/bin:/bin" }, encoding: "utf8" });
+    expect(security("default-keychain").stdout).toContain(path.join(home, AGY_KEYCHAIN));
+    expect(
+      security("add-generic-password", "-U", "-s", "Antigravity CLI", "-a", "test", "-w", "fake-token").status,
+    ).toBe(0);
+    expect(security("find-generic-password", "-s", "Antigravity CLI", "-wa", "test").stdout.trim()).toBe("fake-token");
+    expect(spawnSync("/usr/bin/security", ["default-keychain"], { encoding: "utf8" }).stdout).not.toContain(home);
+  },
+);
 
 test("a chat turn's guard: init with our server's tools alone; a tool of its own, a subagent or an answer first stop it", () => {
   const init = (tools: unknown) => ({ event: "init", conversation_id: FIRST, init: { tools } });
@@ -408,7 +455,7 @@ test.skipIf(!posix)(
     const limited = await run(ctx, turn({ runId: RUN.replace(/1$/, "6"), prompt: "LIMIT" }));
     expect(limited.find((e) => e.type === "limit")).toMatchObject({ resetsAt: expect.any(String) });
     expect(limited.at(-1)).toMatchObject({ type: "error", code: "plan_limit" });
-    expect(await final({}, { ...ctx, platform: "darwin" })).toMatchObject({ code: "unsupported" });
+    expect(await final({}, { ...ctx, platform: "win32" })).toMatchObject({ code: "unsupported" });
   },
   20_000,
 );
@@ -472,12 +519,56 @@ test.skipIf(!posix)(
       state: "done",
       account: { kind: "antigravity", loggedIn: true, provider: "enterprise" },
     });
-    // Elsewhere than Linux the CLI keeps every sign-in in one keychain: refused.
-    const mac = new AccountManager({ root: path.join(home, "mac"), orgId: () => ORG, platform: "darwin" });
-    managers.push(mac);
-    await expect(mac.begin("antigravity", "0193eeee-0000-7000-8000-0000000000d3")).rejects.toMatchObject({
+    // Windows keeps every sign-in in the user's one Credential Manager: refused.
+    const win = new AccountManager({ root: path.join(home, "win"), orgId: () => ORG, platform: "win32" });
+    managers.push(win);
+    await expect(win.begin("antigravity", "0193eeee-0000-7000-8000-0000000000d3")).rejects.toMatchObject({
       code: "bad_request",
     });
+  },
+  20_000,
+);
+
+test.skipIf(!posix)(
+  "the computer's models are what its signed-in accounts list, every account's once, kept for a restart",
+  async () => {
+    const home = tempDir("agy-accounts-");
+    dirs.push(home);
+    const root = path.join(home, "accounts");
+    // Another account here, on a plan with more models, listed them at its last look.
+    const other = "0193eeee-0000-7000-8000-0000000000d4";
+    mkdirSync(path.join(root, "antigravity", other), { recursive: true });
+    const paid = [
+      { id: "gemini-4-neon-high", label: "Gemini 4 Neon (High)" },
+      { id: "gemini-4-neon-xhigh", label: "Gemini 4 Neon (XHigh)" },
+      { id: "gemini-4-argon-high", label: "Gemini 4 Argon (High)" },
+    ];
+    writeFileSync(path.join(root, "agy-models.json"), JSON.stringify({ [other]: paid }));
+    const m = new AccountManager({
+      root,
+      orgId: () => ORG,
+      platform: "linux",
+      commands: { antigravity: [process.execPath, FAKE] },
+    });
+    managers.push(m);
+    expect(m.listedModels("antigravity")).toEqual(paid);
+    const id = "0193eeee-0000-7000-8000-0000000000d5";
+    const begun = await m.begin("antigravity", id);
+    const aad = accountCodeAad(id, ORG);
+    await m.code(id, aad, await sealSecret(begun.publicKey as string, "4/0AbCdEf-code", aad));
+    await waitFor(() => m.status(id).state === "done", 5000);
+    // Its own look lists fewer: the longer list leads, then what only the new account lists.
+    const flash = { id: "gemini-3.8-flash-medium", label: "Gemini 3.8 Flash (Medium)" };
+    expect(m.listedModels("antigravity")).toEqual([...paid, flash]);
+    const again = new AccountManager({ root });
+    managers.push(again);
+    expect(again.listedModels("antigravity")).toEqual([...paid, flash]);
+    // A removed account's models go with its folder.
+    rmSync(path.join(root, "antigravity", other), { recursive: true, force: true });
+    expect(again.listedModels("antigravity")).toEqual([
+      { id: "gemini-4-argon-high", label: "Gemini 4 Argon (High)" },
+      flash,
+    ]);
   },
   20_000,
 );

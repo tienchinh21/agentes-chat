@@ -25,6 +25,7 @@ import {
   iphoneRestartOf,
   iphoneSteps,
   linkPhase,
+  mayChangeTasks,
   mayTakePhone,
   NO_IPHONE_RESTART,
   narrowsAudience,
@@ -36,6 +37,9 @@ import {
   screenGesture,
   statusDetail,
   statusPill,
+  statusSentence,
+  taskChoices,
+  taskLimitLine,
   waitEndedText,
   waitText,
   wifiHosts,
@@ -97,6 +101,24 @@ const computer = (c: Partial<ComputerDevice>): ComputerDevice => ({
   ...c,
 });
 
+describe("tasks at once", () => {
+  test("a busy computer says its limit and where it changes; its owner changes it, an admin only on nobody's", () => {
+    const busy = computer({ status: { kind: "busy", running: 5, max: 5 }, maxTasks: 5 });
+    expect(taskLimitLine(t, busy, true)).toBe("Tasks at once here: 5. Change it below.");
+    expect(taskLimitLine(t, busy, false)).toBe("Tasks at once here: 5. The person who connected it can change that.");
+    expect(taskLimitLine(t, { ...busy, maxTasks: null, status: { kind: "busy", running: 3, max: 3 } }, true)).toBe(
+      "Tasks at once here: 3. Update its app to change that from here.",
+    );
+    expect(taskLimitLine(t, computer({}), true)).toBeNull();
+    expect(mayChangeTasks(busy, "u-sam", false)).toBe(true);
+    expect(mayChangeTasks(busy, "u-ana", true)).toBe(false);
+    expect(mayChangeTasks({ ...busy, ownerUserId: null }, "u-ana", true)).toBe(true);
+    expect(mayChangeTasks({ ...busy, machineKind: "managed", ownerUserId: null }, "u-ana", true)).toBe(false);
+    expect(taskChoices(7)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 16, 20]);
+    expect(taskChoices(4)).toHaveLength(11);
+  });
+});
+
 describe("status words", () => {
   test("the pill says the state, the detail the rest", () => {
     const inUse = {
@@ -121,6 +143,20 @@ describe("status words", () => {
       statusDetail(t, "en-US", { kind: "offline", lastSeenAt: null, withHost: true }, { host: "Ana's iMac" }),
     ).toBe("with Ana's iMac");
     expect(statusDetail(t, "en-US", { kind: "ready" })).toBeNull();
+  });
+
+  test("a computer offline for a known cause: the row says why, its page adds the one way out", () => {
+    const off = (cause: "unresponsive" | "stopped" | "dropped") =>
+      ({ kind: "offline", lastSeenAt: at(14, 2), cause }) as const;
+    expect(statusDetail(t, "en-US", off("unresponsive"), { now: NOW })).toBe("stopped answering at 2:02 PM");
+    expect(statusDetail(t, "en-US", off("stopped"), { now: NOW })).toBe("runner stopped at 2:02 PM");
+    expect(statusDetail(t, "en-US", off("dropped"), { now: NOW })).toBe("connection dropped at 2:02 PM");
+    expect(statusSentence(t, "en-US", off("stopped"), { now: NOW })).toBe(
+      "The runner stopped at 2:02 PM. Start it again, or run `agentes-runner doctor` on it to see why.",
+    );
+    expect(statusSentence(t, "en-US", off("unresponsive"), { now: NOW })).toContain(
+      "Run `agentes-runner doctor` on it.",
+    );
   });
 });
 

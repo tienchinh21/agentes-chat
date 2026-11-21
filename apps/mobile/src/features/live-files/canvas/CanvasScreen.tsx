@@ -32,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import {
+  besideFold,
   EmptyState,
   Glass,
   type HeaderMenuItem,
@@ -42,6 +43,7 @@ import {
   PressScale,
   SCREEN_X,
   Text,
+  useFoldRoom,
   usePulse,
   useReducedMotion,
   useTheme,
@@ -165,6 +167,10 @@ function LiveCanvas({
   const failed = useErrorToast();
   const reduced = useReducedMotion();
   const lineRoom = useTalkLineRoom();
+  // Folded like a book (ADR 0212), the tools and the pen's bar over them stand beside the fold, together, instead of
+  // in its middle.
+  const foldSide = useFoldRoom();
+  const beside = foldSide ? besideFold(foldSide) : null;
   const doc = room.doc;
   const readOnly = live.mode !== "edit";
   const plane = useRef<PlaneHandle>(null);
@@ -615,7 +621,7 @@ function LiveCanvas({
             </GlassBar>
           </Animated.View>
         ) : null}
-        <View style={[styles.dockAt, { bottom: lineRoom }]} pointerEvents="box-none">
+        <View style={[styles.dockAt, { bottom: lineRoom }, beside]} pointerEvents="box-none">
           <View style={Platform.OS === "android" ? { borderRadius: DOCK_H / 2, boxShadow: shadows.e2 } : undefined}>
             <Glass liquid interactive={false} intensity={70} style={[styles.dock, { borderColor: c.line2 }]}>
               <View
@@ -675,7 +681,11 @@ function LiveCanvas({
           </View>
         </View>
         {tool === "pen" && !readOnly ? (
-          <Animated.View {...fade} style={[styles.dockAt, { bottom: lineRoom + DOCK_H + 8 }]} pointerEvents="box-none">
+          <Animated.View
+            {...fade}
+            style={[styles.dockAt, { bottom: lineRoom + DOCK_H + 8 }, beside]}
+            pointerEvents="box-none"
+          >
             <PenBar pen={pen} onPen={setPen} />
           </Animated.View>
         ) : null}
@@ -709,6 +719,7 @@ function PenBar({ pen, onPen }: { pen: PenStyle; onPen: (next: PenStyle) => void
             accessibilityLabel={t(`live.canvas.pen.${tool}`)}
             accessibilityState={{ selected: pen.tool === tool }}
             style={[styles.penTool, pen.tool === tool && { backgroundColor: c.plate }]}
+            contentStyle={styles.penToolIn}
           >
             <Icon name={tool === "pen" ? "pen" : "marker"} size={20} color={c.ink} />
           </PressScale>
@@ -726,6 +737,7 @@ function PenBar({ pen, onPen }: { pen: PenStyle; onPen: (next: PenStyle) => void
               accessibilityLabel={t(`live.canvas.inks.${ink.key}`)}
               accessibilityState={{ checked: on }}
               style={styles.penSwatchAt}
+              contentStyle={styles.penSwatchAtIn}
             >
               <View
                 style={[styles.penSwatch, { backgroundColor: shown }, on && [styles.penOn, { borderColor: c.ink }]]}
@@ -743,6 +755,7 @@ function PenBar({ pen, onPen }: { pen: PenStyle; onPen: (next: PenStyle) => void
             accessibilityLabel={t(`live.canvas.pen.sizes.${size}`)}
             accessibilityState={{ checked: pen.size === size }}
             style={[styles.penSize, pen.size === size && { backgroundColor: c.plate }]}
+            contentStyle={styles.penSizeIn}
           >
             <Text variant="footnote" style={styles.penSizeWord}>
               {t(`live.canvas.pen.short.${size}`)}
@@ -818,6 +831,7 @@ function DockButton({
       accessibilityLabel={label}
       accessibilityState={{ selected: on, disabled }}
       style={[styles.dockButton, on && { backgroundColor: c.ink }, disabled && styles.off]}
+      contentStyle={styles.dockButtonIn}
     >
       <Icon name={icon} size={22} color={on ? c.bg : c.ink} />
     </PressScale>
@@ -858,6 +872,7 @@ function BarButton({
       accessibilityRole="button"
       accessibilityLabel={label}
       style={[styles.barButton, iconOnly && styles.barIcon]}
+      contentStyle={[styles.barButtonIn, iconOnly && styles.barIconIn]}
     >
       {face ? <Face who={{ type: "agent", id: face }} size={20} live={false} /> : null}
       {icon ? <Icon name={icon} size={18} color={c.ink} /> : null}
@@ -916,15 +931,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   dockRow: { flexDirection: "row", alignItems: "center" },
-  dockButton: {
-    width: DOCK_BUTTON,
-    height: DOCK_BUTTON,
-    borderRadius: DOCK_BUTTON / 2,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  dockButton: { width: DOCK_BUTTON, height: DOCK_BUTTON, borderRadius: DOCK_BUTTON / 2 },
+  dockButtonIn: { alignItems: "center", justifyContent: "center" },
   off: { opacity: 0.4 },
-  barAt: { position: "absolute", top: 12, left: 12, right: 12, alignItems: "flex-start" },
+  barAt: { position: "absolute", top: 12, left: SCREEN_X, right: SCREEN_X, alignItems: "flex-start" },
   bar: {
     flexDirection: "row",
     alignItems: "center",
@@ -935,24 +945,21 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     overflow: "hidden",
   },
-  barButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    minHeight: 40,
-    minWidth: 44,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-  },
-  barIcon: { paddingHorizontal: 0, justifyContent: "center" },
+  barButton: { minHeight: 40, minWidth: 44, paddingHorizontal: 10, borderRadius: 12 },
+  barButtonIn: { flexDirection: "row", alignItems: "center", gap: 6 },
+  barIcon: { paddingHorizontal: 0 },
+  barIconIn: { justifyContent: "center" },
   barWords: { fontWeight: "600" },
   hint: { paddingHorizontal: 10, paddingVertical: 8 },
   penRow: { flexDirection: "row", alignItems: "center" },
-  penTool: { width: 40, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
-  penSwatchAt: { width: 30, height: 44, alignItems: "center", justifyContent: "center" },
+  penTool: { width: 40, height: 44, borderRadius: 12 },
+  penToolIn: { alignItems: "center", justifyContent: "center" },
+  penSwatchAt: { width: 30, height: 44 },
+  penSwatchAtIn: { alignItems: "center", justifyContent: "center" },
   penSwatch: { width: 22, height: 22, borderRadius: 11 },
   penOn: { borderWidth: 2 },
-  penSize: { width: 30, height: 44, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  penSize: { width: 30, height: 44, borderRadius: 10 },
+  penSizeIn: { alignItems: "center", justifyContent: "center" },
   penSizeWord: { fontWeight: "600" },
   divider: { width: StyleSheet.hairlineWidth, height: 24, marginHorizontal: 4 },
   swatch: { width: 24, height: 24, borderRadius: 6, borderWidth: StyleSheet.hairlineWidth },

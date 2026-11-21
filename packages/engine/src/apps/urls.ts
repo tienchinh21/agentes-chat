@@ -126,7 +126,7 @@ export async function reachableFromInternet(
   } catch {
     return false;
   }
-  const resolved = await publicHostAddress(host, resolve);
+  const resolved = await publicHostAddress(host, resolve, { internet: true });
   if (!resolved.ok && resolved.reason === "unreachable") return true;
   reachable.set(publicUrl, resolved.ok);
   return resolved.ok;

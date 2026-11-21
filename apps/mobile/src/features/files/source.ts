@@ -43,6 +43,18 @@ const localCopies = new Map<string, string>();
 export const rememberLocalCopy = (id: string, uri: string) => localCopies.set(id, uri);
 
 /**
+ * Pictures already drawn once in this run, by their cache key: one coming back (its row mounted again as the list
+ * scrolls, the conversation opened again) shows at once from the cache, where a fade each time read as a flicker.
+ */
+const drawn = new Set<string>();
+/** A picture's fade in, its first time only (`drawn`). */
+export const pictureFade = (key: string) => (drawn.has(key) ? 0 : 160);
+/** Its `onLoad`: drawn once, it never fades in again in this run. */
+export const pictureDrawn = (key: string) => {
+  drawn.add(key);
+};
+
+/**
  * The link to show a file; a file this phone just sent, from its own copy. Shared and refreshed before it expires, for
  * a picture (its cache entry is `id@version`, whatever the link). `once`: read when the view opens and kept while it
  * stays, for what a new link would start over (a video back at 0:00, a PDF at its first page): a link of the view's
@@ -133,6 +145,20 @@ export async function localCopy(
       : await remote(api, orgId, a.id, a.shownVersion);
   const done = await File.downloadFileAsync(r.uri, file, { headers: r.headers, idempotent: true });
   return { uri: done.uri, source };
+}
+
+/**
+ * A PDF's copy in the cache for the system's renderer, which reads a file, never a link (`PdfPages`): one per version,
+ * kept while the cache keeps it, so the PDF opens again without downloading it.
+ */
+export async function pdfCopy(api: ApiClient, orgId: string, a: ArtifactDetail): Promise<string> {
+  const dir = new Directory(Paths.cache, "pdf");
+  dir.create({ intermediates: true, idempotent: true });
+  const file = new File(dir, `${safeFileName(a.id)}-${a.shownVersion}.pdf`);
+  if (file.exists && (file.size ?? 0) > 0) return file.uri;
+  const r = await remote(api, orgId, a.id, a.shownVersion);
+  const done = await File.downloadFileAsync(r.uri, file, { headers: r.headers, idempotent: true });
+  return done.uri;
 }
 
 /** The system share sheet with the real file (Salvar imagem, Salvar em Arquivos, other apps). */

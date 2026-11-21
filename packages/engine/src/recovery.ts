@@ -8,6 +8,7 @@ import { onConsultedRunFinished } from "./consultations";
 import { ValidationError } from "./errors";
 import { publishChannelEvent, publishMessageCreated } from "./events";
 import type { Transcript } from "./executor";
+import { queueLiveActivityRun } from "./live-activity-queue";
 import { getMessage, insertMessage, messageView } from "./messages";
 import { enqueue } from "./outbox";
 import { closeRoutineRun } from "./routine-ledger";
@@ -22,6 +23,7 @@ import {
   shownStatusSql,
   transitionRun,
 } from "./runs";
+import { linesSaid, withoutSaidNow } from "./say-now";
 import { cancelSecretRequests, publishSecret, syncSecretMessage } from "./secrets";
 import { USAGE_WAIT_CODES } from "./usage-pause";
 import { endWork } from "./works";
@@ -270,15 +272,19 @@ async function failInterrupted(deps: { db: Database; pubsub?: PubSub }, run: Age
   const { db } = deps;
   const threadId = replyThreadOf(run);
   const t = (run.transcript ?? {}) as StoredTranscript;
-  // A reply held for its wording is a finished answer: it wins over the working text its rewrite wrote since.
+  // A reply held for its wording is a finished answer: it wins over the working text its rewrite wrote since. Never
+  // the line it said on the way again (`say_now`, ADR 0207).
   const said =
     t.heldWording ||
-    (t.messages ?? [])
-      .slice(t.postedUpTo ?? 0)
-      .filter((m) => m.role === "assistant")
-      .map((m) => textOf(m.content).trim())
-      .filter(Boolean)
-      .join("\n\n");
+    withoutSaidNow(
+      (t.messages ?? [])
+        .slice(t.postedUpTo ?? 0)
+        .filter((m) => m.role === "assistant")
+        .map((m) => textOf(m.content).trim())
+        .filter(Boolean)
+        .join("\n\n"),
+      await linesSaid(db, run).catch(() => []),
+    );
   const note = `_${INTERRUPTED_BY_RESTART}. Ask again to continue._`;
   const result = await db.transaction(async (tx) => {
     if (!(await claimStale(tx, run.id, at))) return null;
@@ -340,8 +346,10 @@ async function failInterrupted(deps: { db: Database; pubsub?: PubSub }, run: Age
   const where = { channelId: run.channelId, threadId, agentId: run.agentId, runId: run.id };
   const bg = run.background ? { background: true as const } : {};
   if (deps.pubsub && result.message) await publishMessageCreated(deps.pubsub, messageView(result.message));
-  // Its worker died: its line went with the heartbeat already (ADR 0084 §11); the apps refresh now.
+  // Its worker died: its line went with the heartbeat already (ADR 0084 §11); the apps refresh now, and so does the
+  // Live Activity of the person behind it (ADR 0210).
   await announceAgentStatus(deps.pubsub, run.orgId, run.agentId).catch(() => {});
+  await queueLiveActivityRun(db, run).catch(() => {});
   await publishChannelEvent(deps.pubsub, {
     type: "agent.run",
     ...where,
@@ -398,7 +406,7 @@ export async function activeRunsIn(db: Database, orgId: string, channelId: strin
   }>(
     // Asking its computer from the line (`computerWaitOf`) it still waits: no "thinking" row for the ask.
     await db.execute(sql`select r.id, r.agent_id, ${shownStatusSql} as status, r.thread_root_id, r.trigger_message_id, r.started_at,
-        r.heartbeat_at, r.working_since, r.created_at, c.kind, array_to_json(r.pending_message_ids) as pending,
+        r.heartbeat_at, r.working_since, r.created_at, c.kind, array_to_json(r.pending_message_ids || r.after_message_ids) as pending,
         (r.background or r.work_id is not null) as background
       from ${agentRuns} r join ${channels} c on c.id = r.channel_id
       where r.org_id = ${orgId}::uuid and r.channel_id = ${channelId}::uuid
@@ -420,7 +428,8 @@ export async function activeRunsIn(db: Database, orgId: string, channelId: strin
     // How long the work it is doing now has taken (`agent_runs.working_since`, else since it was created), as a
     // length and not a time: the app counts on from it by its own clock, whatever that clock says.
     workingMs: Math.max(0, now - new Date(r.working_since ?? r.created_at).getTime()),
-    // Sent while it works and not read yet ("lê na próxima pausa"); the rest it already read.
+    // Sent while it works and not read yet ("lê na próxima pausa"); the rest it already read. A separate request left
+    // for after the task (`after_message_ids`) is unread too: a reload never says the agent read it.
     pendingMessageIds: pendingIds(r.pending),
     // A routine's work, or long work (ADR 0121): it holds no conversation's working row.
     background: r.background === true || r.background === "t",

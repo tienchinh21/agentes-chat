@@ -7,12 +7,12 @@ import {
   ownSignInName,
   signInOf,
 } from "@agenteschat/client/lib/ai-accounts";
+import { managesAgent } from "@agenteschat/client/lib/audience";
 import { brainLine, thinksWith } from "@agenteschat/client/lib/brain";
 import { advancedContents, viewSpeedFits } from "@agenteschat/client/lib/brain-advanced";
 import { computerNameOf } from "@agenteschat/client/lib/computer";
 import { agentGrammar } from "@agenteschat/client/lib/grammar";
 import { aiChoiceOf, planOfKind } from "@agenteschat/client/lib/no-ai";
-import { can } from "@agenteschat/client/lib/permissions";
 import { modelLimitText } from "@agenteschat/client/lib/plan-usage";
 import { brainPlan, geminiPersonal, isPlanId, planFreeHint, planOf } from "@agenteschat/client/lib/plans";
 import { apiProviderOf, isAuto, providerLabel } from "@agenteschat/client/lib/providers";
@@ -31,11 +31,13 @@ import {
   GroupedHeader,
   GroupedList,
   GroupedRow,
+  insetPastFold,
   motion,
   ProviderLogo,
   SCREEN_X,
   SkeletonList,
   Text,
+  useFoldRoom,
   useReducedMotion,
   useTheme,
 } from "@/ui";
@@ -98,8 +100,8 @@ export function AgentAiScreen({ agentId }: { agentId: string }) {
   const name = agent?.name ?? "";
   const g = agentGrammar(name);
   const ownerFirst = agent?.ownerUserId ? dir.memberById.get(agent.ownerUserId)?.name.split(" ")[0] : undefined;
-  // As on the web: its owner and admins load it, members don't.
-  const allowed = (meId !== null && agent?.ownerUserId === meId) || can(org, "manage_agents");
+  // As on the web: its owner and who manages it (the server's `canManage`) load it, members don't.
+  const allowed = (meId !== null && agent?.ownerUserId === meId) || managesAgent(agent);
   const brain = useAgentBrain(orgId, agentId, allowed);
   const { pending, save } = useSaveBrain(agentId);
   // Looking at the plan: its usage is looked up again (it comes back as `machine.updated`).
@@ -357,7 +359,8 @@ const DOCK_OUT = 28;
 
 /**
  * The effort, floating over the model list in the thumb's reach, whatever is scrolled under it. It slides away with
- * "Automático", which picks the effort too.
+ * "Automático", which picks the effort too. Folded like a book, the ramp keeps to the half past the fold, so its thumb
+ * never slides through the curve (ADR 0212).
  */
 function EffortDock({
   agentId,
@@ -373,6 +376,7 @@ function EffortDock({
   const { colors, shadows } = useTheme();
   const reduced = useReducedMotion();
   const insets = useSafeAreaInsets();
+  const foldSide = useFoldRoom();
   const dir = useDirectory();
   const { orgId } = useOrg();
   const view = useAgentBrain(orgId, agentId, true, false, scope).data;
@@ -395,7 +399,12 @@ function EffortDock({
         height.set(e.nativeEvent.layout.height);
         onHeight(e.nativeEvent.layout.height);
       }}
-      style={[styles.dock, { bottom: insets.bottom + 8, boxShadow: shadows.e2 }, slid]}
+      style={[
+        styles.dock,
+        { bottom: insets.bottom + 8, boxShadow: shadows.e2 },
+        foldSide && insetPastFold(foldSide, SCREEN_X),
+        slid,
+      ]}
     >
       <Glass liquid intensity={70} style={[styles.dockGlass, { borderColor: colors.line2 }]}>
         <EffortRamp

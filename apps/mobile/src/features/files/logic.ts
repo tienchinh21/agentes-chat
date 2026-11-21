@@ -1,5 +1,5 @@
 import type { ArtifactDetail, ArtifactKind } from "@agenteschat/client";
-import { fileIcon, previewKind, previewType } from "@agenteschat/client/lib/files";
+import { extensionOf, fileIcon, isMarkdownFile, previewKind, previewType } from "@agenteschat/client/lib/files";
 import { filePath } from "@agenteschat/client/lib/message-links";
 import { type LiveScreen, liveRoute, opensLive, type PhoneLiveKind } from "../live-files/routes";
 
@@ -65,7 +65,6 @@ const VIDEO_TYPES = new Set(["video/mp4", "video/quicktime", "video/x-m4v", "vid
 export const VIDEO_EXT = new Set(["mp4", "mov", "m4v", "webm"]);
 /** Names that say "picture": while the details load, and when the stored type doesn't (an upload typed as bytes). */
 export const IMAGE_EXT = new Set(["png", "jpg", "jpeg", "gif", "webp", "heic", "heif"]);
-const MARKDOWN_EXT = new Set(["md", "markdown", "mdx"]);
 const TEXT_EXT = new Set(["txt", "log", "csv", "tsv", "json", "yml", "yaml", "toml", "xml", "ini", "env"]);
 
 /** Non-file artifacts: the extension their download gets (as the server names them). */
@@ -98,11 +97,7 @@ const KIND_TYPE: Record<Exclude<ArtifactKind, "file">, FileTypeKey> = {
   canvas: "canvas",
 };
 
-/** "relatorio.final.PDF" → "pdf" ("" without one). */
-export function extensionOf(name: string): string {
-  const m = /\.([a-z0-9]{1,8})$/i.exec(name.trim());
-  return m?.[1]?.toLowerCase() ?? "";
-}
+export { extensionOf, isCodeName } from "@agenteschat/client/lib/files";
 
 /** The tile's label: "MD", "PDF", "JPEG" (4 letters at most); "" → the caller shows an icon. */
 export const extLabel = (ext: string) => ext.slice(0, 4).toUpperCase();
@@ -146,7 +141,7 @@ export function fileInfo(a: Pick<ArtifactDetail, "kind" | "title" | "content">):
     else if (office) view = office;
     // A page is shown as a page (its source isn't the point), before the text types it is one of.
     else if (mime === "text/html" || ext === "html" || ext === "htm") view = "html";
-    else if (MARKDOWN_EXT.has(ext) || mime === "text/markdown") view = "markdown";
+    else if (isMarkdownFile(name, mime)) view = "markdown";
     else if (TEXT_EXT.has(ext) || mime.startsWith("text/")) view = "text";
     return { name, view, type: fileType(name, mime, view), ext: extLabel(ext), size: c.size, mime };
   }

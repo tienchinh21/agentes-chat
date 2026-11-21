@@ -35,7 +35,14 @@ import { can, getMembership } from "../organizations";
 import { personWords, runReadOutsideById, UNASKED_DESTINATION, unaskedDestination } from "../outside";
 import { personBehindCall, wikiActorOfCall } from "../requester";
 import { isRightHandId, rightHandReader } from "../right-hand";
-import { agentSearchChannels, agentVisibleChannels, indexSource, searchForUser, searchVisible } from "../search";
+import {
+  agentSearchChannels,
+  agentVisibleChannels,
+  indexSource,
+  type QueryEmbedding,
+  searchForUser,
+  searchVisible,
+} from "../search";
 import { closedRefusal } from "../standing";
 import { noAgentText } from "../team";
 import type { ToolContext, ToolDefinition, ToolSource } from "../tools/types";
@@ -888,7 +895,7 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
     {
       name: "propose_instruction_change",
       description:
-        "When a person asks to change how agents work, propose it: your instructions (my_instructions), other agents' (agents: with their handles, all on one card), or what every agent should know now and later (org_context). Add a rule with change. To change or remove existing text, put the exact text in replaces and the new text in change (empty removes it). With target agents you can also give an agent a new role (roles) and turn an app on or off for it (access: a connected app by its name, or a built-in area such as browser:use; your own apps go through request_permission). When the person who asked may make the change and this turn read nothing from outside, it applies at once with Undo; else a person who may accepts it. Instructions: the agent's owner or someone who reviews memory. A role or an app: an admin who manages agents, or the agent's owner for an app only turned off. The org context: someone who reviews memory. Never tell the person only they can make the change: propose it. Not for routines: a change to what a routine does ('a rotina', 'when a new error comes in…') is `update_routine`.",
+        "When a person asks to change how agents work, propose it: your instructions (my_instructions), other agents' (agents: with their handles, all on one card), or what every agent should know now and later (org_context). Add a rule with change. To change or remove existing text, put the exact text in replaces and the new text in change (empty removes it). To rewrite them whole when the person asks, give the full new text in instructions, for yourself or one agent (read it first: read_agent). With target agents you can also give an agent a new role (roles) and turn an app on or off for it (access: a connected app by its name, or a built-in area such as browser:use; your own apps go through request_permission). When the person who asked may make the change and this turn read nothing from outside, it applies at once with Undo; else a person who may accepts it. Instructions: the agent's owner or someone who reviews memory. A role or an app: an admin who manages agents, or the agent's owner for an app only turned off. The org context: someone who reviews memory. Never tell the person only they can make the change: propose it. Not for routines: a change to what a routine does ('a rotina', 'when a new error comes in…') is `update_routine`.",
       scope: "memory:write",
       inputSchema: {
         type: "object",
@@ -903,6 +910,7 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
           },
           change: { type: "string", maxLength: 2000 },
           replaces: { type: "string", minLength: 1, maxLength: 2000 },
+          instructions: { type: "string", minLength: 3, maxLength: 50_000 },
           roles: {
             type: "array",
             maxItems: CARD_MAX_AGENTS,
@@ -943,6 +951,7 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
           const target = str(input.target);
           const change = str(input.change);
           const replaces = typeof input.replaces === "string" ? input.replaces : undefined;
+          const whole = typeof input.instructions === "string" ? input.instructions : undefined;
           const handles = Array.isArray(input.agents) ? input.agents.map(handleOf) : [];
           const roles = (Array.isArray(input.roles) ? input.roles : []) as { agent: string; role: string }[];
           const access = (Array.isArray(input.access) ? input.access : []) as {
@@ -955,7 +964,11 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
             return fail("agents, roles and access go with target agents.");
           if (target === "agents" && !changesText && roles.length === 0 && access.length === 0)
             return fail("Name the agents whose instructions change (agents), or give roles or access.");
-          if (changesText && replaces === undefined && change.trim().length < 3)
+          if (whole !== undefined && (change || replaces !== undefined))
+            return fail("instructions is the whole new text: leave change and replaces out.");
+          if (whole !== undefined && (target === "org_context" || handles.length > 1))
+            return fail("instructions rewrites the instructions of yourself or of one agent at a time.");
+          if (changesText && whole === undefined && replaces === undefined && change.trim().length < 3)
             return fail("change needs the rule to add (at least 3 characters).");
           const named = await agentsByHandle(ctx.db, ctx.orgId, [
             ...handles,
@@ -982,6 +995,7 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
             agentIds: target === "agents" ? handles.map(idOf) : undefined,
             change,
             replaces,
+            whole,
             roles: roles.map((r) => ({ agentId: idOf(r.agent), role: r.role })),
             access: lines.map((l) => ({ agentId: idOf(l.agent), lines: [l.line] })),
             rationale: str(input.reason),
@@ -1010,7 +1024,15 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
           return memoryResult(ctx, `${done}${made}; ${who}${left}`, {
             action: "proposed",
             itemId: first.id,
-            text: proposalSummary(replaces === undefined || change.trim() ? change : `− ${replaces}`, roles, lines),
+            text: proposalSummary(
+              whole !== undefined
+                ? cutText(whole, 200)
+                : replaces === undefined || change.trim()
+                  ? change
+                  : `− ${replaces}`,
+              roles,
+              lines,
+            ),
             requestedByUserId: requester,
             proposalId: first.id,
             proposalIds: proposals.map((p) => p.id),
@@ -1026,15 +1048,20 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
   return { name: "context", tools: async (ctx) => inWorkspaceWords(ctx.db, ctx.orgId, tools, personalWords(tools)) };
 }
 
-/** Who accepts a row the person who asked can't, for the agent to tell them (`deciders` in proposals.ts). */
+/**
+ * Who accepts a row the person who asked can't, for the agent to tell them (`deciders` in proposals.ts). Who edits the
+ * agent is its owner, who manages it and who its "Quem pode editar" names (ADR 0085 addendum of 2026-11-17).
+ */
 const decidedBy = (p: Proposal) =>
   p.target === "org_context"
     ? "someone who reviews memory (the org context)"
     : p.target === "agent_instructions"
-      ? "the agent's owner or someone who reviews memory (instructions)"
-      : ownerDecides(p)
-        ? "an admin who manages agents or the agent's owner (apps turned off)"
-        : `an admin who manages agents (${p.target === "agent_role" ? "a role" : "apps"})`;
+      ? "someone who edits the agent or reviews memory (instructions)"
+      : p.target === "agent_role"
+        ? "someone who edits the agent (a role)"
+        : ownerDecides(p)
+          ? "an admin who manages the agent or the agent's owner (apps turned off)"
+          : "an admin who manages the agent (apps)";
 
 /** Memory tools only act on a person's request in the current turn (never on tool, webhook or document text). */
 /** The person behind the run (`authority.ts`); null for a routine's work and unattended runs. */
@@ -1528,6 +1555,8 @@ export async function retrieveForRun(
     runId?: string;
     /** The holdout arm (`memoryArmOf`): its own items come in whatever the request, as before ADR 0167. */
     withOwn?: boolean;
+    /** `sharedQueryEmbedding` of `text`, shared with the run's wiki search. */
+    queryEmbedding?: () => Promise<QueryEmbedding>;
   },
 ): Promise<{ text: string; itemIds: string[]; matchedIds: string[] }> {
   const { db } = deps;
@@ -1635,6 +1664,7 @@ export async function retrieveForRun(
       kinds: ["context_item"],
       limit: 15,
       match: "any",
+      queryEmbedding: input.queryEmbedding,
     }).catch(() => []);
     const rank = new Map(hits.map((h, i) => [h.sourceId, i]));
     searched = (
@@ -1807,7 +1837,7 @@ export function pickDistinct(candidates: ContextItem[], known: string): ContextI
 }
 
 /** Tools whose calls say nothing about how a task was done. */
-const STEP_NOISE = ["search_context", "get_summary", "expand", "react", "ask_user", "save_how_to"];
+const STEP_NOISE = ["search_context", "get_summary", "expand", "react", "ask_user", "say_now", "save_how_to"];
 /** Words too common to tell one step from another (English and Portuguese). */
 const STEP_STOP_WORDS = new Set(
   "the and for from with that this you your what how com que para por uma dos das nos nas como sobre isso esse essa".split(

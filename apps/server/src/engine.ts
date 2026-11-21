@@ -38,6 +38,7 @@ import {
   createChatToolSource,
   createClaudeCodeBrain,
   createCoAuthorToolSource,
+  createCommentToolSource,
   createConnectorToolSource,
   createContextToolSource,
   createDashboardToolSource,
@@ -72,6 +73,7 @@ import {
   createReactToolSource,
   createReleaseAsksToolSource,
   createSandboxToolSource,
+  createSayNowToolSource,
   createScheduleToolSource,
   createSessionScreening,
   createSetStatusToolSource,
@@ -449,7 +451,7 @@ export function buildEngine(o: EngineOptions) {
         judge: context.judge,
       }),
       createFindAgentToolSource({ machines: machineHub }),
-      createUsageToolSource(),
+      createUsageToolSource({ pubsub: adapters.pubsub }),
       // What people saved for the agent in the Vault, found before it asks them (ADR 0144).
       createVaultToolSource(vault),
       // What the agent says it is doing, next to its name (ADR 0084).
@@ -466,6 +468,7 @@ export function buildEngine(o: EngineOptions) {
         rateLimiter: adapters.rateLimiter,
       }),
       createReactToolSource({ pubsub: adapters.pubsub }),
+      createSayNowToolSource({ pubsub: adapters.pubsub }),
       // A GIF or the agent's sticker when asked (ADR 0091): listed by the workspace's switches and the agent's.
       createMediaToolSource({ pubsub: adapters.pubsub, gifs: adapters.gifs ?? null }),
       // Long work goes to the background and reports back by itself, on every brain (ADR 0121).
@@ -487,6 +490,8 @@ export function buildEngine(o: EngineOptions) {
       // Spreadsheets, presentations and canvases agents edit with people, and images onto a canvas (ADR 0196, 0197);
       // pictures from the web are downloaded through the public-address guard (ADR 0196 §8).
       createLiveFileToolSource({ artifacts, live, images, web: { resolveHost: o.resolveHost } }),
+      // Comments on a picture, a video or a PDF, seen, made and resolved by the agent there (ADR 0208).
+      createCommentToolSource({ artifacts, pubsub: adapters.pubsub, judge: context.judge }),
       // Live blocks and votes in the agent's own conversation (ADR 0113).
       createBlockToolSource(artifacts),
       createChatToolSource({ pubsub: adapters.pubsub, artifacts, gif: createAgentGifPoster(adapters.gifs) }),
@@ -557,6 +562,7 @@ export function buildEngine(o: EngineOptions) {
         pubsub: adapters.pubsub,
         artifacts,
         publicUrl: config.PUBLIC_URL,
+        rateLimiter: adapters.rateLimiter,
       }),
       browserTools,
       // Reading the web, for every agent and run (ADR 0109): a search service when configured, else the agent's
@@ -842,6 +848,7 @@ export function buildEngine(o: EngineOptions) {
     gifs: adapters.gifs ?? null,
     log: o.log,
     maxToolTurns: config.AGENT_MAX_TOOL_TURNS,
+    signInConcurrency: config.CLAUDE_PLAN_CONCURRENCY,
     // A run started on a person's message reads what they add in the next seconds with it (ADR 0112).
     quietMs: o.routerQuietMs ?? ROUTER_QUIET_MS,
     // It ends early when the person isn't typing, and Claude's API reads the prompt into its cache meanwhile.

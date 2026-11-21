@@ -1,4 +1,4 @@
-import { usePinMessage, useToggleReaction } from "@agenteschat/client";
+import { usePinMessage, useResolveComment, useToggleReaction } from "@agenteschat/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { type Href, Link } from "expo-router";
 import {
@@ -121,7 +121,7 @@ const menuItemOf = (a: MessageAction): MenuItem => ({
 });
 
 /** The writes a menu's actions make, mounted with its actions (`MenuWrites`). */
-type Writes = Pick<MessageActionHands, "toggle" | "pin">;
+type Writes = Pick<MessageActionHands, "toggle" | "pin" | "resolve">;
 
 /**
  * A message's row under the system's menu, with the same actions as the app's sheet (`messageActionsOf`): the
@@ -165,6 +165,7 @@ export function MessageMenuFor({
         qc,
         toggle: (input, options) => writes.current?.toggle(input, options),
         pin: (input, options) => writes.current?.pin(input, options),
+        resolve: (input, options) => writes.current?.resolve(input, options),
       })
     : null;
   const items = actions ? actions.groups.map((g) => g.map(menuItemOf)) : null;
@@ -185,12 +186,13 @@ export function MessageMenuFor({
   );
 }
 
-/** The menu's two writes, mounted with its actions: a row nobody holds never subscribes to them. */
+/** The menu's writes, mounted with its actions: a row nobody holds never subscribes to them. */
 function MenuWrites({ messageId, into }: { messageId: string; into: RefObject<Writes | null> }) {
   const orgId = useOrgId();
   const toggle = useToggleReaction(orgId, messageId).mutate;
   const pin = usePinMessage(orgId).mutate;
-  useImperativeHandle(into, () => ({ toggle, pin }), [toggle, pin]);
+  const resolve = useResolveComment(orgId).mutate;
+  useImperativeHandle(into, () => ({ toggle, pin, resolve }), [toggle, pin, resolve]);
   return null;
 }
 

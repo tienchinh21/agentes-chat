@@ -54,7 +54,7 @@ const POWERS: [RolePermission, string][] = [
   ["create_agents", "create agents"],
   [
     "manage_agents",
-    "change any agent's settings (model, AI account, budget, owner, who may use it), archive and delete agents",
+    "change the settings (model, AI account, budget, owner, who may use it) of the agents they talk to and the ones with no owner (owners and administrators: every agent), archive and delete them",
   ],
   ["manage_channels", "manage channels (which agents are in them, how they reply)"],
   ["manage_connectors", "connect apps and MCP servers"],
@@ -62,7 +62,7 @@ const POWERS: [RolePermission, string][] = [
   ["invite_people", "invite people"],
   ["manage_members", "change people's roles and remove people"],
   ["manage_billing", "manage billing"],
-  ["manage_routines", "manage any agent's routines"],
+  ["manage_routines", "manage the routines of the agents they talk to"],
 ];
 
 /** At most this many agents, people and channels in the snapshot, like the team roster. */
@@ -363,8 +363,8 @@ export async function rightHandPrompt(
         : "- A whole team (a new workspace, 'start over', several agents at once): ONE propose_team card, never one propose_agent card per agent.",
       "- One new agent: propose_agent, with first_task when there is something to try it on.",
       personal
-        ? "- An agent's model, AI account, budget, owner, who talks to it, channels, reply mode, skills, name, look or who it reports to: propose_settings_change. Its instructions, role or apps: propose_instruction_change. Archiving or deleting agents, several at once ('start over'): propose_remove_agents, then propose the new agents."
-        : "- A teammate's model, AI account, budget, owner, who talks to it, channels, reply mode, skills, name, look or who it reports to: propose_settings_change. Its instructions, role or apps: propose_instruction_change. Archiving or deleting agents, several at once ('start over'): propose_remove_agents, then propose the new team.",
+        ? "- An agent's model, AI account, budget, owner, who talks to it, channels, reply mode, skills, name, look or who it reports to: propose_settings_change. Its instructions, role or apps: propose_instruction_change, after read_agent shows them whole. A skill's own text, whoever has it: load_skill, then update_skill. Archiving or deleting agents, several at once ('start over'): propose_remove_agents, then propose the new agents."
+        : "- A teammate's model, AI account, budget, owner, who talks to it, channels, reply mode, skills, name, look or who it reports to: propose_settings_change. Its instructions, role or apps: propose_instruction_change, after read_agent shows them whole. A skill's own text, whoever has it: load_skill, then update_skill. Archiving or deleting agents, several at once ('start over'): propose_remove_agents, then propose the new team.",
       "- At most 5 agent proposals in a row; ask one short question first when what they need is unclear.",
       "- Approvals waiting for them: offer_approvals (they decide each on the card; you never decide). Someone's ownership, roles or removal: propose_member_changes.",
       `- Anything else the app lets them do (roles, channels, invitations, their own settings, the workspace, stopping work${cardActions.map((a) => `, ${a}`).join("")}): workspace_action, find it first, and never say you can't before it does. Billing, deleting the workspace or their account, a password or ${removesKeys ? "adding a key" : "keys"}: offer_open_page.`,

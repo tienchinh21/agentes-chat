@@ -184,9 +184,10 @@ Usage:
 Every command takes --home <dir> (default $AGENTES_RUNNER_HOME or ~/.agentes-runner).
 On the server's own computer each organization has its own connection in <home>/orgs: folders and tools
 take --org <id | name> to pick one when it serves several.
-Config: <home>/config.json, mode 600. For background tasks, optional "maxConcurrentTasks" (default 3)
-and "taskMaxSeconds" (default 14400). For agents thinking with Claude Code, optional "brainIdleMinutes"
-(default 20 on Linux, 3 elsewhere) and "brainMaxProcesses" (default 2 on Linux, 1 elsewhere). Changes apply while it runs.
+Config: <home>/config.json, mode 600. For background tasks, optional "maxConcurrentTasks" (default: one
+per 2 CPUs and 2 GiB of memory past 4 GiB, at least 3; also in the app's computer page) and "taskMaxSeconds"
+(default 14400). For agents thinking with Claude Code, optional "brainIdleMinutes" (default 20 on Linux,
+3 elsewhere) and "brainMaxProcesses" (default 2 on Linux, 1 elsewhere). Changes apply while it runs.
 Background tasks keep running when the runner restarts. Their logs are in tasks/.
 Commands run as the user that runs the runner. Consider a dedicated OS user.`;
 

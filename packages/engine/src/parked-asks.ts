@@ -31,6 +31,7 @@ import { publishChannelEvent, publishMessageCreated } from "./events";
 import type { Transcript } from "./executor";
 import { cutText, fromNow, pgSafeJson, stringsOf } from "./format";
 import type { Judge } from "./judge";
+import { queueLiveActivityRun } from "./live-activity-queue";
 import { getMessage, insertMessage, type Message, messageView } from "./messages";
 import { notifyCatchUpClosed, notifyCatchUpClosedAsker } from "./notification-producers";
 import { openRequestsOf } from "./open-requests";
@@ -77,7 +78,8 @@ export const CLOSED_NOTE_CODE = "catch_up_closed";
  * already be answered here. One statement.
  */
 export async function scheduleParkedChecks(db: Executor, m: Message) {
-  if (m.deletedAt || m.meta.notice || m.meta.usageWait || m.meta.talker) return;
+  // A line before slow work (`say_now`, ADR 0207) answers nothing a waiting run asked.
+  if (m.deletedAt || m.meta.notice || m.meta.usageWait || m.meta.talker || m.meta.sayNow) return;
   if (m.authorType !== "person" && m.authorType !== "agent") return;
   const card = m.authorType === "agent" && Boolean(m.meta.questionId || m.meta.secretRequest || m.meta.browserHandoff);
   // One check per run and window, a whole window after the first message in it: the replies it brings come in.
@@ -305,6 +307,7 @@ async function closeParked(deps: ParkedDeps, run: AgentRun, r: Release): Promise
       passed: true,
     });
   await announceAgentStatus(deps.pubsub, run.orgId, run.agentId).catch(() => {});
+  await queueLiveActivityRun(db, run).catch(() => {});
   const line = lineMachineOf(run);
   if (line) await publishQueueChanged(deps.pubsub, run.orgId, line);
   // A note that also speaks for later turns waiting here is theirs now; this run's says why it didn't answer.

@@ -21,6 +21,7 @@ export { Button, type ButtonProps, type ButtonVariant } from "./Button";
 export { Card, type CardProps } from "./Card";
 export { Chip, type ChipProps } from "./Chip";
 export { CodeInput, type CodeInputProps } from "./CodeInput";
+export { CodeWords } from "./CodeWords";
 export {
   Composer,
   type ComposerMentionState,
@@ -40,6 +41,15 @@ export {
 } from "./EventPill";
 export { CLICK_IN, FADE_IN, FADE_OUT, RISE_IN } from "./entrances";
 export { type FilterItem, Filters, type FiltersProps } from "./Filters";
+export {
+  besideFold,
+  FOLD_GAP,
+  type FoldRoom,
+  insetPastFold,
+  padPastFold,
+  sidesPastFold,
+  type WindowFold,
+} from "./fold-room";
 export { Glass, type GlassProps, liquidHere } from "./Glass";
 export {
   GroupedField,
@@ -85,6 +95,7 @@ export {
   useNavigationTheme,
   usePushedOptions,
   useScrollUnderPushedOptions,
+  useSideInsets,
 } from "./navigation";
 export { OptionTile } from "./OptionTile";
 export { OPTION_ROW } from "./option-row";
@@ -99,6 +110,7 @@ export { Row, type RowProps } from "./Row";
 export { ROW_CARD_INSET, RowAction } from "./RowAction";
 export { CheckMark, Disclosure, MenuMark, ROW_MARK } from "./RowMarks";
 export { ROW_OUT_MS, RowPressable, type RowPressableProps } from "./RowPressable";
+export { type Corners, corners, insetCorners, RADIUS } from "./radius";
 export { CARD_PAD, GROUPED_ROW, SCREEN_X, SHEET_BAR, SHEET_GAP, SHEET_X, TOOL_H, TOUCH } from "./rhythm";
 export { roleMarkFit, roleMarkIcon } from "./role-mark";
 export { SearchField, type SearchFieldProps } from "./SearchField";
@@ -134,6 +146,7 @@ export {
 export { ToastHost, type ToastInput, useToast } from "./Toast";
 export { Toggle, type ToggleProps, ToggleSwitch } from "./Toggle";
 export { TOKEN_GAP, TOKEN_H, Token, type TokenProps, TokenWrap } from "./Token";
+export { DuoProvider, TwoPane, useFoldRoom, useWide, useWindowFold } from "./TwoPane";
 export { TextScaleProvider, useFontScale, useTextScale } from "./text-scale";
 export {
   type AppColors,

@@ -121,6 +121,7 @@ const KEPT = [
   "list_reminders",
   "list_routines",
   "load_skill",
+  "read_agent",
   "read_artifact",
   "read_conversation",
   "read_file",

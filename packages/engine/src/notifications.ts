@@ -21,6 +21,7 @@ import { decidableBySql } from "./approvals";
 import { NotFoundError, ValidationError } from "./errors";
 import { publishUserEvent } from "./events";
 import { cutText } from "./format";
+import { queueLiveActivity } from "./live-activity-queue";
 import type { PreviewMeta } from "./message-preview";
 import { noticeOn, noticePrefsOf, readNoticePrefs } from "./notice-prefs";
 import { listMemberships, requirePermission } from "./organizations";
@@ -1264,6 +1265,8 @@ export async function notificationCountsByOrg(
 }
 
 async function publishCounts(deps: NotificationDeps, orgId: string, userId: string) {
+  // What waits on them moved (a request made, answered, dismissed, snoozed): their phone's Live Activity too (ADR 0210).
+  await queueLiveActivity(deps.db, userId).catch(() => {});
   if (!deps.pubsub) return;
   const c = await countsOf(deps.db, orgId, userId, nowOf(deps)).catch(() => null);
   if (c)

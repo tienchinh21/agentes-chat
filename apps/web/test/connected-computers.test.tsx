@@ -213,6 +213,26 @@ describe("uploaded files in the Drive", () => {
     expect(dialog.querySelector("textarea")).toBeNull();
   });
 
+  test("a Markdown file reads as a document and a code file in a code card", async () => {
+    const api = createFakeApi(seedState());
+    const md = await api.artifacts.upload(
+      ORG_ID,
+      new File(["# Plano\n\nUm **passo** por vez"], "plano.md", { type: "text/markdown" }),
+    );
+    const ts = await api.artifacts.upload(ORG_ID, new File(["const total = 1;"], "soma.ts", { type: "text/plain" }));
+    await renderApp(`/org/${ORG_ID}/drive?artifact=${md.id}`, { api });
+    await settle(8);
+    let dialog = screen().getByRole("dialog", { name: "plano.md" });
+    expect(dialog.querySelector(".file-view__doc strong")?.textContent).toBe("passo");
+    expect(dialog.querySelector(".file-view__text")).toBeNull();
+    cleanup();
+    await renderApp(`/org/${ORG_ID}/drive?artifact=${ts.id}`, { api });
+    await settle(8);
+    dialog = screen().getByRole("dialog", { name: "soma.ts" });
+    expect(dialog.querySelector(".code-card .code-card__code")?.textContent).toBe("const total = 1;");
+    expect(dialog.querySelector(".file-view__text")).toBeNull();
+  });
+
   test("a JSON file reads formatted in a code card, the text as written one press away", async () => {
     const api = createFakeApi(seedState());
     const raw = '{"status":"ok","checks":[{"id":"db","ms":12}]}';
@@ -739,7 +759,7 @@ describe("the computer page: pause, folders and tools (ADR 0036)", () => {
     // "Pausado", "até 16:24" (past midnight the date comes first: "até 10 nov 00:08").
     const sameDay = new Date(until).toDateString() === new Date().toDateString();
     const line = head.querySelector(".dv-statusline")?.textContent ?? "";
-    expect(line).toContain("Pausado");
+    expect(head.querySelector(".dv-headchips")?.textContent).toContain("Pausado");
     expect(line).toContain(sameDay ? `até ${time}` : "até ");
     expect(line).toContain(time);
     expect(head.textContent).toContain("Pausado no próprio computador por quem o conectou.");

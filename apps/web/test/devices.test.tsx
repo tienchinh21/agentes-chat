@@ -164,6 +164,57 @@ describe("Settings › Devices", () => {
     expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/settings/devices/phones/${PIXEL}`);
   });
 
+  test("a computer's page: its system at a glance; its size and toolchains behind Details, closed", async () => {
+    await open(`/org/${ORG_ID}/settings/devices/${MAC}`);
+    const card = screen().getByRole("heading", { name: "Sam's MacBook Pro" }).closest(".ac-card") as HTMLElement;
+    const glance = card.querySelector(":scope > .dv-facts") as HTMLElement;
+    expect([...glance.querySelectorAll("dt")].map((d) => d.textContent)).toEqual(["System"]);
+    const more = card.querySelector("details.ac-disclosure") as HTMLDetailsElement;
+    expect(more.open).toBe(false);
+    expect(more.querySelector("summary")?.textContent).toBe("Details");
+    expect([...more.querySelectorAll(".dv-facts dt")].map((d) => d.textContent)).toEqual([
+      "CPU",
+      "Memory",
+      "Toolchains found",
+    ]);
+  });
+
+  test("a busy computer's page says its tasks at once and where that changes, for its owner or anyone else", async () => {
+    await open(`/org/${ORG_ID}/settings/devices/${BUILD_PC}`);
+    expect(screen().getByText("Tasks at once here: 1. The person who connected it can change that.")).toBeTruthy();
+    cleanup();
+    await open(`/org/${ORG_ID}/settings/devices/${MAC}`, (devices) => {
+      const list = acmeDevices();
+      devices.set({
+        ...list,
+        devices: list.devices.map((d) =>
+          d.id === MAC ? { ...d, status: { kind: "busy", running: 1, max: 1 }, maxTasks: 1 } : d,
+        ),
+      });
+    });
+    expect(screen().getByText("Tasks at once here: 1. Change it below.")).toBeTruthy();
+    expect(screen().getByRole("combobox", { name: "Tasks at once" })).toBeTruthy();
+  });
+
+  test("a computer's phones: each state a pill alone, its detail in its tip; one that needs me opens its fix", async () => {
+    await open(`/org/${ORG_ID}/settings/devices/${MAC}`);
+    const list = screen().getByRole("list", { name: "Phones on this computer" });
+    expect(list.querySelector(".dv-row__detail")).toBeNull();
+    const [pixel, iphone] = [...list.querySelectorAll(".dv-row")] as HTMLElement[];
+    const used = pixel?.querySelector(".dv-status-tip") as HTMLElement;
+    expect(used.tagName).toBe("SPAN");
+    expect(used.textContent).toMatch(/^In use by Lia\s*for Rui since /);
+    await act(async () => {
+      fireEvent.keyDown(document.body, { key: "Tab" });
+      used.focus();
+    });
+    expect(document.querySelector(".ac-tip")?.textContent).toMatch(/^for Rui since /);
+    const fix = iphone?.querySelector("button.dv-status-tip") as HTMLButtonElement;
+    expect(fix.textContent).toBe("Needs youTurn on Developer Mode");
+    await click(fix);
+    expect(screen().getByRole("dialog", { name: "Connect an iPhone" })).toBeTruthy();
+  });
+
   test("Let it join, from the list: name and who can use it, then the server lets it in", async () => {
     const { state } = await open(`/org/${ORG_ID}/settings/devices`);
     const ask = screen().getByRole("list", { name: "Asking to join" });
@@ -697,7 +748,7 @@ describe("Connect a device", () => {
 
     await show(iphoneAs({ kind: "needs_you", reason: "ui_not_authorized" }));
     expect(step()?.textContent).toContain("Turn on UI Automation");
-    expect(step()?.textContent).toContain("The iPhone refused the test helper's taps. Unlock it");
+    expect(step()?.textContent).toContain("Agents see the iPhone's screen, but iOS refuses their taps.");
 
     await show(iphoneAs({ kind: "needs_you", reason: "xcode_too_old" }, {}, { xcodeSdk: "26.2" }));
     expect(step()?.textContent).toContain(
@@ -946,8 +997,9 @@ describe("iPhones over Wi-Fi", () => {
 describe("A device's page", () => {
   test("a phone in use: Stop, and who can use it", async () => {
     const { state } = await open(`/org/${ORG_ID}/settings/devices/phones/${PIXEL}`);
+    // The pill sits in the header's chips, after its owner's; the line under them says the rest.
+    expect(document.querySelector(".dv-headchips")?.textContent).toContain("In use by Lia");
     const line = document.querySelector(".dv-statusline");
-    expect(line?.textContent).toContain("In use by Lia");
     expect(line?.textContent).toContain("Recording a test video");
     await click(within(line as HTMLElement).getByRole("button", { name: "Stop" }));
     expect(calls(state, "devices.stopPhone")[0]?.args).toEqual([ORG_ID, PIXEL]);
@@ -1015,6 +1067,40 @@ describe("A device's page", () => {
   test("an iPhone follows its Mac", async () => {
     await open(`/org/${ORG_ID}/settings/devices/phones/${IPHONE}`);
     expect(document.querySelector(".settings-rows")?.textContent).toContain("Same as Sam's MacBook Pro");
+  });
+
+  test("a brought computer offline for a known cause: its way out names the command as code", async () => {
+    const app = await open(`/org/${ORG_ID}/settings/devices/${IMAC}`, (devices) => {
+      const list = acmeDevices();
+      const imac = list.devices.find((d) => d.id === IMAC);
+      if (imac?.status.kind !== "offline") throw new Error("fixture");
+      imac.status = { ...imac.status, cause: "unresponsive" };
+      devices.set(list);
+    });
+    const line = document.querySelector(".dv-statusline__text");
+    expect(line?.textContent).toContain("Run agentes-runner doctor on it.");
+    expect(line?.querySelector("code.ac-inlinecode")?.textContent).toBe("agentes-runner doctor");
+    // The longest translation keeps the command whole, with its own backticks never shown.
+    await showIn(app.services, "ru");
+    await settle(4);
+    const ru = document.querySelector(".dv-statusline__text");
+    expect(ru?.querySelector("code.ac-inlinecode")?.textContent).toBe("agentes-runner doctor");
+    expect(ru?.textContent).not.toContain("`");
+    (globalThis as { geometrySnapshot?: () => void }).geometrySnapshot?.();
+  });
+
+  test("a computer's typed name in the line stays as typed: its backticks and asterisks mark nothing", async () => {
+    const name = "Ana's `iMac` **<b>2</b>**";
+    await open(`/org/${ORG_ID}/settings/devices/phones/p-ana-iphone`, (devices) => {
+      const list = acmeDevices();
+      const imac = list.devices.find((d) => d.id === IMAC);
+      if (!imac) throw new Error("fixture");
+      imac.name = name;
+      devices.set(list);
+    });
+    const line = document.querySelector(".dv-statusline__text");
+    expect(line?.textContent).toContain(`${name} is offline.`);
+    expect(line?.querySelector("code, b")).toBeNull();
   });
 
   test("spill-over on someone's computer: an admin may turn it off, never on", async () => {

@@ -120,6 +120,8 @@ export const MULTIPART_PATHS = [
   /\/organizations\/[^/]+\/artifacts(\/[^/]+)?\/files$/,
   // A picture dropped on a live file (ADR 0196 §8).
   /\/organizations\/[^/]+\/artifacts\/[^/]+\/assets$/,
+  // The app's picture of the place a comment points at in a picture, a video or a PDF (ADR 0208).
+  /\/organizations\/[^/]+\/artifacts\/[^/]+\/marks$/,
   /\/organizations\/[^/]+\/imports\/files$/,
   /\/organizations\/[^/]+\/channels\/[^/]+\/voice$/,
   /\/feedback\/files$/,

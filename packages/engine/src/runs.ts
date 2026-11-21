@@ -1,11 +1,16 @@
-import { and, type Executor, eq, type SQL, schema, sql } from "@agenteschat/db";
+import { and, type Executor, eq, notInArray, type SQL, schema, sql } from "@agenteschat/db";
 import { PROVIDERS, type ProviderCause, ProviderError, providerCause } from "@agenteschat/providers";
 import { wakeLineOfRun } from "./approval-order";
-import { BRAIN_NAMES, type ComputerBrainKind, planName } from "./brains/types";
+import { BRAIN_NAMES, type ComputerBrainKind, planName, SYSTEM_REFUSED } from "./brains/types";
+import { kickSignInLine } from "./computer-queue";
 import { cutText, pgSafeJson } from "./format";
 import { recordRunFinished } from "./operator-events";
 import { standingErrorDetail } from "./standing";
 import { cliErrorWords, redactCredentials } from "./tool-detail";
+
+/** How often a running run's worker says it is alive; after `RUN_STALE_MS` without it, the run is recovered. */
+export const RUN_HEARTBEAT_MS = 20_000;
+export const RUN_STALE_MS = 2 * 60_000;
 
 const { agentRuns, agentRunSteps } = schema;
 
@@ -126,6 +131,8 @@ export const PERSON_LIMIT = "person_limit" as const;
 export const COMPUTER_BUSY = "computer_busy" as const;
 /** A run's error when it went in circles and its kind of run can't end with Continuar (a routine's). */
 export const STUCK_ERROR = "stuck" as const;
+/** A run's error when its computer's disk is full (`saysDiskFull`): every turn there fails until someone frees space. */
+export const DISK_FULL = "disk_full" as const;
 
 /** A run's error when its server stopped in the middle of a tool call (a deploy, a crash, a reboot). */
 export const INTERRUPTED_BY_RESTART = "Interrupted by a server restart";
@@ -187,8 +194,11 @@ export interface CliFailure {
  * `apt install -y bubblewrap`. Refusing to start with denied paths unprotected."), outside its pinned version range.
  */
 const REFUSED_START = /\brefus(?:e|es|ing) to start\b/i;
-/** A CLI's sandbox (bubblewrap) that didn't start on its computer, before the model was asked (`bwrap: …`). */
-const SANDBOX_FAILED = /\bbwrap: /;
+/**
+ * A CLI's sandbox that didn't start on its computer, before the model was asked: bubblewrap's `bwrap: …`, or Grok
+ * Build's own "Sandbox initialization failed: …" / "Platform not supported: …" (no Landlock or Seatbelt there).
+ */
+const SANDBOX_FAILED = /\bbwrap: |\bsandbox initialization failed\b|\bplatform not supported\b/i;
 
 /**
  * A CLI that refused to start on its computer, or whose sandbox didn't: every retry fails the same way until someone
@@ -261,6 +271,7 @@ export function cliFailureText(
  * its detail), which is stored as it is.
  */
 export function brainFailureText(failure: CliFailure, kind: ComputerBrainKind): string | null {
+  if (failure.code === SYSTEM_REFUSED) return `cli_system: ${BRAIN_NAMES[kind]}`;
   const known = runErrorDetail(failure.code);
   if (known && known.errorCode !== "run.failed") return null;
   const words = cliErrorWords(failure.message);
@@ -268,7 +279,7 @@ export function brainFailureText(failure: CliFailure, kind: ComputerBrainKind): 
 }
 
 /** `cli_failed: Claude Code: what it said` (`cliFailureText`); `cli_closed` when it ended without a word. */
-const CLI_FAILURE = /^cli_(failed|closed|sandbox): ([^:]+?)(?:: ([\s\S]*))?$/;
+const CLI_FAILURE = /^cli_(failed|closed|sandbox|system): ([^:]+?)(?:: ([\s\S]*))?$/;
 
 /** A run that stopped on an error of ours that kept repeating (`gave up` in the executor): its stored text's start. */
 export const OUR_ERROR = "Stopped after an error";
@@ -333,6 +344,7 @@ export function runErrorDetail(error: string | null | undefined): {
     PERSON_LIMIT,
     COMPUTER_BUSY,
     STUCK_ERROR,
+    DISK_FULL,
     // A Codex turn on a Windows computer where MXC can't hold its commands (the runner's own words say what to do).
     "windows_sandbox",
   ];
@@ -341,7 +353,7 @@ export function runErrorDetail(error: string | null | undefined): {
   const cli = CLI_FAILURE.exec(error);
   if (cli) {
     const [, how, brain = "", detail = ""] = cli;
-    if (how === "closed" || how === "sandbox") return { errorCode: `run.cli_${how}`, errorParams: { brain } };
+    if (how !== "failed") return { errorCode: `run.cli_${how}`, errorParams: { brain } };
     return detail
       ? { errorCode: "run.cli_failed", errorParams: { brain, detail } }
       : { errorCode: "run.cli_stopped", errorParams: { brain } };
@@ -585,6 +597,10 @@ export async function transitionRun(
     })
     .where(and(eq(agentRuns.id, runId), eq(agentRuns.status, from)))
     .returning();
+  // Out of work on a plan sign-in that has runs waiting for it: the first of them takes the slot now.
+  const ask = (row?.transcript as { roomAsk?: { machineId?: string; signIn?: string } } | null)?.roomAsk;
+  if (row && from === "running" && ask?.machineId && ask.signIn)
+    await kickSignInLine(db, ask.machineId, ask.signIn).catch(() => {});
   if (row && isTerminal(to)) {
     await recordRunFinished(
       db,
@@ -613,6 +629,42 @@ export type StepKind = (typeof schema.agentRunStepKindEnum.enumValues)[number];
 
 /** Tries for a free number: tool calls that run side by side each lose at most to the others. */
 const STEP_TRIES = 20;
+
+/**
+ * The tools a turn uses to talk, not to work: a reaction, a question card, the line it says before slow work, its
+ * background works' own tools (`REACT_TOOL`, `ASK_USER_TOOL`, `ASK_CHOICES_TOOL`, `SAY_NOW_TOOL` and the four of
+ * `work-tools.ts`, written out here: those modules import this one).
+ */
+const TALK_TOOLS = [
+  "react",
+  "ask_user",
+  "ask_choices",
+  "say_now",
+  "post_update",
+  "steer_work",
+  "stop_work",
+  "work_in_background",
+];
+
+/**
+ * Whether a run is at work on something: its trail has a call of a tool other than a way of talking (`TALK_TOOLS`).
+ * One that has only talked so far ("oi", a reaction, a question) is a conversation, not a task (ADR 0112 addendum of
+ * 2026-11-19): what the person adds is part of what it answers, in one message.
+ */
+export async function runAtWork(db: Executor, runId: string): Promise<boolean> {
+  const [step] = await db
+    .select({ id: schema.agentRunSteps.id })
+    .from(schema.agentRunSteps)
+    .where(
+      and(
+        eq(schema.agentRunSteps.runId, runId),
+        eq(schema.agentRunSteps.kind, "tool_call"),
+        notInArray(sql<string>`coalesce(${schema.agentRunSteps.data}->>'name', '')`, TALK_TOOLS),
+      ),
+    )
+    .limit(1);
+  return step !== undefined;
+}
 
 /**
  * Appends a step to a run's trail (numbered in order). Two at once read the same last number, and the unique

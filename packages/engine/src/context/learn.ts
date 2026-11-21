@@ -15,6 +15,8 @@ import {
 } from "@agenteschat/db";
 import { modelInfo } from "@agenteschat/providers";
 import { recordAgentActions } from "../agent-actions";
+import { handleOf } from "../agents";
+import { othersEditAgent } from "../audience";
 import { steeredByOthers } from "../authority";
 import { isConfidentialRun, threadIsConfidential } from "../confidential";
 import { callLine, type LearnSignal, type RunCall, runCalls } from "../continuation";
@@ -167,6 +169,23 @@ const OTHERS_WORDS = new Set([
   "ask_agent",
 ]);
 
+/** A teammate's instructions this run read (`read_agent`) that someone besides `person` may have written. */
+async function readOthersInstructions(db: Database, orgId: string, person: string, calls: RunCall[]) {
+  const handles = calls
+    .filter((c) => c.name === "read_agent" && !c.result?.isError)
+    .map((c) => handleOf(String((c.input as { agent?: unknown } | null)?.agent ?? "").trim()));
+  if (handles.length === 0) return false;
+  const read = await db
+    .select({
+      ownerUserId: agents.ownerUserId,
+      editorUserIds: agents.editorUserIds,
+      editorRoleIds: agents.editorRoleIds,
+    })
+    .from(agents)
+    .where(and(eq(agents.orgId, orgId), inArray(agents.handle, handles)));
+  return read.some((a) => othersEditAgent(a, person));
+}
+
 /**
  * The person whose own words this run answers, when it may act on them with no card (ADR 0092 §5, amended): it is high
  * trust, the message that started it is theirs (not a colleague's or a notice's), nobody else wrote into it or answered
@@ -186,6 +205,7 @@ export async function ownWords(
   if (trigger?.authorUserId !== person) return null;
   const calls = await runCalls(ctx.db, { id: ctx.runId, orgId: ctx.orgId });
   if (calls.some((c) => OTHERS_WORDS.has(c.name))) return null;
+  if (await readOthersInstructions(ctx.db, ctx.orgId, person, calls)) return null;
   const [answered] = await ctx.db
     .select({ id: agentQuestions.id })
     .from(agentQuestions)
