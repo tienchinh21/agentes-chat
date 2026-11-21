@@ -262,8 +262,21 @@ async function boot(
   let gifKey: GifKey | null = null;
   const defaults: Adapters = {
     search: createPostgresSearchResolver(database.db),
-    // PGlite (native mode) is one process: nothing to tell other replicas.
-    pubsub: database.client ? await createPostgresPubSub(postgresJsNotifier(database.client)) : createMemoryPubSub(),
+    // PGlite (native mode) is one process: nothing to tell other replicas. A break in delivery stops every app's live
+    // updates, so it is reported as an error (ADR 0104), and its end says how long it lasted (ADR 0010).
+    pubsub: database.client
+      ? await createPostgresPubSub(postgresJsNotifier(database.client, database.listenClient), {
+          onTrouble: (kind, detail) => {
+            if (kind === "resumed") log.warn("realtime events reach their subscribers again", { kind, ...detail });
+            else
+              log.error("realtime events stopped reaching their subscribers", {
+                kind,
+                ...detail,
+                error: detail.error ?? kind,
+              });
+          },
+        })
+      : createMemoryPubSub(),
     presence: createMemoryPresence(),
     rateLimiter: createMemoryRateLimiter(),
     keyWrapper: localKeyWrapper,

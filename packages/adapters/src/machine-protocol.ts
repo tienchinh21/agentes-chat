@@ -2100,6 +2100,8 @@ export const CURSOR_MODEL_LIMITS = { models: 60, id: 80, label: 80 } as const;
  */
 export interface BrainTurnTimings {
   warm: boolean;
+  /** Not `warm`: why the turn started a new process (`BRAIN_COLD_CAUSES`). */
+  cold?: BrainColdCause;
   initMs?: number;
   firstEventMs?: number;
   firstTokenMs?: number;
@@ -2109,6 +2111,26 @@ export interface BrainTurnTimings {
   thinkingBlocks?: number;
   thinkingChars?: number;
 }
+
+/**
+ * Why a turn started a new Claude Code process: a session that never ran on this runner (a new conversation, or a
+ * fresh session the server started for an old one), or the end of the session's last process: idle past its limit,
+ * closed for another conversation of the agent (its cap) or for memory, another launch asked (folder, permissions,
+ * account, sign-in), a warm start with another system text, exited by itself, closed after its turn (canceled,
+ * died, a background turn), or a session that ran before with no process left in this runner (it restarted).
+ */
+export const BRAIN_COLD_CAUSES = [
+  "new_session",
+  "idle",
+  "cap",
+  "memory",
+  "settings",
+  "warm_mismatch",
+  "exited",
+  "closed",
+  "restart",
+] as const;
+export type BrainColdCause = (typeof BRAIN_COLD_CAUSES)[number];
 
 /** The measures of `BrainTurnTimings` past `warm`, each a whole number from 0 up to a day. */
 export const BRAIN_TURN_MEASURES = [
@@ -3758,7 +3780,17 @@ export function parseBrainEvent(v: unknown): WireBrainEvent | null {
         type: "done",
         text: v.text.slice(0, BRAIN_LIMITS.doneText),
         ...(session ? { session } : {}),
-        ...(t ? { timings: { warm: t.warm as boolean, ...Object.fromEntries(measures) } } : {}),
+        ...(t
+          ? {
+              timings: {
+                warm: t.warm as boolean,
+                ...(!t.warm && (BRAIN_COLD_CAUSES as readonly unknown[]).includes(t.cold)
+                  ? { cold: t.cold as BrainColdCause }
+                  : {}),
+                ...Object.fromEntries(measures),
+              },
+            }
+          : {}),
       };
     }
     case "error":

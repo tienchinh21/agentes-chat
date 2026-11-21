@@ -260,6 +260,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // The share extension reads as the app in the share sheet. Before expo-share-intent, so it runs once the
     // extension's files are written (a project's changes run from the last plugin to the first).
     "./plugins/with-share-extension-name",
+    // The agents a person sends to, among the share sheet's suggestions (ADR 0213): the app declares the intent it
+    // donates, the extension the suggestions it takes and passes the one picked on to the app. Also before
+    // expo-share-intent, for the same reason.
+    "./plugins/with-share-suggestions",
     [
       // "Compartilhar com…": the app in the system's share sheet (an iOS share extension and Android's send intents),
       // for photos, videos, files, links and text; what arrives opens the agent picker (src/features/share). The

@@ -86,7 +86,7 @@ import {
   systemLauncher,
   trustedNetworkLauncher,
 } from "./agent-users";
-import { BrainManager } from "./brain";
+import { BrainManager, readyRoom } from "./brain";
 import { CodexAppServers } from "./brain-codex-app";
 import { BrowserManager } from "./browser";
 import { ensureBrowserBindPolicy, prepareAgents } from "./browser-bind-policy";
@@ -1276,6 +1276,7 @@ export class RunnerDaemon implements RequestObserver {
       idleMs: (config.brainIdleMinutes ?? DEFAULT_LIMITS.brainIdleMinutes) * 60_000,
       maxProcesses: config.brainMaxProcesses ?? DEFAULT_LIMITS.brainMaxProcesses,
       accounts: this.accounts,
+      readyRoom,
       log,
     });
     const codexRuns = new Map<string, McpTaskInfo>();

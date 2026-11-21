@@ -1,4 +1,4 @@
-import { ClipOp, ImageFormat, Skia } from "@shopify/react-native-skia";
+import { ClipOp, ImageFormat, type SkImage, Skia } from "@shopify/react-native-skia";
 import { Directory, File } from "expo-file-system";
 import { agentFrame } from "@/agent/AgentAvatar";
 import type { AgentLookInput } from "@/agent/looks";
@@ -11,18 +11,28 @@ export const FACE_PX = 102;
 /** What a face is drawn from: when it changes, its picture is drawn again. */
 export const faceKey = (look: AgentLookInput) => `${look.color}|${look.eyes ?? ""}|${look.accessory ?? ""}`;
 
-/** One agent's still face on its night sky in its tile's corners, as PNG bytes. */
-function facePng(id: string, look: AgentLookInput): Uint8Array | null {
-  const surface = Skia.Surface.Make(FACE_PX, FACE_PX);
+/**
+ * One agent's still face on its night sky, `px` pixels square, as the app draws its tile on a dark page: in the
+ * tile's corners, or square where the system cuts its own shape (a share sheet's circle). Null: nothing drew.
+ */
+export function stillFace(id: string, look: AgentLookInput, px = FACE_PX, corners = true): SkImage | null {
+  const surface = Skia.Surface.Make(px, px);
   if (!surface) return null;
   const canvas = surface.getCanvas();
-  const corner = FACE_PX * 0.3;
-  canvas.clipRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, FACE_PX, FACE_PX), corner, corner), ClipOp.Intersect, true);
-  // The tile as the app draws it on a dark page (the island is black), still, its sky under it.
-  const frame = agentFrame(look, FACE_PX, "idle", STILL_T, seedOf(id), true, { dark: true }, undefined, true);
+  if (corners) {
+    const corner = px * 0.3;
+    canvas.clipRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, px, px), corner, corner), ClipOp.Intersect, true);
+  }
+  // Still, its sky under it (the island is black, and so is a share sheet's dark plate).
+  const frame = agentFrame(look, px, "idle", STILL_T, seedOf(id), true, { dark: true }, undefined, true);
   replay(canvas, frame);
   surface.flush();
-  return surface.makeImageSnapshot().encodeToBytes(ImageFormat.PNG, 100);
+  return surface.makeImageSnapshot();
+}
+
+/** One agent's still face for the island, as PNG bytes. */
+function facePng(id: string, look: AgentLookInput): Uint8Array | null {
+  return stillFace(id, look)?.encodeToBytes(ImageFormat.PNG, 100) ?? null;
 }
 
 /** What was drawn for each agent, kept beside the faces so a launch draws only what changed. */

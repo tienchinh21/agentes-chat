@@ -98,6 +98,7 @@ type Timings = {
   stages: Rows;
   stagesMore: boolean;
   computerStarts: Rows;
+  coldStarts: Rows;
   waits: Rows;
 };
 const timings = async (query: string) => ok<Timings>(await get(`/analytics/run-timings?${query}`));
@@ -107,10 +108,11 @@ type Claim = {
   queries: number;
   stages: { stage: string; ms: number; queries: number; parts?: { stage: string; ms: number; queries: number }[] }[];
   stagesCut: boolean;
-  computerTurns: ({ warm: boolean } & Record<string, number | null | boolean>)[];
+  computerTurns: ({ warm: boolean } & Record<string, string | number | null | boolean>)[];
 };
 // A turn's measures past the three every runner gives, none of them said.
 const unsaid = {
+  cold: null,
   firstTokenMs: null,
   firstAssistantMs: null,
   retries: null,
@@ -273,6 +275,7 @@ test("computer starts and waits: per brain, each wait until the run's next step,
         brain: [
           {
             warm: false,
+            cold: "new_session",
             initMs: 4000,
             firstEventMs: 6000,
             firstTokenMs: 5000,
@@ -331,6 +334,8 @@ test("computer starts and waits: per brain, each wait until the run's next step,
       thinkingCharsP90: 280,
     },
   ]);
+  // Why the cold one started its process.
+  expect(found.coldStarts).toEqual([{ brain: "claude_code", model: null, cause: "new_session", turns: 1 }]);
   const wait = (brain: string, cause: string, waits: number, runs: number, ...sec: number[]) => ({
     cause,
     brain,
