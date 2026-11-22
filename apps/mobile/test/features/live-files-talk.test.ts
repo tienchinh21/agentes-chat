@@ -48,13 +48,13 @@ import {
   pinUnder,
   pointMark,
   sheetParts,
-  stageAbove,
   TALK_SHEET_DETENTS,
   TALK_SHEET_DIMMED,
   talkKindOf,
   talkLine,
   talkPins,
   talkSheetReserve,
+  withSending,
 } from "../../src/features/live-files/talk/logic";
 
 /**
@@ -400,8 +400,11 @@ describe("a picture's, a video's and a PDF's conversation (ADR 0208)", () => {
     expect(viewer).toContain("{talkFile ? <FileTalkLine file={talkFile} bare /> : null}");
     expect(viewer).not.toContain('icon="comment"');
     expect(viewer).not.toContain("commenting");
-    // With the sheet up: the picture above it, the line and the actions aside, a tap marks, the draft's pin on it.
-    expect(viewer).toContain("const stage = sheet ? stageAbove(screen, bars.top, sheet.reserve) : screen;");
+    // With the sheet up: the picture stays the whole screen's under it (never laid out again as the sheet moves), the
+    // line and the actions aside, a tap marks, the draft's pin on it.
+    expect(viewer).toMatch(/<ZoomPicture\s+source=\{link\.data\}\s+cacheKey=\{key\}\s+screen=\{screen\}/);
+    expect(viewer).not.toContain("screen={stage}");
+    expect(viewer).not.toContain("paddingTop: bars.top");
     expect(viewer).toContain("visible={chrome && !shownSheet}");
     expect(viewer).toContain("<PicturePins pins={shownPins} zoom={zoom} draft={draft} />");
     expect(viewer).toContain('t(media === "video" ? "mobile.files.talk.hint.video" : "mobile.files.talk.hint.image")');
@@ -412,7 +415,7 @@ describe("a picture's, a video's and a PDF's conversation (ADR 0208)", () => {
     expect(viewer).toContain("void afterTalkSheet().then(() => goBack());");
     const document = src("features/files/DocumentViewer.tsx");
     expect(document).toContain("useTalkFocus(pdfTalk, focusId);");
-    expect(document).toContain("{pdfTalk ? <FileTalkLine file={pdfTalk} /> : null}");
+    expect(document).toContain("{pdfTalk ? <FileTalkLine file={pdfTalk} keepPlace /> : null}");
     expect(document).toContain("router.replace({ ...route, params: { ...route.params, m: focusId } });");
     // A PDF drawn by the system's renderer on both platforms, a tap with the sheet up marking its page and point.
     expect(document).toContain('const pdf = info?.view === "pdf";');
@@ -454,9 +457,6 @@ describe("the conversation's sheet over the file (ADR 0208)", () => {
     expect(talkSheetReserve(852, null, 34)).toBe(460);
     expect(talkSheetReserve(852, 852, 34)).toBe(460);
     expect(talkSheetReserve(852, Number.NaN)).toBe(426);
-    // A picture lays out from under the viewer's bar down to the sheet's top.
-    expect(stageAbove({ width: 393, height: 852 }, 118, 462)).toEqual({ width: 393, height: 272 });
-    expect(stageAbove({ width: 393, height: 500 }, 118, 462)).toEqual({ width: 393, height: 0 });
   });
 
   test("every file opens its conversation in the same sheet, which the file behind follows", () => {
@@ -468,17 +468,42 @@ describe("the conversation's sheet over the file (ADR 0208)", () => {
     const layout = readFileSync(join(import.meta.dir, "../../app/(app)/_layout.tsx"), "utf8");
     expect(layout).toContain('<Sheet.Screen name="file-talk/[channelId]" options={o.fileTalk} />');
     expect(layout).toContain("fileTalk: { ...sheet(TALK_SHEET_DETENTS), dimmedDetentIndex: TALK_SHEET_DIMMED },");
-    // The conversation itself, in its sheet mode: the sheet's bar, the field raising the sheet.
+    // The conversation itself, in its sheet mode: the sheet's bar. The keyboard alone raises the sheet (one motion, on
+    // its own curve): the field never sends it to the full height as well.
     const sheet = src("features/live-files/talk/TalkSheet.tsx");
     expect(sheet).toContain("<SheetSurface>");
-    expect(sheet).toContain("if (focused && place.current.detent !== 1) navigation.resize(1);");
+    expect(sheet).not.toContain("navigation.resize(1)");
+    expect(sheet).toContain("const mode = useMemo<ChatSheetMode>(() => ({ onClose: close, seek }), [close, seek]);");
     const chat = src("features/chat/ChatScreen.tsx");
     expect(chat).toContain("<ChatSheetBar title={title} onClose={inSheet.onClose} />");
-    expect(src("features/chat/screen/parts.tsx")).toContain("onFocusChange={sheet?.onFieldFocus}");
-    // The line steps aside while the sheet is up, its room held in a column.
-    expect(src("features/live-files/talk/TalkLine.tsx")).toContain(
-      "if (sheet) return floating || bare ? null : <View style={{ height: sheet.reserve, backgroundColor: c.bg }} />;",
+    expect(src("features/chat/screen/parts.tsx")).not.toContain("onFocusChange");
+    // The line steps aside while the sheet is up, its room held in a column; under a PDF it keeps its place unseen and
+    // the pages run on past their end by the sheet's room: nothing in sight lays out again as the sheet comes and goes.
+    const line = src("features/live-files/talk/TalkLine.tsx");
+    expect(line).toContain("const unseen = keepPlace && sheet !== null;");
+    expect(line).toContain("<View style={{ height: sheet.reserve, backgroundColor: c.bg }} />");
+    expect(line).toMatch(/if \(keyboardUp && !unseen\) return null;/);
+    expect(src("features/files/DocumentViewer.tsx")).toContain("<FileTalkLine file={pdfTalk} keepPlace />");
+    expect(src("features/files/PdfPages.tsx")).toContain(
+      "ListFooterComponent={sheet ? <View style={{ height: sheet.reserve }} /> : undefined}",
     );
+  });
+
+  test("the sheet opens on the conversation the file's line already read, still, and a sent comment's pin stays", () => {
+    // In the sheet the list shows the moment it is placed: no skeleton before it, no fade, no rise of what arrives.
+    const list = src("features/chat/screen/ChatList.tsx");
+    expect(list).toContain("listShown.value = inSheet ? 1 : withTiming(1, { duration: 120 });");
+    expect(src("features/chat/ChatScreen.tsx")).toContain("{loading || (showList && !placed && !inSheet) ? (");
+    // A comment on its way keeps its pin: its local copy counts until the server's copy (same clientId) takes its place.
+    const a = { id: "m1", clientId: null };
+    const echoed = { id: "m2", clientId: "c2" };
+    const waiting = { id: "local-c2", clientId: "c2" };
+    const fresh = { id: "local-c3", clientId: "c3" };
+    expect(withSending([a], [])).toEqual([a]);
+    expect(withSending([a], [fresh])).toEqual([a, fresh]);
+    expect(withSending([a, echoed], [waiting, fresh])).toEqual([a, echoed, fresh]);
+    expect(withSending([a], [a])).toEqual([a]);
+    expect(src("features/live-files/talk/hooks.ts")).toContain("withSending(messages, sending).map((m) => ({");
   });
 });
 

@@ -159,6 +159,7 @@
     "forwards": "Leitet „{{subject}}“ weiter",
     "forwardsFrom": "Leitet „{{subject}}“ weiter, von {{from}}",
     "onlyOwner": "Nur {{name}} oder ein Admin kann entscheiden.",
+    "onlyOwnerRole": "Nur Personen mit der Rolle {{role}} oder ein Admin können entscheiden.",
     "onlyAdmins": "Nur ein Admin kann entscheiden.",
     "notFound": "Diese Anfrage gibt es nicht mehr oder du kannst sie nicht sehen.",
     "trait": {
@@ -1549,6 +1550,7 @@
       "ruleBody": "{{name}} folgt dieser Regel nicht mehr. Wer sie festgelegt hat, kann sie noch einmal festlegen.",
       "ruleRemove": "Entfernen",
       "footOwner": "Nur {{name}} oder ein Admin kann das korrigieren.",
+      "footOwnerRole": "Nur Personen mit der Rolle {{role}} oder ein Admin können das korrigieren.",
       "footAdmins": "Nur ein Admin kann das korrigieren.",
       "emptyF": "{{name}} hat noch nichts über dich gespeichert.",
       "emptyM": "{{name}} hat noch nichts über dich gespeichert.",
@@ -1598,6 +1600,7 @@
       },
       "asksYou": "Mergen und Veröffentlichen fragen nach deiner Freigabe, außer der Agent fragt nie.",
       "asksOwner": "Mergen und Veröffentlichen fragen nach der Freigabe von {{name}}, außer der Agent fragt nie.",
+      "asksOwnerRole": "Mergen und Veröffentlichen brauchen die Freigabe einer Person mit der Rolle {{role}}, außer der Agent fragt nie.",
       "asksAdmins": "Mergen und Veröffentlichen fragen nach der Freigabe eines Admins, außer der Agent fragt nie.",
       "empty": "Vorerst nur Unterhaltung."
     }

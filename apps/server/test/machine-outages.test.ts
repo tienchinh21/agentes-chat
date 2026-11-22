@@ -78,6 +78,7 @@ test("outages and move-agents over HTTP: the contract the apps read", async () =
       waitingRuns: 1,
     },
   ]);
+  // Both Macs' runners bring the Antigravity CLI themselves (protocol 76): Gemini thinks there once an account signs in.
   expect(body.targets).toEqual([
     {
       kind: "machine",
@@ -86,7 +87,7 @@ test("outages and move-agents over HTTP: the contract the apps read", async () =
       platform: "mac",
       managed: false,
       online: true,
-      brains: ["claude_code"],
+      brains: ["claude_code", "antigravity"],
       reasonOff: null,
     },
     {
@@ -96,7 +97,7 @@ test("outages and move-agents over HTTP: the contract the apps read", async () =
       platform: "mac",
       managed: false,
       online: false,
-      brains: ["claude_code"],
+      brains: ["claude_code", "antigravity"],
       reasonOff: "offline",
     },
   ]);

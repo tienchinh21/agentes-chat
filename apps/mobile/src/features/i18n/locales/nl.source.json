@@ -392,6 +392,9 @@
   "approval.onlyOwner": {
     "value": "Only {{name}} or an admin can decide."
   },
+  "approval.onlyOwnerRole": {
+    "value": "Only whoever holds {{role}} or an admin can decide."
+  },
   "approval.onlyAdmins": {
     "value": "Only an admin can decide."
   },
@@ -3812,6 +3815,9 @@
   "intentAgents.knows.footOwner": {
     "value": "Only {{name}} or an admin can correct these."
   },
+  "intentAgents.knows.footOwnerRole": {
+    "value": "Only whoever holds {{role}} or an admin can correct these."
+  },
   "intentAgents.knows.footAdmins": {
     "value": "Only an admin can correct these."
   },
@@ -3926,6 +3932,9 @@
   },
   "intentAgents.uses.asksOwner": {
     "value": "Merging and publishing ask for {{name}}'s approval, unless the agent never asks."
+  },
+  "intentAgents.uses.asksOwnerRole": {
+    "value": "Merging and publishing ask for approval from whoever holds {{role}}, unless the agent never asks."
   },
   "intentAgents.uses.asksAdmins": {
     "value": "Merging and publishing ask for an admin's approval, unless the agent never asks."

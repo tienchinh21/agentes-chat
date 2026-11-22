@@ -159,6 +159,7 @@
     "forwards": "Stuurt “{{subject}}” door",
     "forwardsFrom": "Stuurt “{{subject}}” door, van {{from}}",
     "onlyOwner": "Alleen {{name}} of een beheerder kan beslissen.",
+    "onlyOwnerRole": "Alleen wie de rol {{role}} heeft of een beheerder kan beslissen.",
     "onlyAdmins": "Alleen een beheerder kan beslissen.",
     "notFound": "Dit verzoek bestaat niet meer of je kunt het niet zien.",
     "trait": {
@@ -1549,6 +1550,7 @@
       "ruleBody": "{{name}} volgt deze regel niet meer. Wie de regel gaf, kan dezelfde opnieuw geven.",
       "ruleRemove": "Weghalen",
       "footOwner": "Alleen {{name}} of een beheerder kan dit corrigeren.",
+      "footOwnerRole": "Alleen wie de rol {{role}} heeft of een beheerder kan dit corrigeren.",
       "footAdmins": "Alleen een beheerder kan dit corrigeren.",
       "emptyF": "{{name}} heeft nog niets over je bewaard.",
       "emptyM": "{{name}} heeft nog niets over je bewaard.",
@@ -1598,6 +1600,7 @@
       },
       "asksYou": "Mergen en publiceren vragen om jouw goedkeuring, tenzij de agent nooit vraagt.",
       "asksOwner": "Mergen en publiceren vragen om goedkeuring van {{name}}, tenzij de agent nooit vraagt.",
+      "asksOwnerRole": "Mergen en publiceren vragen goedkeuring van iemand met de rol {{role}}, tenzij de agent nooit vraagt.",
       "asksAdmins": "Mergen en publiceren vragen om goedkeuring van een beheerder, tenzij de agent nooit vraagt.",
       "empty": "Voorlopig alleen gesprekken."
     }

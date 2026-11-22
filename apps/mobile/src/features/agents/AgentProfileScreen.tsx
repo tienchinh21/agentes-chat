@@ -69,6 +69,7 @@ import {
   Locked,
   PixelOrbit,
   ProviderLogo,
+  RoleMark,
   SCREEN_X,
   Segmented,
   SkeletonOver,
@@ -102,12 +103,16 @@ import {
   useDirectory,
   useErrorToast,
   useMeId,
+  useMyRoleIds,
   useNow,
   useOrgId,
+  useOwnerRoles,
+  useOwnsAgent,
   usePushEnded,
   useWhen,
 } from "../shared/hooks";
 import { agentLook, genderOf } from "../shared/logic";
+import { ownerNameIn, ownerRoleOf } from "../shared/owner";
 import { SheetTitle } from "../shared/PromptForm";
 import { PushedHeader } from "../shared/parts";
 import { useWaitingApprovals, useWorkingNow } from "../shared/queries";
@@ -246,13 +251,19 @@ function Profile({ id }: { id: string }) {
   const look = agentLook(agent);
   const name = agent?.name ?? detail.data?.name ?? "";
   const g = genderOf(name);
+  // The person asked for access; a role that answers for it (ADR 0085, addendum of 2026-11-21) has nobody to write
+  // to, and its name stands where the person's would.
   const ownerId = agent?.ownerUserId ?? null;
-  const owner = ownerId ? dir.memberById.get(ownerId)?.name : undefined;
-  const mine = Boolean(meId && ownerId === meId);
+  const ownerRoles = useOwnerRoles();
+  const ownerRole = ownerRoleOf(agent, ownerRoles);
+  const owner = ownerNameIn(agent, dir.memberById, ownerRoles);
+  const myRoleIds = useMyRoleIds();
+  const owns = useOwnsAgent();
+  const mine = owns(agent);
   const roleName = (agent?.role || detail.data?.role || "").trim();
   const plain = plainRole(agent?.instructions || detail.data?.instructions);
   const busy = work.length > 0;
-  const editable = canEditMemories(agent, { id: meId, org });
+  const editable = canEditMemories(agent, { id: meId, org, roleIds: myRoleIds });
   // Its presence (ADR 0084): the badge, and the card with what it does where nothing else here says it.
   const status = useAgentProfileStatus(id, name);
   const statusLine = usePresenceOf().agent(id)?.status?.status ?? null;
@@ -399,9 +410,10 @@ function Profile({ id }: { id: string }) {
     );
   };
 
+  // A role is named even to who holds it: others answer for it too.
   const ownerLine = rightHand
     ? null
-    : mine
+    : mine && !agent?.ownerRoleId
       ? t("mobile.intentAgents.ownerYou")
       : owner
         ? t("mobile.intentAgents.owner", { name: owner })
@@ -612,6 +624,7 @@ function Profile({ id }: { id: string }) {
   // The approval rule under what it can use: in one sentence, naming whoever decides for it.
   const asksNote = () => {
     if (decides) return t("mobile.intentAgents.uses.asksYou");
+    if (ownerRole) return t("mobile.intentAgents.uses.asksOwnerRole", { role: ownerRole.name });
     return owner ? t("mobile.intentAgents.uses.asksOwner", { name: owner }) : t("mobile.intentAgents.uses.asksAdmins");
   };
   const usesNote =
@@ -766,8 +779,20 @@ function Profile({ id }: { id: string }) {
           {ownerLine ? (
             <View style={styles.apart}>
               <GroupedList>
-                <GroupedRow icon="person" label={ownerLine} />
+                {/* A role that answers for it shows its mark, and under it who that means (ADR 0085, addendum of
+                    2026-11-21). */}
+                <GroupedRow
+                  {...(ownerRole
+                    ? { leading: <RoleMark color={ownerRole.color} icon={ownerRole.icon} size={22} /> }
+                    : { icon: "person" as const })}
+                  label={ownerLine}
+                />
               </GroupedList>
+              {ownerRole ? (
+                <GroupedFooter>
+                  {t("newAgent.ownerRoleHelp", { ...agentGrammar(name), role: ownerRole.name })}
+                </GroupedFooter>
+              ) : null}
             </View>
           ) : null}
         </>
@@ -778,9 +803,11 @@ function Profile({ id }: { id: string }) {
   // Who may correct what it knows, said once under the memories (a tap corrects, a swipe forgets).
   const editFoot = editable
     ? t("mobile.intentAgents.knows.footSwipe")
-    : owner
-      ? t("mobile.intentAgents.knows.footOwner", { name: owner })
-      : t("mobile.intentAgents.knows.footAdmins");
+    : ownerRole
+      ? t("mobile.intentAgents.knows.footOwnerRole", { role: ownerRole.name })
+      : owner
+        ? t("mobile.intentAgents.knows.footOwner", { name: owner })
+        : t("mobile.intentAgents.knows.footAdmins");
   const memoryKnows = (
     <>
       <GroupedHeader>{t("mobile.intentAgents.knows.title", agentGrammar(name))}</GroupedHeader>

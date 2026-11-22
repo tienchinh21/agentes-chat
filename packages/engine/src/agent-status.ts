@@ -92,6 +92,8 @@ export interface AgentStatusView {
   working: boolean;
   /** For one viewer (`agentStatuses`): its most important work and where it shows (`agent-work.ts`); null: none. */
   work?: AgentWork | null;
+  /** Work of its waits on its monthly budget (long work paused near it included): the team-stalled line names it. */
+  budgetPaused?: true;
 }
 
 /** A run going this long is heavy work: the agent reads as busy. */
@@ -333,7 +335,17 @@ export async function loadAgentStatuses(
           : runs.length > 0 || a.builtin === "right_hand" || ms - fresh.getTime() < AGENT_AWAY_AFTER_MS
             ? "online"
             : "away";
-    return { agentId: a.id, presence, status, activeAt: activeAt?.toISOString() ?? null, working: thinking };
+    const budgetPaused =
+      out?.reason === "budget" ||
+      alive.some((r) => r.agentId === a.id && r.status === "waiting_input" && r.waitCode === "budget");
+    return {
+      agentId: a.id,
+      presence,
+      status,
+      activeAt: activeAt?.toISOString() ?? null,
+      working: thinking,
+      ...(budgetPaused ? { budgetPaused: true as const } : {}),
+    };
   });
 }
 

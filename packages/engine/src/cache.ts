@@ -137,6 +137,8 @@ export const caches = {
    * moved, or a retry, asks again within minutes. Never an image's: a screen changes under the same words.
    */
   jevAnswers: new TtlCache<unknown>(15 * 60_000, 2000),
+  /** The working line's first words for a message and agent (`orgId:messageId:agentId`, `announceIntent`), none too. */
+  intents: new TtlCache<unknown>(3600_000, 5000),
   /** Automático's choice for a routine's prompt (`orgId:agentId:routineId:hash`): the same work every firing. */
   routineAutoModel: new TtlCache<unknown>(24 * 3600_000, 5000),
 };

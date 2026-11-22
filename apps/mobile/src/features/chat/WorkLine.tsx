@@ -23,6 +23,7 @@ import { useFontScale } from "@/ui/text-scale";
 import { chatHref, consultationHref } from "../links/logic";
 import { useBubblePart } from "../shared/bubble-part";
 import { useColors, useNow, useOrgId } from "../shared/hooks";
+import { ownsIn } from "../shared/owner";
 import { tapHaptic, useSurface } from "../shared/parts";
 import { RowPartContext, useCardTop } from "./look";
 import { useRowDirectory, useRowMeId } from "./row-data";
@@ -60,7 +61,8 @@ function useLine(work: WorkView, inUpdatesThread = false) {
     agentName: agent?.name ?? "",
     nameOf: (id: string) => dir.memberById.get(id)?.name ?? null,
     agentNameOf: (id: string) => dir.anyAgent(id)?.name,
-    canStop: managesAgent(agent) || agent?.ownerUserId === meId || work.requestedByUserId === meId,
+    // Its owner, or one who holds the role that answers for it (ADR 0085, addendum of 2026-11-21).
+    canStop: managesAgent(agent) || ownsIn(dir.memberById, meId, agent) || work.requestedByUserId === meId,
     inUpdatesThread,
   };
   const view = workLine(t, work, context);

@@ -22,6 +22,7 @@ import {
   TextInput,
   type TextInputInstance,
   type TextStyle,
+  useWindowDimensions,
   View,
 } from "react-native";
 import {
@@ -329,6 +330,11 @@ export function Composer({
 }: ComposerProps) {
   const { colors, shadows, reducedMotion } = useTheme();
   const { t, i18n } = useTranslation();
+  // An empty field is one line high on iOS (`oneLineIos`): emptied from code right after typing, a multiline field
+  // kept the height of the words that had gone (its height is measured from the text the native side last reported,
+  // and a late report of the old words won over the empty value: an empty five-line field after a long message).
+  const { fontScale } = useWindowDimensions();
+  const emptyCap = Platform.OS === "ios" ? { maxHeight: oneLineIos(fontScale) } : null;
   const toast = useToast();
   const [text, setText] = useState(() => (draftKey ? (DRAFTS.get(draftKey) ?? "") : ""));
   const tooLong = tooLongToSend(text);
@@ -662,7 +668,7 @@ export function Composer({
                 onFocusChange?.(false);
               }}
               accessibilityLabel={placeholder}
-              style={[inputText, styles.inputFill, { color: colors.ink }]}
+              style={[inputText, styles.inputFill, { color: colors.ink }, text ? null : emptyCap]}
             />
           </View>
           {mediaButton ? (
@@ -891,6 +897,8 @@ const SendButton = memo(function SendButton({
  * keeps the font's own height and the padding centers it; Android centers it itself.
  */
 const body = systemText("body");
+/** The field's padding over and under its words on iOS. */
+const IOS_PAD_V = 8;
 const inputText: TextStyle = {
   flex: 1,
   minWidth: 0,
@@ -901,7 +909,7 @@ const inputText: TextStyle = {
   letterSpacing: body.letterSpacing,
   paddingHorizontal: 0,
   ...Platform.select<TextStyle>({
-    ios: { paddingTop: 8, paddingBottom: 8 },
+    ios: { paddingTop: IOS_PAD_V, paddingBottom: IOS_PAD_V },
     // The one line centered in the send button's height: the field is exactly as tall.
     default: {
       lineHeight: body.lineHeight,
@@ -912,6 +920,13 @@ const inputText: TextStyle = {
     },
   }),
 };
+
+/**
+ * One line of the field on iOS at the system's text size: the body's line (the font's size and a fifth, as SF draws
+ * it) and the padding over and under it, never under the send button's height.
+ */
+const oneLineIos = (fontScale: number) =>
+  Math.max(SEND, Math.ceil((body.fontSize ?? 17) * fontScale * 1.2) + IOS_PAD_V * 2);
 
 /** The placeholder's words, as the field's own text sits on its first line. */
 const placeholderText: TextStyle = {

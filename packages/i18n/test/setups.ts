@@ -116,6 +116,8 @@ export const SHOWN_ONLY: Record<Condition, readonly string[]> = {
     // The way out for the right hand's plan on a computer that is away: Cloud's own computer is always on.
     "rightHand.unusable.connect",
     "aiAccounts.connect.noComputer",
+    // A connector of ours whose developer app this server lacks: the listing marks it off the Cloud only (`needsApp`).
+    "connectors.needsApp",
     "brain.reasons.no_computer",
     "browser.inCard.noComputer",
     "browser.live.noComputer",

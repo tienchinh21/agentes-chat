@@ -194,6 +194,7 @@ const READS = new Set([
   "get_my_usage",
   "computer_status",
   "read_file",
+  "review_media",
   "list_files",
   "list_tasks",
   "task_status",

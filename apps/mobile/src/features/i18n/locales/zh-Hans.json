@@ -153,6 +153,7 @@
     "forwards": "转发“{{subject}}”",
     "forwardsFrom": "转发“{{subject}}”，来自 {{from}}",
     "onlyOwner": "只有 {{name}} 或管理员可以决定。",
+    "onlyOwnerRole": "只有拥有 {{role}} 角色的人或管理员可以决定。",
     "onlyAdmins": "只有管理员可以决定。",
     "notFound": "此请求已不存在，或你无权查看。",
     "trait": {
@@ -1459,6 +1460,7 @@
       "ruleBody": "{{name}} 将不再遵循这条规则。定下这条规则的人可以再次定下同样的规则。",
       "ruleRemove": "移除",
       "footOwner": "只有 {{name}} 或管理员可以更正这些内容。",
+      "footOwnerRole": "只有拥有 {{role}} 角色的人或管理员可以更正。",
       "footAdmins": "只有管理员可以更正这些内容。",
       "emptyF": "{{name}} 还没有保存关于你的任何内容。",
       "emptyM": "{{name}} 还没有保存关于你的任何内容。",
@@ -1508,6 +1510,7 @@
       },
       "asksYou": "合并和发布会请你审批，除非智能体设为“从不询问”。",
       "asksOwner": "合并和发布会请 {{name}} 审批，除非智能体设为“从不询问”。",
+      "asksOwnerRole": "合并和发布需要拥有 {{role}} 角色的人审批，除非该智能体从不询问。",
       "asksAdmins": "合并和发布会请管理员审批，除非智能体设为“从不询问”。",
       "empty": "目前只能对话。"
     }

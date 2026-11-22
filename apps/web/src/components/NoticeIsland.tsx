@@ -286,7 +286,11 @@ function Line({ n, className }: { n: AppNotification; className?: string }) {
   const request = n.kind === "approval" ? approvals.data?.find((a) => a.id === n.source.approvalId) : undefined;
   // What the right hand found is its headline: nothing under it says it again.
   const line =
-    n.kind === "team_watch" ? "" : request ? approvalTitle(t, request) : noticeLine(n, (kind) => mediaWord(t, kind));
+    n.kind === "team_watch" || n.kind === "budget_paused"
+      ? ""
+      : request
+        ? approvalTitle(t, request)
+        : noticeLine(n, (kind) => mediaWord(t, kind));
   return line ? <span className={className}>{line}</span> : null;
 }
 

@@ -165,6 +165,7 @@
     "forwards": "Transfère « {{subject}} »",
     "forwardsFrom": "Transfère « {{subject}} », de {{from}}",
     "onlyOwner": "Seul {{name}} ou un admin peut décider.",
+    "onlyOwnerRole": "Seules les personnes ayant le rôle {{role}} ou un admin peuvent décider.",
     "onlyAdmins": "Seul un admin peut décider.",
     "notFound": "Cette demande n'existe plus ou vous n'y avez pas accès.",
     "trait": {
@@ -1634,6 +1635,7 @@
       "ruleBody": "{{name}} cesse de suivre cette règle. Qui l'a donnée peut la redonner.",
       "ruleRemove": "Retirer",
       "footOwner": "Seul {{name}} ou un admin peut les corriger.",
+      "footOwnerRole": "Seules les personnes ayant le rôle {{role}} ou un admin peuvent corriger cela.",
       "footAdmins": "Seul un admin peut les corriger.",
       "emptyF": "{{name}} n'a encore rien enregistré sur vous.",
       "emptyM": "{{name}} n'a encore rien enregistré sur vous.",
@@ -1683,6 +1685,7 @@
       },
       "asksYou": "Fusionner et publier demandent votre approbation, sauf si l'agent ne demande jamais.",
       "asksOwner": "Fusionner et publier demandent l'approbation de {{name}}, sauf si l'agent ne demande jamais.",
+      "asksOwnerRole": "Fusionner et publier demandent l'approbation d'une personne ayant le rôle {{role}}, sauf si l'agent ne demande jamais.",
       "asksAdmins": "Fusionner et publier demandent l'approbation d'un admin, sauf si l'agent ne demande jamais.",
       "empty": "Pour l'instant, seulement la conversation."
     }

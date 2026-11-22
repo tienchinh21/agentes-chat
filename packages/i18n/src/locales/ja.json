@@ -2534,6 +2534,7 @@
     "working_other": "{{count}}体のエージェントが作業中"
   },
   "channel": {
+    "teamStalled": "チームが停止中",
     "settingsNav": {
       "label": "チャンネル設定",
       "overview": "概要",
@@ -2659,6 +2660,8 @@
     "noTopic": "説明なし",
     "nameLabel": "名前",
     "nameHelp": "全員に対して変更されます。古いリンクも引き続き使えます。",
+    "replyInThreads": "エージェントはスレッドで返信",
+    "replyInThreadsHelp": "チャンネルで呼ばれたエージェントは、そのメッセージの下のスレッドで答え、チャンネルにはそのスレッドが1行で表示されます。進行中の作業はそのままです。",
     "nameTaken": "#{{name}}はすでにあります。",
     "generalName": "#generalの名前は変更できません。",
     "archive": "チャンネルをアーカイブ",
@@ -2992,6 +2995,7 @@
       "anAgent": "エージェント",
       "none": "なし",
       "budgetDefault": "ワークスペースの既定",
+      "pausesNow": "すぐに一時停止します",
       "anAccount": "AIアカウント",
       "everyone": "全員",
       "ownerOnly": "責任者だけ",
@@ -5466,6 +5470,7 @@
       "undo": "元に戻す",
       "deadline": "残り時間",
       "decides": "決める人",
+      "decidesRole": "{{role}}ロールを持つ人なら誰でも",
       "state": "状況",
       "why": "{{name}}が求める理由",
       "email": "メール",
@@ -6882,6 +6887,8 @@
     "noOwnerShort": "管理者がアラートを受け取り、承認します",
     "noOwnerHelp": "オーナーがいない場合、管理者がアラートを受け取り、重要な操作を承認します。",
     "ownerHelp": "予算のアラートを受け取り、重要な操作を承認します。",
+    "ownerRoleHelp": "{{role}}ロールを持つ人が承認リクエストと通知を受け取り、誰でも決められます。あとからロールを得た人も含みます。",
+    "ownerRoleHelp_female": "{{role}}ロールを持つ人が承認リクエストと通知を受け取り、誰でも決められます。あとからロールを得た人も含みます。",
     "ownerYours": "エージェントを作成した人がオーナーになります。あとで管理者がほかの人に引き継げます。",
     "accessAdmins": "エージェントにアプリやメールボックスへのアクセスを与えられるのは管理者だけです。作成後に管理者に頼んでください。",
     "accessAdminsKeeper": "エージェントにアプリやメールボックスへのアクセスを与えられるのは{{keeper}}だけです。作成後に{{keeper}}に頼んでください。",
@@ -7783,6 +7790,46 @@
     "custom_write": {
       "label": "書き込みツール",
       "description": "書き込みツールを使います。重要とマークされたものは必ず承認を求めます。"
+    },
+    "telegram_messages_read": {
+      "label": "メッセージを読む",
+      "description": "ボットのチャットを一覧し、ボット宛てやボットがいる場所で書かれた内容を読みます。"
+    },
+    "telegram_messages_write": {
+      "label": "メッセージを送る",
+      "description": "ボットとしてメッセージやファイルを送信・編集・ピン留めします。メッセージの削除、メンバーのBAN、招待リンクは承認が必要です。"
+    },
+    "x_posts_read": {
+      "label": "ポストを読む",
+      "description": "アカウントのポストとメンション、IDによるポスト、検索による最近のポストを読みます。"
+    },
+    "x_posts_write": {
+      "label": "ポストする",
+      "description": "Driveの画像や動画を付けてアカウントにポストします。ポストの削除は承認が必要です。"
+    },
+    "threads_posts_read": {
+      "label": "投稿を読む",
+      "description": "アカウントの投稿、返信、メンション、結果を読みます。"
+    },
+    "threads_posts_write": {
+      "label": "投稿と返信",
+      "description": "Driveの画像や動画付きで投稿し、返信し、返信を非表示にします。投稿の削除は承認が必要です。"
+    },
+    "meta_ads_ads_read": {
+      "label": "広告を読む",
+      "description": "広告アカウント、キャンペーン、広告セット、広告を一覧し、結果を読みます。"
+    },
+    "meta_ads_ads_write": {
+      "label": "広告を管理",
+      "description": "キャンペーン、広告セット、広告を作成（常に停止状態）、編集、停止します。有効化と予算の変更は必ず承認が必要です。アーカイブと削除も承認が必要です。"
+    },
+    "tiktok_videos_read": {
+      "label": "動画を読む",
+      "description": "クリエイターのプロフィール、公開動画、投稿できる内容を読みます。"
+    },
+    "tiktok_videos_write": {
+      "label": "動画を下書きに送る",
+      "description": "Driveの動画をクリエイターのTikTok下書きに送り、そこで投稿を仕上げてもらいます。アップロードごとに承認が必要です。"
     }
   },
   "issues": {
@@ -8154,7 +8201,12 @@
       "empty": "ここにファイルをドロップするか、スクリーンショットを貼り付けるか、タスクの会話で送ってください。",
       "fromCreation": "作成時 · {{when}}",
       "fromComment": "{{name}}のコメント · {{when}}",
-      "linked": "{{name}}がリンク"
+      "linked": "{{name}}がリンク",
+      "remove": "{{name}}をタスクから外す",
+      "removeShort": "タスクから外す",
+      "removed": "{{name}}をタスクから外しました。Driveには残っています。",
+      "added_other": "{{count}}件のファイルを添付ファイルに追加しました",
+      "see": "添付ファイルを見る"
     },
     "history": {
       "commented": "がコメントしました",
@@ -8220,6 +8272,11 @@
       "methods": "受け付けるメソッド",
       "methodsHelp": "このアドレスはチェックしたメソッドにだけ応答します。GET の場合は URL のクエリパラメータが呼び出しのデータになります。",
       "methodsLine": "{{methods}} を受け付けます。",
+      "groupBy": "呼び出しのグループ化",
+      "groupByHelp": "各呼び出しのデータ内のフィールド（例: conversation.id）。同じ値の呼び出しは順番に1件ずつ実行され、異なる値の呼び出しは同時に実行されます。",
+      "groupByOff": "すべての呼び出しが1つの列で順番に待ちます。",
+      "groupByOn": "同じ{{path}}の呼び出しは順番に実行され、それ以外は同時に実行されます。",
+      "groupBySaved": "グループ化を保存しました。",
       "address": "アドレス",
       "addressHelp": "アドレスを知っている人は誰でもエージェントを起動できます。パスワードのように扱い、漏れた場合は新しいアドレスを作成してください。",
       "copied": "アドレスをコピーしました。",
@@ -8632,6 +8689,9 @@
       },
       "deploy": {
         "succeeded": "デプロイが完了したとき"
+      },
+      "telegram": {
+        "message": "Telegramボットへのメッセージ"
       }
     },
     "when": {
@@ -9567,6 +9627,7 @@
       "openShort": "開く",
       "reply": "返信",
       "replies_other": "{{count}}件の返信",
+      "replying_other": "{{names}}がスレッドで返信中",
       "closed_other": "スレッドを閉じました · {{title}} · {{count}}件のメッセージ",
       "archived_other": "アーカイブした{{count}}件のスレッドはここに表示されません",
       "see": "見る"
@@ -10423,6 +10484,7 @@
       "everyone": "ワークスペースの全員",
       "people": "一部の人またはロールのみ",
       "owner": "オーナーのみ",
+      "ownerRole": "{{role}}ロールを持つ人のみ",
       "everyonePersonal": "ここにいる全員",
       "peoplePersonal": "一部の人のみ"
     },
@@ -10431,6 +10493,8 @@
       "people": "{{name}}と話せる人とロールを選んでください。",
       "owner": "{{name}}と話せるのは{{owner}}だけです。一覧で{{name}}が見えるのは、{{owner}}、管理者、編集できる人だけです。",
       "noOwner": "このオプションを使うにはオーナーを設定してください。",
+      "ownerRole": "{{name}}と話せるのは{{role}}ロールを持つ人だけです。リストでは、{{name}}は{{role}}ロールを持つ人、管理者、編集できる人にだけ表示されます。",
+      "ownerRole_female": "{{name}}と話せるのは{{role}}ロールを持つ人だけです。リストでは、{{name}}は{{role}}ロールを持つ人、管理者、編集できる人にだけ表示されます。",
       "everyonePersonal": "ここにいる誰でも{{name}}を呼べます。",
       "peoplePersonal": "{{name}}と話せる人を選んでください。"
     },
@@ -10440,8 +10504,11 @@
     "roleMembers_other": "{{count}}人",
     "picked": "選択済み",
     "ownerAlways": "{{name}}はオーナーなので常に話せます。",
+    "ownerRoleAlways": "{{role}}ロールを持つ人はオーナーなので常に話せます。",
+    "whoHolds": "{{role}}ロールを持つ人",
     "onlyYouForNow": "今のところあなただけ",
     "onlyOwnerForNow": "今のところ{{name}}だけ",
+    "onlyOwnerRoleForNow": "今のところ{{role}}ロールを持つ人だけ",
     "search": "ロールと人を検索",
     "searchPeople": "人を検索",
     "noMatch": "その名前のロールや人はいません。",
@@ -10456,6 +10523,7 @@
       "everyone": "ワークスペースの全員",
       "everyonePersonal": "ここにいる全員",
       "owner": "{{name}}のみ",
+      "ownerRole": "{{role}}ロールを持つ人のみ",
       "nobody": "今のところ誰もいません",
       "someone": "一部の人",
       "people": "{{names}}",
@@ -10478,6 +10546,8 @@
     "modeText": {
       "owner": "編集できるのは、{{owner}}（オーナー）、管理者、エージェントを編集でき{{name}}と話せる人です。",
       "noOwner": "編集できるのは、管理者と、エージェントを編集でき{{name}}と話せる人です。",
+      "ownerRole": "編集できるのは、{{role}}ロールを持つ人（オーナーのロール）、管理者、エージェントを編集でき{{name}}と話せる人です。",
+      "ownerRole_female": "編集できるのは、{{role}}ロールを持つ人（オーナーのロール）、管理者、エージェントを編集でき{{name}}と話せる人です。",
       "people": "ほかに{{name}}の働き方を変えられる人を選んでください。"
     },
     "rolesHint": "そのロールを持つ人は誰でも編集できます。あとからロールを得た人も含みます。",
@@ -11609,6 +11679,11 @@
     "recommended": "おすすめ",
     "free": "無料",
     "opencodeFreeHint": "ほかの無料モデルは、エージェントのコンピューターの OpenCode で動きます。",
+    "missingModel": {
+      "app_old": "{{model}} を使うには、エージェントのコンピューターの agentes.chat アプリを更新してください。",
+      "cli_old": "{{model}} を使うには、エージェントのコンピューターの Antigravity CLI を新しいバージョンにする必要があります。そこで agy update を実行してください。",
+      "plan": "{{model}} は Google AI Pro と Ultra に含まれています。エージェントのコンピューターにある Gemini アカウントには、このプランがありません。"
+    },
     "modelHelp": "大きいモデルほど深く考え、プランの消費が早くなります。",
     "hidden": "考えるAIを選ぶのは{{owner}}または管理者です。",
     "hiddenAdmins": "考えるAIを選べるのは管理者だけです。",
@@ -12740,7 +12815,8 @@
       },
       "meta_ads": {
         "1": "キャンペーンと成果を見る",
-        "2": "キャンペーンを作成・調整する"
+        "2": "キャンペーンを作成・調整する",
+        "ask": "広告の有効化と予算の変更は必ずあなたの承認を求めます"
       },
       "google_docs": {
         "1": "ドキュメントを検索して読む",
@@ -12872,6 +12948,26 @@
         "1": "テーブルを見る",
         "2": "データにクエリして答える",
         "3": "何も変更しません"
+      },
+      "telegram": {
+        "1": "ボット宛てのメッセージを読む",
+        "2": "ボットとしてメッセージやファイルを送る",
+        "ask": "削除、BAN、招待リンクは必ずあなたの承認を求めます"
+      },
+      "x": {
+        "1": "アカウントのポストとメンションを読む",
+        "2": "画像や動画付きでポストする",
+        "ask": "ポストの削除は必ずあなたの承認を求めます"
+      },
+      "threads": {
+        "1": "投稿、返信、結果を見る",
+        "2": "画像や動画付きで投稿し返信する",
+        "ask": "投稿の削除は必ずあなたの承認を求めます"
+      },
+      "tiktok": {
+        "1": "プロフィールと動画を見る",
+        "2": "動画を下書きに送り、TikTokで仕上げる",
+        "ask": "アップロードごとに必ずあなたの承認を求めます"
       }
     },
     "connectedList": "接続済み",
@@ -13014,8 +13110,13 @@
       "youtube": "YouTubeチャンネルの動画、コメント、再生リスト、アナリティクス。",
       "pinterest": "Pinterestのピン、ボード、アナリティクス。",
       "reddit": "Redditの投稿、コメント、コミュニティ。",
-      "whatsapp": "WhatsApp Businessのメッセージとテンプレート。"
-    }
+      "whatsapp": "WhatsApp Businessのメッセージとテンプレート。",
+      "telegram": "あなたのTelegramボット：そのチャット、グループ、チャンネル。",
+      "x": "Xアカウントのポスト：投稿、メンションの確認、検索。",
+      "threads": "Threadsアカウントの投稿と返信。",
+      "tiktok": "TikTokのプロフィールと動画、下書きに送られた動画。"
+    },
+    "needsApp": "このサーバーにはまだ{{name}}のアプリがありません。運用者が{{name}}でアプリを登録し、変数を設定します（docs/social-apps-checklist.md）。"
   },
   "toolNames": {
     "order": "verb-last",
@@ -13845,7 +13946,39 @@
       "get_my_usage": "自分の使用量を表示",
       "ignore_usage_limit": "利用上限を無視",
       "send_feedback": "フィードバックを送信",
-      "offer_feedback": "問題の報告を提案"
+      "offer_feedback": "問題の報告を提案",
+      "list_chats": "チャットを一覧",
+      "read_messages": "メッセージを読む",
+      "get_chat": "チャットを見る",
+      "send_file": "ファイルを送る",
+      "edit_message": "メッセージを編集",
+      "pin_message": "メッセージをピン留め",
+      "ban_member": "メンバーをBAN",
+      "create_invite_link": "招待リンクを作成",
+      "get_my_posts": "自分のポストを見る",
+      "get_mentions": "メンションを見る",
+      "search_recent": "最近のポストを検索",
+      "get_replies": "返信を見る",
+      "get_insights": "結果を見る",
+      "reply": "返信する",
+      "hide_reply": "返信を非表示",
+      "list_ad_accounts": "広告アカウントを一覧",
+      "list_campaigns": "キャンペーンを一覧",
+      "list_ad_sets": "広告セットを一覧",
+      "list_ads": "広告を一覧",
+      "create_campaign": "キャンペーンを作成",
+      "create_ad_set": "広告セットを作成",
+      "create_ad": "広告を作成",
+      "update": "更新",
+      "pause": "停止",
+      "activate": "有効にする",
+      "set_budget": "予算を設定",
+      "archive": "アーカイブ",
+      "delete": "削除",
+      "list_videos": "動画を一覧",
+      "get_creator_info": "投稿オプションを見る",
+      "get_post_status": "アップロード状況を見る",
+      "upload_draft": "下書きに送る"
     }
   },
   "toolReview": {
@@ -14026,6 +14159,13 @@
       "asks_other": "{{count}}件の操作は、チャットで承認を求めます。",
       "adjust": "調整",
       "ok": "完了"
+    },
+    "telegram": {
+      "token": "ボットのトークン",
+      "steps": "Telegramで@BotFatherを開き、/newbotを送信し、名前と「bot」で終わるユーザー名を決めて、表示されたトークンをここに貼り付けます。グループを読むにはボットを追加し、チャンネルに投稿するにはそこで管理者にします。"
+    },
+    "x": {
+      "consent": "Xを使えるエージェントはこのアカウントに自分でポストします。ポストの削除は事前に確認し、各エージェントのページでできることを絞り込めます。Xアカウントは一度に1つのワークスペースでのみ使えます。"
     }
   },
   "database": {
@@ -14891,6 +15031,7 @@
       "takeOverNoAccess": "引き継ぐ前に、ルーティンの会話に参加してください。",
       "agentNotInChannel": "先にエージェントを会話に追加してください。",
       "webhookPaused": "テストするにはルーティンをオンにしてください。",
+      "groupByInvalid": "conversation.id のように、各ドットの間にフィールド名があるパスを入力してください。",
       "continueExtraOff": "このプランの利用枠を使い切りました。このエージェントの長い作業にはプランの有料の追加利用が使われません。リセット後に再開します。",
       "continueExtraUsedUp": "このプランの利用枠を使い切り、有料の追加利用も使い切ったか利用できません。リセット後に再開します。",
       "actionsNeedApprover": "ルーティンに自動で実行させられるのは、エージェントのオーナーか、そのアクションを承認する人だけです。",
@@ -14921,7 +15062,9 @@
       "sharingForbidden": "閲覧できる人を変えられるのは、ファイルの会話にいる人だけです。",
       "sharingEmpty": "閲覧できる人を選んでください。",
       "sharingTooMany": "選べるのは最大{{max}}人と{{max}}個のロールです。",
-      "notInDrive": "これは会話の中だけにあるため、共有できません。"
+      "notInDrive": "これは会話の中だけにあるため、共有できません。",
+      "viewOnly": "このファイルは閲覧できますが、変更はできません。作成した人に編集アクセスを依頼してください。",
+      "accessInvalid": "このアクセスを保存できませんでした。閲覧できる人と編集できる人を確認して、もう一度お試しください。"
     },
     "drive": {
       "folderIntoItself": "フォルダを自分自身や中のフォルダに移動することはできません。"
@@ -15016,7 +15159,9 @@
       "ownerOrAdmin": "これができるのは、エージェントのオーナーか管理者だけです。",
       "detailsHidden": "仕組みを見られるのは、{{agentName}} と話す人だけです。",
       "undoForbidden": "元に戻せるのは、エージェントが作業した相手、そのオーナー、または管理者だけです。",
-      "undoSkillsAdmins": "スキルの変更を元に戻したりやり直したりできるのは、エージェントを編集できる人だけです。"
+      "undoSkillsAdmins": "スキルの変更を元に戻したりやり直したりできるのは、エージェントを編集できる人だけです。",
+      "ownerBoth": "オーナーは人かロールのどちらかで、両方にはできません。どちらかを選んでください。",
+      "ownerRoleUnknown": "そのロールはこのワークスペースにもうありません。別のオーナーを選んでください。"
     },
     "account": {
       "notRestorable": "このアカウントはもう復元できません。",
@@ -18800,7 +18945,9 @@
     "usedOf": "{{used}} / {{limit}}",
     "seatsPaid_other": "支払い済み {{count}}席",
     "noLimit": "上限なし",
-    "ownBucket": "自前のバケットを使用、こちらの上限はありません"
+    "ownBucket": "自前のバケットを使用、こちらの上限はありません",
+    "connectors": "今月の X",
+    "shareUsed": "{{share}} 使用済み"
   },
   "referrals": {
     "open": "紹介して特典を獲得",
@@ -19927,23 +20074,15 @@
   "share": {
     "button": "共有",
     "title": "{{name}}を共有",
-    "conversation": "会話のみ",
-    "people": "選んだ人とロール",
-    "peoplePersonal": "選んだ人",
     "everyone": "ワークスペース全体",
     "everyonePersonal": "ここにいる全員",
     "whereDm": "{{name}}とのダイレクトメッセージ",
     "whereDmGone": "ダイレクトメッセージ",
     "whereDmBetween": "{{names}}の間のダイレクトメッセージ",
     "whereChannel": "#{{name}}のメンバー",
-    "add": "人またはロールを追加",
-    "addPersonal": "人を追加",
-    "addSearch": "人とロールを検索",
-    "addSearchPersonal": "人を検索",
     "noResults": "その名前の人はいません",
     "groupPeople": "人",
     "groupRoles": "ロール",
-    "access": "アクセスできる人",
     "you": "{{name}}（あなた）",
     "agent": "エージェント",
     "role": "ロール",
@@ -19952,28 +20091,36 @@
     "adminsPersonal": "ここを管理している人にも見えます。",
     "copyLink": "リンクをコピー",
     "copied": "リンクをコピーしました。",
-    "done": "完了",
     "onlyHere": "この会話にいない人はリンクを開けません。",
-    "choosePeople": "人を選ぶ",
     "readOnly": "閲覧できる人を変えられるのは、会話にいる人だけです。",
-    "open": "ワークスペース全体がこのファイルを見られます。",
-    "openPersonal": "ここにいる全員がこのファイルを見られます。",
-    "savedEveryone": "ワークスペース全体がファイルを見られるようになりました。",
-    "savedEveryonePersonal": "ここにいる全員がファイルを見られるようになりました。",
-    "savedPeople": "選んだ人がファイルを見られるようになりました。",
-    "savedConversation": "会話にいる人だけがファイルを見られるようになりました。",
-    "onlyYou": "あなただけ",
-    "onlyMaker": "{{name}}だけ",
     "onlyYouLink": "このリンクを開けるのはあなただけです。",
     "onlyMakerLink": "このリンクを開けるのは{{name}}だけです。",
     "readOnlyDrive": "閲覧できる人を変えられるのは、ファイルを作成した人と管理者だけです。",
-    "savedOnlyYou": "あなただけがファイルを見られるようになりました。",
-    "savedOnlyMaker": "{{name}}だけがファイルを見られるようになりました。",
-    "undo": "元に戻す",
     "fileRef": "ファイル {{title}}",
     "fileRefNone": "アクセスできないファイル",
     "also": "{{text}}。{{who}}とも共有しています。",
-    "someOnlyHere": "これらのリンクの一部は、すでにファイルを見られる人しか開けません。"
+    "someOnlyHere": "これらのリンクの一部は、すでにファイルを見られる人しか開けません。",
+    "level": {
+      "none": "アクセスなし",
+      "view": "閲覧",
+      "edit": "編集"
+    },
+    "levelOf": "{{name}} にできること",
+    "madeIt": "ファイルを作成",
+    "placeText": "ファイルがある場所",
+    "everyoneText": "このワークスペースの全員",
+    "everyoneTextPersonal": "ここにいる全員",
+    "agentsAll": "すべてのエージェント",
+    "agentsAllText": "ワークスペースのどのエージェントでも",
+    "agentsHere": "この会話のエージェント",
+    "agentsHereText": "ファイルがある場所のエージェント",
+    "addAll": "人、ロール、エージェントを追加",
+    "addAllPersonal": "人またはエージェントを追加",
+    "addAllSearch": "人、ロール、エージェントを検索",
+    "addAllSearchPersonal": "人とエージェントを検索",
+    "groupAgents": "エージェント",
+    "addRow": "追加",
+    "saved": "アクセスを保存しました。"
   },
   "linkErrors": {
     "signIn": {
@@ -20283,7 +20430,7 @@
     "mark": "Beta",
     "open": "フィードバックを送る",
     "ask": "足りなかったこと、壊れたこと、気になったことは？",
-    "goesCloud": "書いた内容は、メールでagentes.chatのチームに届きます。",
+    "goesCloud": "書いた内容は、メールでagentes.chatのチームに届きます。チームは確認のためにAIアシスタントを使うことがあります。",
     "goesServer": "書いた内容は、メールでこのサーバーの管理者に届きます。",
     "placeholder": "自由に書いてください",
     "report": "ここで問題を報告",
@@ -20721,6 +20868,9 @@
         "inTrash": "ゴミ箱にあります。変更するには復元してください。",
         "closing": "ワークスペースを削除しています。ファイルは閲覧のみできます。"
       },
+      "requestEdit": "編集をリクエスト",
+      "requestEditText": "このファイルの編集アクセスをもらえますか？",
+      "requestEditAnyone": "誰かこのファイルの編集アクセスをもらえますか？",
       "present": "発表",
       "download": "ダウンロード",
       "formats": {

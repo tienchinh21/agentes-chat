@@ -27,7 +27,6 @@ import { readMark } from "../logic";
 import type { Unseen } from "../scroll";
 import { withOpacity } from "../turn";
 import { useValueOf, type ValueStore } from "./hooks";
-import { useChatSheet } from "./sheet-mode";
 
 /** A dropped connection shows only past this long (a quick reconnect says nothing). */
 const OFFLINE_AFTER_MS = 1200;
@@ -146,9 +145,7 @@ export const ChatComposer = memo(function ChatComposer({
     afterSend: onVoiceSent,
     onRecording,
   });
-  // In a file's sheet (ADR 0208) the field raises the sheet to its full height while the person types.
-  const sheet = useChatSheet();
-  return <Composer {...composer} voice={voice} onFocusChange={sheet?.onFieldFocus} />;
+  return <Composer {...composer} voice={voice} />;
 });
 
 /**

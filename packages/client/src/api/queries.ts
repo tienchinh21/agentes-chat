@@ -5433,13 +5433,13 @@ export function useSaveArtifact(orgId: string, id: string) {
   });
 }
 
-/** "Compartilhar" (ADR 0157): who sees a file on top of its conversation. The dialog says a failure itself. */
-export function useSetArtifactSharing(orgId: string) {
+/** Compartilhar with levels (ADR 0202): who sees and who edits a file. The dialog says a failure itself. */
+export function useSetArtifactAccess(orgId: string) {
   const api = useApi();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: { id: string; sharing: Parameters<typeof api.artifacts.setSharing>[2] }) =>
-      api.artifacts.setSharing(orgId, input.id, input.sharing),
+    mutationFn: (input: { id: string; access: Parameters<typeof api.artifacts.setAccess>[2] }) =>
+      api.artifacts.setAccess(orgId, input.id, input.access),
     meta: { silent: true },
     onSuccess: (saved) => putArtifact(qc, orgId, saved),
     onSettled: () => void qc.invalidateQueries({ queryKey: keys.artifacts(orgId) }),
@@ -5621,7 +5621,7 @@ function issueEdits(orgId: string, id: string, patch: (issue: Issue) => Issue | 
  * project its name and colour. New criteria wait for the answer (their ids are the server's).
  */
 function issuePatched(qc: QueryClient, orgId: string, patch: IssuePatch) {
-  const { criteria: _criteria, columnId, projectId, ...same } = patch;
+  const { criteria: _criteria, columnId, projectId, removeFiles, ...same } = patch;
   const columns = qc.getQueryData<IssueColumn[]>(keys.issueColumns(orgId)) ?? [];
   const projects = qc.getQueryData<IssueProjects>(keys.issueProjects(orgId))?.projects ?? [];
   return (issue: Issue): Issue => {
@@ -5635,6 +5635,7 @@ function issuePatched(qc: QueryClient, orgId: string, patch: IssuePatch) {
     }
     if (projectId === null) next.project = null;
     else if (projectId !== undefined) next.project = projects.find((p) => p.id === projectId) ?? issue.project;
+    if (removeFiles?.length) next.artifacts = issue.artifacts.filter((f) => !removeFiles.includes(f.id));
     return next;
   };
 }

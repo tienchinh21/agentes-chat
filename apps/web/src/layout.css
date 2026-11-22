@@ -2001,7 +2001,7 @@ html:not([data-pointer]) .artifact-tile__open:focus-visible {
   overflow: hidden;
   color: var(--ink2);
   -webkit-mask-image: linear-gradient(#000 60%, transparent);
-  mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 40%, transparent calc(100% - 1.25em));
 }
 .artifact-tile__code {
   font-family: var(--font-mono);
@@ -3756,15 +3756,26 @@ html:not([data-pointer]) .channel-ref:focus-visible {
   overflow: hidden;
 }
 .folded-body__text[data-cut] {
-  mask-image: linear-gradient(#000 60%, transparent);
+  mask-image: linear-gradient(#000 40%, transparent calc(100% - 1.25em));
 }
 .folded-body__more {
   margin-top: 2px;
   font-size: 13px;
+  text-decoration-color: transparent;
+}
+.msg-clip__more > .ac-icon,
+.folded-body__more > .ac-icon {
+  margin-inline-start: 2px;
+}
+.folded-body__text[data-cut] + .folded-body__more {
+  position: relative;
+  margin-top: -1.25em;
 }
 /*
  * A tall message in a conversation (ClippedBody): whole up to `LONG_MESSAGE.over`, past it only its first
- * `LONG_MESSAGE.shows`, fading out, with "Ver mais" under it, which opens it in place. The limits sit on the words'
+ * `LONG_MESSAGE.shows`, fading out, with "Ver mais" over the fade's last line, which opens it in place. A mask, not a
+ * gradient painted over the words: it fades into whatever is behind them (either theme, a row's hover or highlight, a
+ * DM's tinted bubble). The limits sit on the words'
  * own root, so the bubble still reads them as its direct child. `clip`, not `hidden`: the browser's find must not
  * scroll the words inside their box. Only a cut message is clipped: one that shows whole keeps whatever reaches past
  * its lines.
@@ -3772,14 +3783,23 @@ html:not([data-pointer]) .channel-ref:focus-visible {
 .msg-clip--cut {
   max-height: 360px;
   overflow-y: clip;
-  -webkit-mask-image: linear-gradient(#000 calc(100% - 96px), transparent);
-  mask-image: linear-gradient(#000 calc(100% - 96px), transparent);
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 128px), transparent calc(100% - 20px));
+  mask-image: linear-gradient(#000 calc(100% - 128px), transparent calc(100% - 20px));
 }
 .msg-clip__more {
   display: inline-block;
   margin-top: var(--space-1);
   font-size: var(--text-sm);
   color: inherit;
+  text-decoration-color: transparent;
+}
+/* Over the fade's clear end: the words show continuing right above it. */
+.msg-clip--cut + .msg-clip__foot {
+  position: relative;
+  margin-top: -20px;
+}
+.msg-clip--cut + .msg-clip__foot .msg-clip__more {
+  margin-top: 0;
 }
 .channel-card__head {
   display: flex;
@@ -9707,6 +9727,12 @@ html:not([data-pointer]) .onb__step:focus-visible {
   width: var(--option-face);
   height: var(--option-face);
 }
+/* A role picked as "Owner" (ADR 0085, addendum of 2026-11-21): its 20px mark in the trigger keeps its own
+   icon size, not the 16px the trigger gives a bare icon. */
+.ac-select__lead > .ac-rolemark .ac-icon {
+  width: 12px;
+  height: 12px;
+}
 /* The role step: "Do zero" first (its Função field right under it, one card's gap apart), then the groups of presets
    under small headings. */
 .newag__role-groups {
@@ -10580,6 +10606,16 @@ html:not([data-pointer]) .agp-cell:focus-visible {
 .agp-cell__key:has(> .ac-brand) {
   background: none;
   box-shadow: none;
+}
+/* A role that answers for the agent (ADR 0085, addendum of 2026-11-21) brings its own circle: its 18px mark, icon 11px,
+   where a person's face goes. */
+.agp-cell__key:has(> .ac-rolemark) {
+  background: none;
+  box-shadow: none;
+}
+.agp-cell__key > .ac-rolemark .ac-icon {
+  width: 11px;
+  height: 11px;
 }
 .agp-cell__key .ac-brand--sm {
   border-radius: inherit;

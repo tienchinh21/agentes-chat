@@ -519,6 +519,29 @@ describe("use (retrieval into prompts)", () => {
 });
 
 describe("context tools through the Tool Gateway", () => {
+  test("an administrator's own words: typed, never refused; an agent's text from them, held to what they say", async () => {
+    f = await setup();
+    const member = await addMember(f.db, f.org.id, "member");
+    const text = "The three logos are approved: no need to ask me again for these.";
+    // The judge reads both texts: it refuses what the administrator's message doesn't say.
+    const judge = createFakeJudge((kind, _id, state) =>
+      kind === "permission_change" && !String(state.administrators_own_message ?? "").includes("logos") ? 0.95 : 0,
+    );
+    const by = (userId: string | null, words?: string) => ({ db: f.db, userId, words });
+    await checkPermissionText(judge, f.org.id, text, by(f.owner.id));
+    await checkPermissionText(judge, f.org.id, text, by(f.owner.id, "Approved the three logos, go ahead."));
+    await expect(checkPermissionText(judge, f.org.id, text, by(f.owner.id, "Review PR 7."))).rejects.toMatchObject({
+      code: "context.changes_permissions",
+    });
+    await expect(
+      checkPermissionText(judge, f.org.id, text, by(member.id, "Approved the three logos.")),
+    ).rejects.toBeInstanceOf(ValidationError);
+    expect(judge.calls.at(0)?.state).toMatchObject({
+      administrators_own_message: "Approved the three logos, go ahead.",
+    });
+    expect(judge.calls.at(-1)?.state).not.toHaveProperty("administrators_own_message");
+  });
+
   test("remember, search, expand, forget; remember refuses secrets and permission rules", async () => {
     let step = 0;
     let rememberedId = "";

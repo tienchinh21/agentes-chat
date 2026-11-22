@@ -58,6 +58,9 @@ const KNOWN = {
   "agent.not_owner": "errors.agent.ownerOrAdmin",
   "usage_queue.cancel_forbidden": "errors.agent.ownerOrAdmin",
   "agent.details_hidden": "errors.agent.detailsHidden",
+  // Who answers for an agent (ADR 0085, addendum of 2026-11-21): a person or a role, never both.
+  "agent.owner_both": "errors.agent.ownerBoth",
+  "agent.owner_role_unknown": "errors.agent.ownerRoleUnknown",
   "action.not_allowed": "errors.agent.undoForbidden",
   "action.skills_admins": "errors.agent.undoSkillsAdmins",
   "account.not_owner": "errors.account.notOwner",
@@ -92,6 +95,9 @@ const KNOWN = {
   "artifact.sharing_too_many": "errors.artifact.sharingTooMany",
   "artifact.not_in_drive": "errors.artifact.notInDrive",
   "drive.folder_into_itself": "errors.drive.folderIntoItself",
+  // Who edits (ADR 0202): a change from someone whose access lets them only view the file, an access that doesn't read.
+  "artifact.view_only": "errors.artifact.viewOnly",
+  "artifact.access_invalid": "errors.artifact.accessInvalid",
   // Live files (ADR 0196): a change to a file that is read-only now (in the trash, its workspace closing), a picture
   // over the size a file takes or that is no picture, a file past what it may hold, a whole new content sent for one
   // (it changes only in place).
@@ -208,6 +214,7 @@ const KNOWN = {
   "routine.widget_fixed": "errors.routine.widgetFixed",
   "routine.agent_not_in_channel": "errors.routine.agentNotInChannel",
   "routine.webhook_paused": "errors.routine.webhookPaused",
+  "routine.group_by_invalid": "errors.routine.groupByInvalid",
   "routine.continue_extra_off": "errors.routine.continueExtraOff",
   "run.continue_extra_off": "errors.routine.continueExtraOff",
   "routine.continue_extra_used_up": "errors.routine.continueExtraUsedUp",

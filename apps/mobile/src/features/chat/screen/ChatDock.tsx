@@ -17,6 +17,7 @@ import { insertRef, refQuery } from "../mentions";
 import { NoAiBanner } from "../NoAiBanner";
 import type { noAiBanner } from "../no-ai-banner";
 import { AgentLocked, UnavailableLines } from "../ReachLines";
+import { TeamStalledLine } from "../TeamStalledLine";
 import { withOpacity } from "../turn";
 import type { ListPlacement } from "./ChatList";
 import { DOCK_SIDE } from "./constants";
@@ -242,6 +243,7 @@ export function ChatDock({
         )}
         <Connection status={realtime} />
         {banner && !org?.deletion ? <NoAiBanner banner={banner} /> : null}
+        {channel?.name === "general" && !threadId && !dmAgentId && !org?.deletion ? <TeamStalledLine /> : null}
         <UnavailableLines notices={notices} />
         {/* A request waiting out of view, with "Ver" (and the working line's stop while one agent works).
             Who is working sits here only while there is no conversation yet: once there is one, it is the

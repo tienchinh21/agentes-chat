@@ -8,6 +8,7 @@ import {
   useRoles,
   useUnarchiveChannel,
 } from "@agenteschat/client";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { editsAgent, managesAgent, opensDm } from "@agenteschat/client/lib/audience";
 import { errorText } from "@agenteschat/client/lib/errors";
 import { agentGrammar } from "@agenteschat/client/lib/grammar";
@@ -16,6 +17,7 @@ import { isRightHand } from "@agenteschat/client/lib/right-hand";
 import { leaves, removes } from "@agenteschat/client/lib/roles";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { useMyRoleIds } from "@/hooks/useMyRoleIds";
 import { useSidebarPins } from "@/hooks/useSidebarPins";
 import { requestChannelDetails } from "@/lib/channel-details";
 import { copyText, type MenuEntry } from "@/lib/context-menu";
@@ -251,16 +253,21 @@ export function useAgentMenu() {
   const copyId = useCopyId();
   const mention = useMention();
   const pins = useSidebarPins();
+  const myRoleIds = useMyRoleIds();
   /** `extra`: the sidebar row's own items (Mudar de grupo), after Fixar no topo. */
   return (
-    a: Pick<Agent, "id" | "name" | "handle" | "ownerUserId" | "builtin" | "canTalk" | "canManage" | "canEdit">,
+    a: Pick<
+      Agent,
+      "id" | "name" | "handle" | "ownerUserId" | "ownerRoleId" | "builtin" | "canTalk" | "canManage" | "canEdit"
+    >,
     extra: MenuEntry[] = [],
     openComputer?: () => void,
   ): MenuEntry[] => {
     const dm = dms?.find((d) => d.with.id === a.id);
     // Its owner and who manages it land on its settings; who only edits how it works (its "Quem pode editar", ADR 0085
     // addendum of 2026-11-17) on its instructions.
-    const settles = managesAgent(a) || a.ownerUserId === me.user.id;
+    // Its owner: the person, or whoever holds the role that answers for it (ADR 0085, addendum of 2026-11-21).
+    const settles = managesAgent(a) || ownsAgentAs(a, me.user.id, myRoleIds);
     const edits = settles || editsAgent(a);
     const working = Object.values(live.get().streams.runs).filter(
       (r) => r.agentId === a.id && isStoppable(r) && runs.canStop(r),

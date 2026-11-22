@@ -15,6 +15,7 @@ import {
 } from "@agenteschat/client";
 import { type Level, levelsOf, resourcesOf } from "@agenteschat/client/lib/access-levels";
 import { groupOf, NO_GROUP } from "@agenteschat/client/lib/agent-groups";
+import { ownerPatchOf, ownerValueOf, ownsAgentAs, roleOfOwnerValue } from "@agenteschat/client/lib/agent-owner";
 import {
   audienceOf,
   audiencePatch,
@@ -206,9 +207,10 @@ function AgentProfile({
   // Per agent (ADR 0085 addendum of 2026-11-17): "Editar agentes" (`manage_agents`) reaches only some agents, and an
   // agent's "Quem pode editar" lets more people edit how it works.
   const admin = managesAgent(agent);
+  // Its owner, or whoever holds the role that answers for it (ADR 0085, addendum of 2026-11-21).
   const viewer: Viewer = admin
     ? "admin"
-    : agent.ownerUserId === me.user.id
+    : ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id))
       ? "owner"
       : editsAgent(agent)
         ? "editor"
@@ -266,7 +268,7 @@ function AgentProfile({
             : DEFAULT_KEY
           : undefined,
       budget: admin && d ? (d.monthlyBudgetUsd ?? null) : undefined,
-      owner: agent.ownerUserId ?? NO_OWNER,
+      owner: ownerValueOf(agent, NO_OWNER),
       audience: audienceOf(agent),
       editors: editorsValueOf(agent),
       levels: access.data ? levelsOf(access.data) : undefined,
@@ -307,21 +309,35 @@ function AgentProfile({
 
   const g = agentGrammar(agent.name);
   const ownerFirst = agent.ownerUserId ? (dir.memberById.get(agent.ownerUserId)?.name.split(/\s+/)[0] ?? null) : null;
+  // Who answers for it in a sentence: the person's first name, or the role's name (ADR 0085, addendum of 2026-11-21).
+  const ownerLabel = ownerFirst ?? (agent.ownerRoleId ? (dir.roleName(agent.ownerRoleId) ?? null) : null);
   const lookText = (l: Look) =>
     [
       t(`look.colors.${colorKey(l.color)}`),
       t(`look.eyesNames.${l.eyes}`),
       ...(l.accessory !== "none" ? [t(`look.accessories.${l.accessory}`)] : []),
     ].join(" · ");
-  const memberName = (id: string) =>
-    id === NO_OWNER ? t("newAgent.noOwnerOption") : (dir.memberById.get(id)?.name ?? t("channel.unknownPerson"));
+  // The owner picker's value in words: a person, a role (`role:<id>`, ADR 0085, addendum of 2026-11-21) or nobody.
+  const ownerText = (value: string) => {
+    const roleId = roleOfOwnerValue(value);
+    if (roleId) return dir.roleName(roleId) ?? t("channel.unknownPerson");
+    return value === NO_OWNER
+      ? t("newAgent.noOwnerOption")
+      : (dir.memberById.get(value)?.name ?? t("channel.unknownPerson"));
+  };
   const audienceText = (a: AgentAudience, owner: string) => {
-    const first = (id: string) => memberName(id).split(/\s+/)[0] ?? "";
+    const first = (id: string) => ownerText(id).split(/\s+/)[0] ?? "";
+    const roleOwner = roleOfOwnerValue(owner);
     if (a.mode === "everyone") return t("audience.summary.everyone");
     if (a.mode === "owner")
-      return owner === NO_OWNER ? t("audience.summary.nobody") : t("audience.summary.owner", { name: first(owner) });
-    const ids = [...new Set([...(owner === NO_OWNER ? [] : [owner]), ...a.userIds])];
-    const roles = (a.roleIds ?? []).flatMap((id) => dir.roleName(id) ?? []);
+      return owner === NO_OWNER
+        ? t("audience.summary.nobody")
+        : roleOwner
+          ? t("audience.summary.ownerRole", { role: ownerText(owner) })
+          : t("audience.summary.owner", { name: first(owner) });
+    const ids = [...new Set([...(owner === NO_OWNER || roleOwner ? [] : [owner]), ...a.userIds])];
+    const roleIds = [...new Set([...(roleOwner ? [roleOwner] : []), ...(a.roleIds ?? [])])];
+    const roles = roleIds.flatMap((id) => dir.roleName(id) ?? []);
     const names = [...roles, ...ids.map(first)];
     return names.length ? joinNames(names, t) : t("audience.summary.nobody");
   };
@@ -329,7 +345,7 @@ function AgentProfile({
   const editorsText = (e: EditorsValue | undefined, owner: string) =>
     editorsSummary(
       t,
-      { name: agent.name, ownerUserId: owner === NO_OWNER ? null : owner, editors: e && editorsPatch(e) },
+      { name: agent.name, ...ownerPatchOf(owner, NO_OWNER), editors: e && editorsPatch(e) },
       (id) => dir.memberById.get(id)?.name,
       dir.roleName,
     );
@@ -431,7 +447,7 @@ function AgentProfile({
         };
       }
       case "owner":
-        return { ...base, label: label("owner"), was: memberName(saved.owner), now: memberName(draft.owner) };
+        return { ...base, label: label("owner"), was: ownerText(saved.owner), now: ownerText(draft.owner) };
       case "audience":
         return {
           ...base,
@@ -549,7 +565,13 @@ function AgentProfile({
     if (fields.has("model")) put("model", "model", draft.model);
     if (fields.has("key")) put("key", "credentialId", draft.key === DEFAULT_KEY ? null : (draft.key ?? null));
     if (fields.has("budget")) put("budget", "monthlyBudgetUsd", budgetValue(draft.budget) ?? null);
-    if (fields.has("owner")) put("owner", "ownerUserId", draft.owner === NO_OWNER ? null : draft.owner);
+    // A person or a role, never both (ADR 0085, addendum of 2026-11-21): the server clears the other one, so only the
+    // one picked goes (a person's id or null for nobody, else the role).
+    if (fields.has("owner")) {
+      const owner = ownerPatchOf(draft.owner, NO_OWNER);
+      if (owner.ownerRoleId) put("owner", "ownerRoleId", owner.ownerRoleId);
+      else put("owner", "ownerUserId", owner.ownerUserId);
+    }
     if (fields.has("audience")) {
       put("audience", "audience", audiencePatch(draft.audience));
     }
@@ -790,6 +812,7 @@ function AgentProfile({
       setPicking({ add });
     },
     ownerFirst,
+    ownerLabel,
     openWork: setWork,
     workOpen: work,
     save,

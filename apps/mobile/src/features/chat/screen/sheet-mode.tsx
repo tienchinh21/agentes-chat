@@ -10,8 +10,6 @@ import { useColors } from "../../shared/hooks";
 export interface ChatSheetMode {
   /** × in the sheet's bar. */
   onClose: () => void;
-  /** The composer took the keyboard (true) or let it go: the sheet rises to its full height while the person types. */
-  onFieldFocus: (focused: boolean) => void;
   /** Go to this message (a pin tapped on the file behind the sheet); `at` is new for each ask. */
   seek: { messageId: string; at: number } | null;
 }

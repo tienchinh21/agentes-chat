@@ -595,6 +595,9 @@ export const Agent = z
     instructions: z.string(),
     model: z.string(),
     ownerUserId: z.string().nullable(),
+    ownerRoleId: z.uuid().nullable().openapi({
+      description: "A role that answers for it instead of a person (ADR 0085, addendum of 2026-11-21).",
+    }),
     hasCredential: z.boolean(),
     monthlyBudgetUsd: z
       .number()
@@ -721,6 +724,10 @@ export const Channel = z
       .optional()
       .openapi({ description: "Its sidebar category; null: on top, with none." }),
     position: z.number().int().optional().openapi({ description: "Order inside its category, from 0." }),
+    replyInThreads: z.boolean().optional().openapi({
+      description:
+        "Agents asked in its main timeline answer in the thread under that message, which then shows as one line (ADR 0214). Regular channels only.",
+    }),
     unreadCount: z.number().int().optional().openapi({
       description:
         "Channel list only: messages since you last read it (since you joined, if never), not yours; a thread reply counts only in a thread you follow; an agent's sticker or GIF after its own reply never (ADR 0091). At most 100; 0 when you're not a member.",
@@ -1129,6 +1136,17 @@ export const BrainOption = z
       }),
     ),
     defaultModel: z.string().nullable(),
+    missing: z
+      .object({
+        modelId: z.string(),
+        label: z.string(),
+        why: z.enum(["app_old", "cli_old", "plan"]),
+      })
+      .optional()
+      .openapi({
+        description:
+          "Antigravity: the newest Gemini isn't among its models because the computer's agentes.chat is too old to bring a CLI that runs it (`app_old`), its CLI predates it where the computer's setup installs it (`cli_old`), or no account there has a plan with it (`plan`).",
+      }),
   })
   .openapi("BrainOption");
 

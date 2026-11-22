@@ -34,6 +34,7 @@ import {
   type EmailArt,
   type FakeScheduleAnswers,
   type FetchAppDocument,
+  type IntentWriter,
   type McpConnect,
   type ResolveHost,
   type ToolSource,
@@ -82,6 +83,8 @@ export async function createTestServer(
     resolveHost?: ResolveHost;
     /** Fake GitHub (git smart HTTP and REST) for the git proxy. */
     github?: { gitUrl: string; apiUrl: string; fetch: typeof fetch };
+    /** The working line's first words at a run's start (`intent-line.ts`). Default: none. */
+    intents?: IntentWriter;
     /** Answers of the fake judge (judge.ts). Default: every Noul 0, but an agent's mention needs nothing. */
     judge?: Parameters<typeof createFakeJudge>[0];
     /** The fake schedule reader's table (phrase → answer), on top of `TEST_SCHEDULES`. */
@@ -187,6 +190,7 @@ export async function createTestServer(
     github: options.github,
     judge: createFakeJudge(options.judge),
     schedules: createFakeScheduleReader({ ...TEST_SCHEDULES, ...options.schedules }),
+    intents: options.intents ?? null,
     toolsOnDemand: false,
     emailArt: options.emailArt,
     jevFetch: options.jevFetch,

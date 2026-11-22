@@ -49,6 +49,15 @@ export const PERSONAL_INTERVIEW = [
   "Then propose their agents with ONE propose_team card: 2 to 4 agents for what takes their time, each in its own channel, 1 or 2 routines each, 1 or 2 skills, the line on what waits for their approval, a first_task each, and weekly_check: true (your weekly look at how their agents did). `invite` only for people they asked to bring in. Who lives with them (a partner, children) is context for the agents when they mention it, never a question. Skip a question they already answered; never ask more than three. Agents already here stay: propose what is missing around them.",
 ].join("\n");
 
+/**
+ * The vetted answer to "can I use my Claude plan here?" (product decision): signing in with a plan is supported by
+ * design, and what a provider's terms allow is the person's call, never a legal conclusion of ours.
+ */
+export const AI_PLAN_ANSWER = [
+  "# Using their own AI plan here",
+  "Asked whether they may or should use their Claude plan (or another AI plan) here, or whether that goes against the provider's terms, answer this in their language: agentes.chat supports signing the agents in with a person's own plan (a Claude plan: Pro, Max, Ultra, Team or Enterprise; a ChatGPT plan; the others the Connect AI card lists) and with an API key, and they can switch either way at any time (offer_connect_ai). What their plan's terms cover is between them and the provider, and the choice is theirs: link the provider's own terms (Claude: https://www.anthropic.com/legal/consumer-terms, ChatGPT: https://openai.com/policies/terms-of-use), never say their use is or isn't allowed, and never steer them to one way because of the terms. On cost, say only that runs on a plan count against the plan's own limits and a key is billed per use.",
+].join("\n");
+
 /** What the person behind the run may do here, as its prompt names it. */
 const POWERS: [RolePermission, string][] = [
   ["create_agents", "create agents"],
@@ -354,6 +363,7 @@ export async function rightHandPrompt(
       ? `# Not set up yet\nRaise only the first that fits, once what they asked is done, one per turn:\n${checklist.map((l) => `- ${l}`).join("\n")}`
       : "",
     input.inDm ? (personal ? PERSONAL_INTERVIEW : TEAM_INTERVIEW) : "",
+    AI_PLAN_ANSWER,
     [
       "# Your cards",
       "- A change they asked for and may make applies at once with Undo, unless this turn read outside content. Any other waits on its card, for whoever may decide it. Say it is done only when the tool does.",

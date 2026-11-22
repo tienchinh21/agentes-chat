@@ -153,6 +153,7 @@
     "forwards": "Meneruskan “{{subject}}”",
     "forwardsFrom": "Meneruskan “{{subject}}”, dari {{from}}",
     "onlyOwner": "Hanya {{name}} atau admin yang bisa memutuskan.",
+    "onlyOwnerRole": "Hanya yang punya peran {{role}} atau admin yang bisa memutuskan.",
     "onlyAdmins": "Hanya admin yang bisa memutuskan.",
     "notFound": "Permintaan ini sudah tidak ada atau tidak bisa kamu lihat.",
     "trait": {
@@ -1459,6 +1460,7 @@
       "ruleBody": "{{name}} berhenti mengikuti aturan ini. Orang yang memberi aturan itu bisa memberikannya lagi.",
       "ruleRemove": "Hapus",
       "footOwner": "Hanya {{name}} atau admin yang bisa mengoreksinya.",
+      "footOwnerRole": "Hanya yang punya peran {{role}} atau admin yang bisa memperbaikinya.",
       "footAdmins": "Hanya admin yang bisa mengoreksinya.",
       "emptyF": "{{name}} belum menyimpan apa pun tentangmu.",
       "emptyM": "{{name}} belum menyimpan apa pun tentangmu.",
@@ -1508,6 +1510,7 @@
       },
       "asksYou": "Merge dan publikasi meminta persetujuanmu, kecuali agen diatur untuk tidak pernah bertanya.",
       "asksOwner": "Merge dan publikasi meminta persetujuan {{name}}, kecuali agen diatur untuk tidak pernah bertanya.",
+      "asksOwnerRole": "Merge dan publikasi meminta persetujuan dari yang punya peran {{role}}, kecuali agen tidak pernah bertanya.",
       "asksAdmins": "Merge dan publikasi meminta persetujuan admin, kecuali agen diatur untuk tidak pernah bertanya.",
       "empty": "Untuk sekarang, hanya percakapan."
     }

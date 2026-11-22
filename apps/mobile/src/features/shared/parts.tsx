@@ -320,6 +320,10 @@ function NativeHeader({
   });
   const word = action?.label ?? null;
   const wordOff = action?.disabled ?? false;
+  // iOS: words with a wide right side (a word beside a button, several buttons) start by the back button, as the
+  // system lays out a title that can't be centred. Centred on the screen they sat against that side's buttons, far
+  // from the back button. Not a large title (the system draws it), not on Android (the bar's start already).
+  const leading = IOS && !custom && !largeTitle && text !== "" && titleSide(word, rightCount) > LEADING_FROM;
   const actionOptions = useHeaderActionOptions({ right: actions, lead });
   const hasActions = (actions?.length ?? 0) > 0 || lead != null;
   // Stable options: `setOptions` runs when the title or the presence of actions change, not on
@@ -335,17 +339,19 @@ function NativeHeader({
         ? { headerLargeTitleShadowVisible: false, headerLargeTitleStyle: { color: colors.ink } }
         : null),
       title: text,
-      headerTitle: custom
-        ? () => (
-            <HeaderTitle
-              text={line !== undefined ? text : ""}
-              node={titleNode}
-              line={line}
-              lineColor={subtitleColor}
-              side={line !== undefined ? titleSide(word, rightCount) : word !== null ? 100 : 75}
-            />
-          )
-        : text,
+      headerTitle: leading
+        ? () => <LeadingTitle text={text} side={titleSide(word, rightCount)} />
+        : custom
+          ? () => (
+              <HeaderTitle
+                text={line !== undefined ? text : ""}
+                node={titleNode}
+                line={line}
+                lineColor={subtitleColor}
+                side={line !== undefined ? titleSide(word, rightCount) : word !== null ? 100 : 75}
+              />
+            )
+          : text,
       ...(word !== null && IOS
         ? {
             unstable_headerRightItems: () => [
@@ -394,6 +400,7 @@ function NativeHeader({
       colors.ink,
       text,
       custom,
+      leading,
       line,
       subtitleColor,
       rightCount,
@@ -419,6 +426,27 @@ const titleSide = (word: string | null, buttons: number) => {
   const right = (word ? 32 + word.length * 9 + (buttons > 0 ? 8 : 0) : 0) + 44 * buttons;
   return 16 + Math.max(44, right) + 8;
 };
+
+/** The back button's side (`titleSide` with nothing on the right). */
+const BACK_SIDE = titleSide(null, 0);
+/** Past this the right side outweighs the back button: more than one button, or a word with one. */
+const LEADING_FROM = BACK_SIDE + 40;
+
+/**
+ * A title in words where the right side is wide (`leading`): nearly as wide as the room between the back button and
+ * that side (8 points short, so the bar never squeezes it), too wide to centre, so the bar lays it by the back
+ * button, the words at its start.
+ */
+function LeadingTitle({ text, side }: { text: string; side: number }) {
+  const { width } = useWindowDimensions();
+  return (
+    <View style={{ width: Math.max(0, width - BACK_SIDE - side - 8) }}>
+      <Text variant="body" numberOfLines={1} accessibilityRole="header" style={styles.titleText}>
+        {text}
+      </Text>
+    </View>
+  );
+}
 
 /**
  * A word and buttons together on a bar (a task's "Concluir" beside its "…"): the word at the bar's end, the buttons

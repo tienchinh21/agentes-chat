@@ -97,6 +97,7 @@ import { ForWhom, type OwnerTab } from "@/components/OwnerScope";
 import { useOrg } from "@/components/org-context";
 import { useAgentsAccess } from "@/hooks/useAgentsAccess";
 import { useDirectory } from "@/hooks/useDirectory";
+import { useMyRoleIds } from "@/hooks/useMyRoleIds";
 import { oauthReturnPath } from "@/lib/desktop";
 import { forgetGithubOrgs, keepGithubOrgs, readGithubOrgs } from "@/lib/github-orgs";
 import { navigateAway } from "@/lib/navigate";
@@ -434,6 +435,10 @@ function ConnectStep({
     }
   };
 
+  // A Telegram bot connects with the token @BotFather gives, not an API key.
+  const telegram = def?.id === "telegram";
+  const keyLabel = telegram ? t("connectFlow.telegram.token") : t("connectors.apiKey");
+  const keyHelp = telegram ? t("connectFlow.telegram.steps") : t("connectors.apiKeyHelp");
   const keyForm = (
     <form
       className="cflow__key"
@@ -460,9 +465,9 @@ function ConnectStep({
         </Alert>
       )}
       <Field
-        label={t("connectors.apiKey")}
+        label={keyLabel}
         id="cflow-key"
-        hint={{ name: t("common.about", { label: t("connectors.apiKey") }), text: t("connectors.apiKeyHelp") }}
+        hint={{ name: t("common.about", { label: keyLabel }), text: keyHelp }}
         error={keyError}
       >
         <Input type="password" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} />
@@ -483,6 +488,8 @@ function ConnectStep({
           ) : def ? (
             <p className="muted cflow__text">
               {connectorDescription(t, def)} {canOAuth && t("connectFlow.oauthHelp", { name: connectorBrand(def) })}
+              {/* X wants the account owner's express consent before agents post for them: connecting after this is it. */}
+              {def.id === "x" && <span className="cflow__said">{t("connectFlow.x.consent")}</span>}
             </p>
           ) : viaComposio ? (
             <p className="muted cflow__text">{t("connectors.composio.via")}</p>
@@ -1111,6 +1118,7 @@ function ToolsStep({
 function WhoStep({ item, onBack, onClose }: { item: ConnectedItem; onBack: () => void; onClose: () => void }) {
   const { t } = useTranslation();
   const { org, me } = useOrg();
+  const myRoleIds = useMyRoleIds();
   const api = useApi();
   const qc = useQueryClient();
   const toast = useToast();
@@ -1118,7 +1126,7 @@ function WhoStep({ item, onBack, onClose }: { item: ConnectedItem; onBack: () =>
   // A personal connection goes on for the agents its person may change (their own, and the ones they manage); a team
   // one for the agents the person manages (ADR 0085 addendum of 2026-11-17): the server refuses the rest.
   const list = (agents.data ?? []).filter((a) =>
-    item.ownerUserId ? canEditAudience(org, a, me.user.id) : managesAgent(a),
+    item.ownerUserId ? canEditAudience(org, a, me.user.id, myRoleIds) : managesAgent(a),
   );
   const access = useAgentsAccess(list);
   const resourceId = `connector:${item.id}`;

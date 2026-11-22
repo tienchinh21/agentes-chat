@@ -274,6 +274,20 @@ export function mediaPins(
   return pins;
 }
 
+/**
+ * The conversation's messages with mine still on their way after them, each once: a local copy whose server copy is
+ * already in (the same `clientId`, or the same id) is left out.
+ */
+export function withSending<M extends { id: string; clientId?: string | null }>(
+  messages: readonly M[],
+  sending: readonly M[],
+): readonly M[] {
+  if (sending.length === 0) return messages;
+  const ids = new Set(messages.map((m) => m.id));
+  const echoed = new Set(messages.flatMap((m) => (m.clientId ? [m.clientId] : [])));
+  return [...messages, ...sending.filter((m) => !ids.has(m.id) && !(m.clientId && echoed.has(m.clientId)))];
+}
+
 /** The pins drawn on a picture: those with a mark, open (a resolved one is off the picture). */
 export const picturePins = (pins: readonly MediaPin[]) => pins.filter((p) => p.selection.mark && !p.resolved);
 
@@ -428,18 +442,6 @@ export function talkSheetReserve(screenHeight: number, top: number | null | unde
   if (top !== null && top !== undefined && Number.isFinite(top) && top > 0 && top < screenHeight)
     return Math.round(screenHeight - top);
   return Math.round(screenHeight * (TALK_SHEET_DETENTS[0] ?? 0.5) + Math.max(0, bottomInset));
-}
-
-/**
- * The box a picture or a video lays out in while the sheet is up at its first height: from under the viewer's bar
- * (`top`) down to the sheet's top, never less than nothing.
- */
-export function stageAbove(
-  screen: { width: number; height: number },
-  top: number,
-  reserve: number,
-): { width: number; height: number } {
-  return { width: screen.width, height: Math.max(0, Math.round(screen.height - top - reserve)) };
 }
 
 // ── Where the conversation opens ─────────────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import type { Agent, AgentAudience, Channel, OrgRole, OrgRoles, Person } from "@agenteschat/client";
-import { channelMembersQuery, keys, useApi, useSetRowHolders, useWidenAudience } from "@agenteschat/client";
+import { channelMembersQuery, keys, useApi, useRoles, useSetRowHolders, useWidenAudience } from "@agenteschat/client";
 import { audienceAdmits, audienceOf, audiencePatch } from "@agenteschat/client/lib/audience";
 import { errorText } from "@agenteschat/client/lib/errors";
 import { agentGrammar } from "@agenteschat/client/lib/grammar";
@@ -511,6 +511,8 @@ function TalksDialog({
   const [failed, setFailed] = useState<unknown>(null);
   const g = agentGrammar(agent.name);
   const owner = people.find((p) => p.userId === agent.ownerUserId);
+  // Or the role that answers for it (ADR 0085, addendum of 2026-11-21): "Only whoever holds Engineering".
+  const ownerRole = useRoles(org.id).data?.roles.find((r) => r.id === agent.ownerRoleId);
   const before = audienceOf(agent);
   const as = (a: AgentAudience): Agent => ({ ...agent, audience: { ...a, consultable: before.consultable } });
   const losing = people.filter(
@@ -519,7 +521,7 @@ function TalksDialog({
       audienceAdmits(agent, p.userId, p.roleIds ?? []) &&
       !audienceAdmits(as(audience), p.userId, p.roleIds ?? []),
   );
-  const valid = audienceValid(audience, agent.ownerUserId);
+  const valid = audienceValid(audience, agent.ownerUserId ?? agent.ownerRoleId);
   const same =
     audience.mode === before.mode &&
     (audience.mode !== "people" ||
@@ -565,6 +567,7 @@ function TalksDialog({
                       value={{ userIds: audience.userIds, roleIds: audience.roleIds ?? [] }}
                       onChange={(v) => setAudience((a) => ({ ...a, ...v }))}
                       ownerUserId={agent.ownerUserId}
+                      ownerRoleId={agent.ownerRoleId}
                       idPrefix={`talks-${agent.id}`}
                       everyRole
                     />
@@ -572,9 +575,13 @@ function TalksDialog({
                 },
                 {
                   value: "owner",
-                  title: owner ? t("rolesPage.only", { names: owner.name }) : t("audience.mode.owner"),
+                  title: ownerRole
+                    ? t("audience.mode.ownerRole", { role: ownerRole.name })
+                    : owner
+                      ? t("rolesPage.only", { names: owner.name })
+                      : t("audience.mode.owner"),
                   description: t("rolesPage.talks.ownerDesc", g),
-                  disabled: !agent.ownerUserId,
+                  disabled: !agent.ownerUserId && !agent.ownerRoleId,
                 },
               ]}
             />

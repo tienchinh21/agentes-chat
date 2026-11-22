@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Stack, useIsFocused } from "expo-router";
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, StyleSheet, View } from "react-native";
+import { Platform, View } from "react-native";
 import { useOrg } from "@/providers/org";
 import { LargeTitleScreen, LIST_AVATAR, ListRow, SkeletonList, SkeletonOver, useFirstLoad, useWide } from "@/ui";
 import { router } from "@/ui/navigation";
@@ -32,7 +32,7 @@ import { useHasWorkAlong } from "../work-along/WorkAlong";
 import { ChatsSplit, OpenFirstChat, SplitHandoff } from "./ChatsSplit";
 import { DeletingNotice } from "./DeletingNotice";
 import { FirstAgentEmpty, Greeting, GreetingSky } from "./Greeting";
-import { Arrive, useHomeEntrance, useWake } from "./HomeEntrance";
+import { useHomeEntrance, useWake } from "./HomeEntrance";
 import { HomeRow } from "./HomeRow";
 import { CollapsibleSection, LandRow, SeeAllRow, useCollapsedSections } from "./HomeSection";
 import { HomeServerError, HomeServerNotice } from "./HomeServerError";
@@ -58,8 +58,6 @@ import { useWaitingItems } from "./useWaitingItems";
 
 /** Faces of the home that move, the pinned ones at work first, then the first rows (a long list stays light). */
 const LIVE_ROWS = 6;
-/** The home's sky fading in after the launch splash. */
-const SKY_ARRIVE_MS = 300;
 /**
  * The team peeking past the list's end (`TeamPeek`) where the list reports a pull there: iOS bounces past its end;
  * Android's list stops at it (as in a conversation, `ChatPeek`).
@@ -224,18 +222,14 @@ function Home() {
   // The first load: the rows arrive over the stand-ins (a refetch plays nothing).
   const load = useFirstLoad(list.loading);
 
-  // The first Conversas after the splash arrives as one gesture (once per launch, never holding a tap back): the sky
-  // comes up from the splash's, the greeting rises, the right hand's field follows and its face wakes with a small
-  // hop. The title stays put: it is where the eye lands.
+  // The first Conversas after the splash is already in place under it (the splash's ring opens on it): only the right
+  // hand's face wakes, once it is in view.
   const entrance = useHomeEntrance();
   const wake = useWake(entrance.armed, entrance.play);
-  const arrive = { armed: entrance.armed, play: entrance.play };
 
   const ask =
     pinned.pin && !failed && !list.loading ? (
-      <Arrive {...arrive} delay={90}>
-        <RightHandAsk row={pinned.pin} onStart={startDm} faceMode={wake.mode} faceStyle={wake.style} />
-      </Arrive>
+      <RightHandAsk row={pinned.pin} onStart={startDm} faceMode={wake.mode} />
     ) : null;
 
   const holdLabel = t("sidebarPins.pin");
@@ -254,14 +248,7 @@ function Home() {
       {...header}
       // The sky stands behind the bar and the large title and scrolls with them: the title is drawn with it.
       drawnTitle
-      backdrop={
-        empty || failed ? undefined : (
-          // The sky comes up quickly after the splash's own (300 ms): the home is there, not still arriving.
-          <Arrive {...arrive} rise={0} duration={SKY_ARRIVE_MS} style={StyleSheet.absoluteFill}>
-            <GreetingSky />
-          </Arrive>
-        )
-      }
+      backdrop={empty || failed ? undefined : <GreetingSky />}
       below={
         empty || failed ? undefined : (
           <Greeting
@@ -269,7 +256,6 @@ function Home() {
             finished={finished.finished}
             onFinishedPress={(f) => finished.dismiss(f.key)}
             after={ask}
-            arrive={arrive}
           />
         )
       }

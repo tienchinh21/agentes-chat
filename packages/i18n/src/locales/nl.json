@@ -2630,6 +2630,7 @@
     "working_other": "{{count}} agents aan het werk"
   },
   "channel": {
+    "teamStalled": "Team staat stil",
     "settingsNav": {
       "label": "Kanaalinstellingen",
       "overview": "Overzicht",
@@ -2757,6 +2758,8 @@
     "noTopic": "Geen beschrijving",
     "nameLabel": "Naam",
     "nameHelp": "Verandert voor iedereen. Oude links blijven werken.",
+    "replyInThreads": "Agents antwoorden in threads",
+    "replyInThreadsHelp": "Een agent die in het kanaal wordt aangeroepen, antwoordt in de thread onder dat bericht, en het kanaal toont er één regel voor. Werk dat al loopt, blijft waar het is.",
     "nameTaken": "Er is al een #{{name}}.",
     "generalName": "#general houdt zijn naam.",
     "archive": "Kanaal archiveren",
@@ -3107,6 +3110,7 @@
       "anAgent": "Een agent",
       "none": "Geen",
       "budgetDefault": "Standaard van de workspace",
+      "pausesNow": "pauzeert meteen",
       "anAccount": "Een AI-account",
       "everyone": "Iedereen",
       "ownerOnly": "Alleen de verantwoordelijke",
@@ -5702,6 +5706,7 @@
       "undo": "Ongedaan maken",
       "deadline": "Resterende tijd",
       "decides": "Wie beslist",
+      "decidesRole": "Iedereen met de rol {{role}}",
       "state": "Status",
       "why": "Waarom {{name}} het vraagt",
       "email": "De e-mail",
@@ -7202,6 +7207,8 @@
     "noOwnerShort": "Beheerders krijgen de meldingen en keuren goed",
     "noOwnerHelp": "Zonder eigenaar krijgen beheerders de meldingen en keuren zij gevoelige acties goed.",
     "ownerHelp": "Krijgt de budgetmeldingen en keurt gevoelige acties goed.",
+    "ownerRoleHelp": "Iedereen met de rol {{role}} krijgt de goedkeuringsverzoeken en meldingen. Ieder van hen beslist, ook wie de rol later krijgt.",
+    "ownerRoleHelp_female": "Iedereen met de rol {{role}} krijgt de goedkeuringsverzoeken en meldingen. Ieder van hen beslist, ook wie de rol later krijgt.",
     "ownerYours": "Wie de agent maakt is de eigenaar. Een beheerder kan hem later aan iemand anders overdragen.",
     "accessAdmins": "Alleen beheerders geven agents toegang tot apps en mailboxen. Vraag het een beheerder zodra hij is gemaakt.",
     "accessAdminsKeeper": "Alleen {{keeper}} geeft agents toegang tot apps en mailboxen. Vraag het {{keeper}} zodra hij is gemaakt.",
@@ -8134,6 +8141,46 @@
     "custom_write": {
       "label": "Schrijftools",
       "description": "De schrijftools gebruiken. Tools die als gevoelig zijn gemarkeerd, vragen altijd om goedkeuring."
+    },
+    "telegram_messages_read": {
+      "label": "Berichten lezen",
+      "description": "De chats van de bot tonen en lezen wat mensen hem schreven of waar hij zit."
+    },
+    "telegram_messages_write": {
+      "label": "Berichten sturen",
+      "description": "Berichten en bestanden als de bot sturen, bewerken en vastzetten. Berichten verwijderen, mensen verbannen en uitnodigingslinks vragen om goedkeuring."
+    },
+    "x_posts_read": {
+      "label": "Posts lezen",
+      "description": "De posts en vermeldingen van het account lezen, posts op id en recente posts via zoeken."
+    },
+    "x_posts_write": {
+      "label": "Posten",
+      "description": "Op het account posten, met afbeeldingen of een video uit de Drive. Een post verwijderen vraagt om goedkeuring."
+    },
+    "threads_posts_read": {
+      "label": "Posts lezen",
+      "description": "De posts van het account lezen, met reacties, vermeldingen en resultaten."
+    },
+    "threads_posts_write": {
+      "label": "Posten en reageren",
+      "description": "Posten met afbeeldingen of video's uit de Drive, reageren en reacties verbergen. Een post verwijderen vraagt om goedkeuring."
+    },
+    "meta_ads_ads_read": {
+      "label": "Advertenties lezen",
+      "description": "Advertentieaccounts, campagnes, advertentiesets en advertenties tonen en hun resultaten lezen."
+    },
+    "meta_ads_ads_write": {
+      "label": "Advertenties beheren",
+      "description": "Campagnes, advertentiesets en advertenties maken (altijd gepauzeerd), bewerken en pauzeren. Aanzetten en een budget wijzigen vragen altijd. Archiveren en verwijderen vragen."
+    },
+    "tiktok_videos_read": {
+      "label": "Video's lezen",
+      "description": "Het profiel, de openbare video's en wat de maker mag posten lezen."
+    },
+    "tiktok_videos_write": {
+      "label": "Video's naar concepten sturen",
+      "description": "Een video uit de Drive naar de TikTok-concepten van de maker sturen, die de post daar afmaakt. Elke upload vraagt om goedkeuring."
     }
   },
   "issues": {
@@ -8527,7 +8574,13 @@
       "empty": "Sleep bestanden hierheen, plak een screenshot of stuur ze in het gesprek van de taak.",
       "fromCreation": "Bij het maken · {{when}}",
       "fromComment": "Reactie van {{name}} · {{when}}",
-      "linked": "Gekoppeld door {{name}}"
+      "linked": "Gekoppeld door {{name}}",
+      "remove": "{{name}} uit de taak halen",
+      "removeShort": "Uit de taak halen",
+      "removed": "{{name}} is uit de taak gehaald. Het bestand staat nog in de Drive.",
+      "added_one": "Bestand bij de bijlagen",
+      "added_other": "{{count}} bestanden bij de bijlagen",
+      "see": "Bijlagen bekijken"
     },
     "history": {
       "commented": "reageerde",
@@ -8593,6 +8646,11 @@
       "methods": "Toegestane methoden",
       "methodsHelp": "Het adres reageert alleen op de aangevinkte methoden. Bij GET zijn de queryparameters van de URL de gegevens van de aanroep.",
       "methodsLine": "Accepteert {{methods}}.",
+      "groupBy": "Aanroepen groeperen op",
+      "groupByHelp": "Een veld in de gegevens van elke aanroep, zoals conversation.id. Aanroepen met dezelfde waarde lopen een voor een, op volgorde. Verschillende waarden lopen tegelijk.",
+      "groupByOff": "Alle aanroepen wachten in één rij, op volgorde.",
+      "groupByOn": "Aanroepen met dezelfde {{path}} lopen op volgorde. De andere lopen tegelijk.",
+      "groupBySaved": "Groepering opgeslagen.",
       "address": "Adres",
       "addressHelp": "Iedereen met het adres kan de agent starten. Bewaar het als een wachtwoord en maak een nieuw als het uitlekt.",
       "copied": "Adres gekopieerd.",
@@ -9007,6 +9065,9 @@
       },
       "deploy": {
         "succeeded": "Deploy voltooid"
+      },
+      "telegram": {
+        "message": "Bericht aan de Telegram-bot"
       }
     },
     "when": {
@@ -10021,6 +10082,8 @@
       "reply": "Antwoorden",
       "replies_one": "{{count}} antwoord",
       "replies_other": "{{count}} antwoorden",
+      "replying_one": "{{names}} antwoordt in de thread",
+      "replying_other": "{{names}} antwoorden in de thread",
       "closed_one": "Thread gesloten · {{title}} · {{count}} bericht",
       "closed_other": "Thread gesloten · {{title}} · {{count}} berichten",
       "archived_one": "{{count}} gearchiveerde thread wordt hier niet getoond",
@@ -10927,6 +10990,7 @@
       "everyone": "Iedereen in de werkruimte",
       "people": "Alleen bepaalde mensen of rollen",
       "owner": "Alleen de eigenaar",
+      "ownerRole": "Alleen wie de rol {{role}} heeft",
       "everyonePersonal": "Iedereen hier",
       "peoplePersonal": "Alleen bepaalde mensen"
     },
@@ -10938,6 +11002,8 @@
       "owner": "Alleen {{owner}} praat met {{name}}. In lijsten zien alleen {{owner}}, admins en wie mag bewerken {{name}}.",
       "owner_female": "Alleen {{owner}} praat met {{name}}. In lijsten zien alleen {{owner}}, admins en wie mag bewerken {{name}}.",
       "noOwner": "Stel een eigenaar in om deze optie te gebruiken.",
+      "ownerRole": "Alleen wie de rol {{role}} heeft, praat met {{name}}. In lijsten zien alleen wie de rol {{role}} heeft, beheerders en wie mag bewerken {{name}}.",
+      "ownerRole_female": "Alleen wie de rol {{role}} heeft, praat met {{name}}. In lijsten zien alleen wie de rol {{role}} heeft, beheerders en wie mag bewerken {{name}}.",
       "everyonePersonal": "Iedereen hier kan {{name}} roepen.",
       "everyonePersonal_female": "Iedereen hier kan {{name}} roepen.",
       "peoplePersonal": "Kies de mensen die met {{name}} mogen praten.",
@@ -10950,8 +11016,11 @@
     "roleMembers_other": "{{count}} mensen",
     "picked": "Gekozen",
     "ownerAlways": "{{name}} mag altijd, als eigenaar.",
+    "ownerRoleAlways": "Wie de rol {{role}} heeft, mag altijd, als eigenaar.",
+    "whoHolds": "wie de rol {{role}} heeft",
     "onlyYouForNow": "Voorlopig alleen jij",
     "onlyOwnerForNow": "Voorlopig alleen {{name}}",
+    "onlyOwnerRoleForNow": "Voorlopig alleen wie de rol {{role}} heeft",
     "search": "Rollen en mensen zoeken",
     "searchPeople": "Mensen zoeken",
     "noMatch": "Geen rol of persoon met die naam.",
@@ -10966,6 +11035,7 @@
       "everyone": "Iedereen in de werkruimte",
       "everyonePersonal": "Iedereen hier",
       "owner": "Alleen {{name}}",
+      "ownerRole": "Alleen wie de rol {{role}} heeft",
       "nobody": "Voorlopig niemand",
       "someone": "Bepaalde mensen",
       "people": "{{names}}",
@@ -10996,6 +11066,8 @@
       "owner_female": "{{owner}} (eigenaar), beheerders en wie agents bewerkt en met {{name}} mag praten.",
       "noOwner": "Beheerders en wie agents bewerkt en met {{name}} mag praten.",
       "noOwner_female": "Beheerders en wie agents bewerkt en met {{name}} mag praten.",
+      "ownerRole": "Wie de rol {{role}} heeft (de eigenaarsrol), beheerders en wie agents bewerkt en met {{name}} mag praten.",
+      "ownerRole_female": "Wie de rol {{role}} heeft (de eigenaarsrol), beheerders en wie agents bewerkt en met {{name}} mag praten.",
       "people": "Kies wie er nog meer mag wijzigen hoe {{name}} werkt.",
       "people_female": "Kies wie er nog meer mag wijzigen hoe {{name}} werkt."
     },
@@ -12182,6 +12254,11 @@
     "recommended": "Aanbevolen",
     "free": "Gratis",
     "opencodeFreeHint": "Andere gratis modellen draaien via OpenCode op de computer van de agent.",
+    "missingModel": {
+      "app_old": "Werk de agentes.chat-app op de computer van de agent bij om {{model}} te gebruiken.",
+      "cli_old": "{{model}} heeft een nieuwere versie van de Antigravity CLI nodig op de computer van de agent. Voer daar agy update uit.",
+      "plan": "{{model}} hoort bij Google AI Pro en Ultra. Geen enkel Gemini-account op de computer van de agent heeft dat abonnement."
+    },
     "modelHelp": "Grotere modellen denken meer na en verbruiken het abonnement sneller.",
     "hidden": "{{owner}} of een beheerder kiest wie denkt.",
     "hiddenAdmins": "Alleen beheerders kiezen wie denkt.",
@@ -13347,7 +13424,8 @@
       },
       "meta_ads": {
         "1": "Campagnes en resultaten bekijken",
-        "2": "Campagnes maken en bijsturen"
+        "2": "Campagnes maken en bijsturen",
+        "ask": "Advertenties aanzetten en budgetten wijzigen vraagt altijd om je goedkeuring"
       },
       "google_docs": {
         "1": "Documenten zoeken en lezen",
@@ -13479,6 +13557,26 @@
         "1": "De tabellen bekijken",
         "2": "De data bevragen om te antwoorden",
         "3": "Wijzigt nooit iets"
+      },
+      "telegram": {
+        "1": "Lezen wat mensen de bot schrijven",
+        "2": "Berichten en bestanden als de bot sturen",
+        "ask": "Verwijderen, verbannen en uitnodigingslinks vragen altijd om je goedkeuring"
+      },
+      "x": {
+        "1": "Posts en vermeldingen van het account lezen",
+        "2": "Posten met afbeeldingen of een video",
+        "ask": "Posts verwijderen vraagt altijd om je goedkeuring"
+      },
+      "threads": {
+        "1": "Posts, reacties en resultaten bekijken",
+        "2": "Posten met afbeeldingen of video's en reageren",
+        "ask": "Posts verwijderen vraagt altijd om je goedkeuring"
+      },
+      "tiktok": {
+        "1": "Profiel en video's bekijken",
+        "2": "Video's naar je concepten sturen om in TikTok af te maken",
+        "ask": "Elke upload vraagt altijd om je goedkeuring"
       }
     },
     "connectedList": "Gekoppeld",
@@ -13626,8 +13724,13 @@
       "youtube": "Video's, reacties, afspeellijsten en statistieken van het YouTube-kanaal.",
       "pinterest": "Pins, borden en statistieken op Pinterest.",
       "reddit": "Posts, reacties en community's op Reddit.",
-      "whatsapp": "Berichten en sjablonen van WhatsApp Business."
-    }
+      "whatsapp": "Berichten en sjablonen van WhatsApp Business.",
+      "telegram": "Een eigen Telegram-bot: zijn chats, groepen en kanalen.",
+      "x": "Posts op je X-account: schrijven, vermeldingen lezen en zoeken.",
+      "threads": "Posts en reacties op je Threads-account.",
+      "tiktok": "Je TikTok-profiel en video's, en video's naar je concepten."
+    },
+    "needsApp": "Deze server heeft nog geen {{name}}-app: wie hem beheert registreert er een bij {{name}} en zet de variabelen (docs/social-apps-checklist.md)."
   },
   "toolNames": {
     "order": "modifiers-first",
@@ -14457,7 +14560,39 @@
       "get_my_usage": "Mijn gebruik bekijken",
       "ignore_usage_limit": "Gebruikslimiet negeren",
       "send_feedback": "Feedback sturen",
-      "offer_feedback": "Aanbieden om een probleem te melden"
+      "offer_feedback": "Aanbieden om een probleem te melden",
+      "list_chats": "Chats tonen",
+      "read_messages": "Berichten lezen",
+      "get_chat": "Chat bekijken",
+      "send_file": "Bestand sturen",
+      "edit_message": "Bericht bewerken",
+      "pin_message": "Bericht vastzetten",
+      "ban_member": "Lid verbannen",
+      "create_invite_link": "Uitnodigingslink maken",
+      "get_my_posts": "Mijn posts bekijken",
+      "get_mentions": "Vermeldingen bekijken",
+      "search_recent": "Recente posts zoeken",
+      "get_replies": "Reacties bekijken",
+      "get_insights": "Resultaten bekijken",
+      "reply": "Reageren",
+      "hide_reply": "Reactie verbergen",
+      "list_ad_accounts": "Advertentieaccounts tonen",
+      "list_campaigns": "Campagnes tonen",
+      "list_ad_sets": "Advertentiesets tonen",
+      "list_ads": "Advertenties tonen",
+      "create_campaign": "Campagne maken",
+      "create_ad_set": "Advertentieset maken",
+      "create_ad": "Advertentie maken",
+      "update": "Bijwerken",
+      "pause": "Pauzeren",
+      "activate": "Aanzetten",
+      "set_budget": "Budget instellen",
+      "archive": "Archiveren",
+      "delete": "Verwijderen",
+      "list_videos": "Video's tonen",
+      "get_creator_info": "Postopties bekijken",
+      "get_post_status": "Uploadstatus bekijken",
+      "upload_draft": "Naar concepten sturen"
     }
   },
   "toolReview": {
@@ -14659,6 +14794,13 @@
       "asks_other": "{{count}} acties vragen om goedkeuring in de chat.",
       "adjust": "Aanpassen",
       "ok": "Klaar"
+    },
+    "telegram": {
+      "token": "Bottoken",
+      "steps": "Open in Telegram @BotFather, stuur /newbot, kies een naam en een gebruikersnaam die op “bot” eindigt en plak hier de token die je krijgt. Om een groep te lezen, voeg je de bot toe. Om in een kanaal te posten, maak je hem daar admin."
+    },
+    "x": {
+      "consent": "Agents met toegang tot X posten zelf op dit account. Een post verwijderen vraagt eerst, en de pagina van elke agent beperkt wat hij mag. Een X-account werkt in één workspace tegelijk."
     }
   },
   "database": {
@@ -15541,6 +15683,7 @@
       "takeOverNoAccess": "Ga in het gesprek van de routine zitten voordat je hem overneemt.",
       "agentNotInChannel": "Voeg de agent eerst toe aan het gesprek.",
       "webhookPaused": "Zet de routine aan om hem te testen.",
+      "groupByInvalid": "Typ een pad zoals conversation.id, met een veldnaam tussen elke punt.",
       "continueExtraOff": "Het venster van dit abonnement is op en het lange werk van deze agent gebruikt geen betaald extra gebruik van het abonnement. Hij gaat verder na de reset.",
       "continueExtraUsedUp": "Het venster van dit abonnement is op en het betaalde extra gebruik is ook op of niet beschikbaar. Hij gaat verder na de reset.",
       "actionsNeedApprover": "Alleen de eigenaar van de agent of wie zijn acties goedkeurt, kan een routine zelfstandig laten handelen.",
@@ -15571,7 +15714,9 @@
       "sharingForbidden": "Alleen wie in het gesprek van het bestand zit, verandert wie het ziet.",
       "sharingEmpty": "Kies wie het ziet.",
       "sharingTooMany": "Kies hoogstens {{max}} mensen en {{max}} rollen.",
-      "notInDrive": "Dit bestaat alleen in zijn gesprek, dus het kan niet worden gedeeld."
+      "notInDrive": "Dit bestaat alleen in zijn gesprek, dus het kan niet worden gedeeld.",
+      "viewOnly": "Je kunt dit bestand bekijken, maar niet wijzigen. Vraag degene die het maakte om bewerktoegang.",
+      "accessInvalid": "Deze toegang kon niet worden opgeslagen. Controleer wie het ziet en wie het bewerkt en probeer het opnieuw."
     },
     "drive": {
       "folderIntoItself": "Een map kan niet in zichzelf of in een map daarin."
@@ -15667,7 +15812,9 @@
       "ownerOrAdmin": "Alleen de eigenaar van de agent of een beheerder kan dit doen.",
       "detailsHidden": "Alleen wie met {{agentName}} praat, ziet hoe het werkt.",
       "undoForbidden": "Alleen de persoon voor wie de agent werkte, zijn eigenaar of een beheerder kan dit ongedaan maken.",
-      "undoSkillsAdmins": "Alleen wie de agent mag bewerken, kan een wijziging in de skills ongedaan maken of opnieuw doen."
+      "undoSkillsAdmins": "Alleen wie de agent mag bewerken, kan een wijziging in de skills ongedaan maken of opnieuw doen.",
+      "ownerBoth": "De eigenaar is een persoon of een rol, niet allebei. Kies er één.",
+      "ownerRoleUnknown": "Die rol bestaat niet meer in deze werkruimte. Kies een andere eigenaar."
     },
     "account": {
       "notRestorable": "Dit account kan niet meer hersteld worden.",
@@ -19555,7 +19702,9 @@
     "seatsPaid_one": "{{count}} betaalde plek",
     "seatsPaid_other": "{{count}} betaalde plekken",
     "noLimit": "Geen limiet",
-    "ownBucket": "Op je eigen bucket, zonder limiet van ons"
+    "ownBucket": "Op je eigen bucket, zonder limiet van ons",
+    "connectors": "X deze maand",
+    "shareUsed": "{{share}} gebruikt"
   },
   "referrals": {
     "open": "Aanbevelen en verdienen",
@@ -20773,23 +20922,15 @@
   "share": {
     "button": "Delen",
     "title": "{{name}} delen",
-    "conversation": "Alleen het gesprek",
-    "people": "Mensen en rollen die je kiest",
-    "peoplePersonal": "Mensen die je kiest",
     "everyone": "De hele werkruimte",
     "everyonePersonal": "Iedereen hier",
     "whereDm": "Het directe bericht met {{name}}",
     "whereDmGone": "Een direct bericht",
     "whereDmBetween": "Het directe bericht tussen {{names}}",
     "whereChannel": "Leden van #{{name}}",
-    "add": "Persoon of rol toevoegen",
-    "addPersonal": "Persoon toevoegen",
-    "addSearch": "Mensen en rollen zoeken",
-    "addSearchPersonal": "Mensen zoeken",
     "noResults": "Niemand met die naam",
     "groupPeople": "Mensen",
     "groupRoles": "Rollen",
-    "access": "Wie toegang heeft",
     "you": "{{name}} (jij)",
     "agent": "Agent",
     "role": "Rol",
@@ -20798,28 +20939,36 @@
     "adminsPersonal": "De mensen die deze ruimte beheren zien het ook.",
     "copyLink": "Link kopiëren",
     "copied": "Link gekopieerd.",
-    "done": "Klaar",
     "onlyHere": "Wie niet in dit gesprek zit, kan de link niet openen.",
-    "choosePeople": "Mensen kiezen",
     "readOnly": "Alleen wie in het gesprek zit, verandert wie het ziet.",
-    "open": "De hele werkruimte ziet dit bestand.",
-    "openPersonal": "Iedereen hier ziet dit bestand.",
-    "savedEveryone": "Nu ziet de hele werkruimte het bestand.",
-    "savedEveryonePersonal": "Nu ziet iedereen hier het bestand.",
-    "savedPeople": "Nu zien de gekozen mensen het bestand.",
-    "savedConversation": "Nu ziet alleen het gesprek het bestand.",
-    "onlyYou": "Alleen jij",
-    "onlyMaker": "Alleen {{name}}",
     "onlyYouLink": "Alleen jij kunt deze link openen.",
     "onlyMakerLink": "Alleen {{name}} kan deze link openen.",
     "readOnlyDrive": "Alleen wie het bestand maakte en beheerders bepalen wie het ziet.",
-    "savedOnlyYou": "Alleen jij ziet het bestand nu.",
-    "savedOnlyMaker": "Alleen {{name}} ziet het bestand nu.",
-    "undo": "Ongedaan maken",
     "fileRef": "Bestand {{title}}",
     "fileRefNone": "Bestand zonder toegang",
     "also": "{{text}}. Ook gedeeld met {{who}}.",
-    "someOnlyHere": "Sommige van deze links gaan alleen open voor wie het bestand al ziet."
+    "someOnlyHere": "Sommige van deze links gaan alleen open voor wie het bestand al ziet.",
+    "level": {
+      "none": "Geen toegang",
+      "view": "Bekijken",
+      "edit": "Bewerken"
+    },
+    "levelOf": "Wat {{name}} kan doen",
+    "madeIt": "Heeft het bestand gemaakt",
+    "placeText": "Waar het bestand staat",
+    "everyoneText": "Iedereen in deze werkruimte",
+    "everyoneTextPersonal": "Iedereen hier",
+    "agentsAll": "Alle agents",
+    "agentsAllText": "Elke agent in de werkruimte",
+    "agentsHere": "Agents in dit gesprek",
+    "agentsHereText": "De agents waar het bestand staat",
+    "addAll": "Een persoon, rol of agent toevoegen",
+    "addAllPersonal": "Een persoon of agent toevoegen",
+    "addAllSearch": "Mensen, rollen en agents zoeken",
+    "addAllSearchPersonal": "Mensen en agents zoeken",
+    "groupAgents": "Agents",
+    "addRow": "Toevoegen",
+    "saved": "Toegang opgeslagen."
   },
   "linkErrors": {
     "signIn": {
@@ -21129,7 +21278,7 @@
     "mark": "Beta",
     "open": "Feedback sturen",
     "ask": "Wat ontbrak er, ging er stuk of zat in de weg?",
-    "goesCloud": "Wat je schrijft gaat per e-mail naar het team van agentes.chat.",
+    "goesCloud": "Wat je schrijft gaat per e-mail naar het team van agentes.chat, dat een AI-assistent kan gebruiken om het te bekijken.",
     "goesServer": "Wat je schrijft gaat per e-mail naar degene die deze server beheert.",
     "placeholder": "Schrijf het op jouw manier",
     "report": "Hier een probleem melden",
@@ -21572,6 +21721,9 @@
         "inTrash": "In de prullenbak. Zet het terug om het te wijzigen.",
         "closing": "De werkruimte wordt verwijderd. De bestanden kunnen alleen nog worden gelezen."
       },
+      "requestEdit": "Vragen om te bewerken",
+      "requestEditText": "kun je me bewerktoegang tot dit bestand geven?",
+      "requestEditAnyone": "Kan iemand me bewerktoegang tot dit bestand geven?",
       "present": "Presenteren",
       "download": "Downloaden",
       "formats": {

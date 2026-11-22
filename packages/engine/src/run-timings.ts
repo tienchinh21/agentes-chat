@@ -3,7 +3,7 @@ import { type Database, rowsOf, type SQL, type schema, sql } from "@agenteschat/
 import { BRAIN_KINDS } from "./brain-settings";
 import { ValidationError } from "./errors";
 import { isJsonObject, numberIn, wholeOrNull } from "./format";
-import { instantOf } from "./operator-paging";
+import { heavyRead, instantOf } from "./operator-paging";
 
 /**
  * Where runs' time went, for the operator API: one run's kept claims (`runClaims`, in its trace) and the stages,
@@ -114,14 +114,6 @@ const stageSql = (value: string) =>
 const listSql = (value: string) => `case when jsonb_typeof(${value}) = 'array' then ${value} else '[]'::jsonb end`;
 const pct = (q: number, column: string, filter = "") =>
   `percentile_cont(${q}) within group (order by ${column})${filter ? ` filter (where ${filter})` : ""}`;
-
-// Fleet-wide these read many rows: compiling them costs more than it saves, and one that still runs long is stopped.
-const heavyRead = (db: Database, statement: SQL) =>
-  db.transaction(async (tx) => {
-    await tx.execute(sql`set local jit = off`);
-    await tx.execute(sql`set local statement_timeout = '20s'`);
-    return tx.execute(statement);
-  });
 
 /** Nulls last, then as the database would order two words. */
 const byWord = (a: string | null, b: string | null) =>

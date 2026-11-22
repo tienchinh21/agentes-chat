@@ -1,7 +1,7 @@
 import type { PubSub } from "@agenteschat/adapters";
 import { and, type Database, eq, inArray, isNull, schema, sql } from "@agenteschat/db";
 import { getAgent } from "./agents";
-import { managesAgent, REACH_COLUMNS } from "./audience";
+import { managesAgent, ownsAgent, REACH_COLUMNS } from "./audience";
 import { recordAudit } from "./audit";
 import { brainOf, brainOptions } from "./brain-settings";
 import type { ComputerBrainKind } from "./brains/types";
@@ -173,7 +173,7 @@ export async function listMachineOutages(
     : [];
   const byId = new Map([...onMachines, ...extra].map((a) => [a.id, a]));
   const mayMove = (a: Parameters<typeof managesAgent>[0]) =>
-    a.ownerUserId === actorId || managesAgent(a, actorId, membership);
+    ownsAgent(a, actorId, membership.roleIds) || managesAgent(a, actorId, membership);
 
   const outages: MachineOutage[] = [];
   for (const m of offline) {
@@ -300,7 +300,7 @@ export async function moveAgentsFromMachine(
       skipped.push({ agentId, reason: "not_found" });
       continue;
     }
-    if (agent.ownerUserId !== actorId && !managesAgent(agent, actorId, membership)) {
+    if (!ownsAgent(agent, actorId, membership.roleIds) && !managesAgent(agent, actorId, membership)) {
       skipped.push({ agentId, reason: "forbidden" });
       continue;
     }

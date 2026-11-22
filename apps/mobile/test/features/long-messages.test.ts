@@ -28,10 +28,13 @@ describe("long messages on the phone", () => {
     expect(clip).not.toContain("layout=");
     expect(clip).not.toContain("<Animated.View");
     expect(clip).toContain('AccessibilityInfo.sendAccessibilityEvent(words.current, "focus")');
+    // As on the web: the words fade into what is behind them, and Ver mais sits on the fade's clear end.
+    expect(clip).toContain("locations={[0, 1 - CLEAR / FADE, 1]}");
+    expect(clip).toContain("shows !== null && styles.overFade");
     // A fade, never an ellipsis: no line count cuts the words.
     expect(clip).not.toContain("numberOfLines");
     const row = src("features/chat/MessageRow.tsx");
-    expect(row.match(/<ClippedMessage /g)?.length).toBe(2);
+    expect(row.match(/<ClippedMessage\s/g)?.length).toBe(2);
     // Opened, its row mounts again at its whole height, no entrance played again: grown in place, the bubble's frame
     // stayed taller than its words, an empty block under the last line.
     expect(row).toContain("const opened = useContext(OpenedMessagesContext)?.has(props.message.id) === true;");

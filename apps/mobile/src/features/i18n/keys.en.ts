@@ -169,6 +169,7 @@ export const featureKeysEn = {
     forwards: "Forwards “{{subject}}”",
     forwardsFrom: "Forwards “{{subject}}”, from {{from}}",
     onlyOwner: "Only {{name}} or an admin can decide.",
+    onlyOwnerRole: "Only whoever holds {{role}} or an admin can decide.",
     onlyAdmins: "Only an admin can decide.",
     notFound: "This request no longer exists or you can't see it.",
     trait: {
@@ -1667,6 +1668,7 @@ export const featureKeysEn = {
       ruleBody_female: "{{name}} stops following this rule. Whoever gave the rule can give the same one again.",
       ruleRemove: "Remove",
       footOwner: "Only {{name}} or an admin can correct these.",
+      footOwnerRole: "Only whoever holds {{role}} or an admin can correct these.",
       footAdmins: "Only an admin can correct these.",
       emptyF: "{{name}} hasn't saved anything about you yet.",
       emptyM: "{{name}} hasn't saved anything about you yet.",
@@ -1709,6 +1711,8 @@ export const featureKeysEn = {
       },
       asksYou: "Merging and publishing ask for your approval, unless the agent never asks.",
       asksOwner: "Merging and publishing ask for {{name}}'s approval, unless the agent never asks.",
+      asksOwnerRole:
+        "Merging and publishing ask for approval from whoever holds {{role}}, unless the agent never asks.",
       asksAdmins: "Merging and publishing ask for an admin's approval, unless the agent never asks.",
       empty: "For now, only conversation.",
     },

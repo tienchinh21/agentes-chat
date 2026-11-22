@@ -2,6 +2,7 @@ import { and, type Database, type Executor, eq, rowsOf, schema, sql } from "@age
 import { type ArtifactDeps, fileRefOf, type LiveArtifactKind, liveFileAccess } from "../artifacts";
 import { caches } from "../cache";
 import { NotFoundError, ValidationError } from "../errors";
+import { clockOf } from "../format";
 import { quietNoticeSql } from "../notices";
 import { fileConversationReaderSql } from "../task-access";
 import { neutralizeUntrusted, untrustedBlock } from "../untrusted";
@@ -207,14 +208,6 @@ const KIND_TOOLS: Record<string, { read: string; edit: string }> = {
 const kindWord = (kind: string) => KIND_WORD[kind] ?? "file";
 /** A fraction as a percentage, as the agent reads a mark. */
 const pct = (v: number) => `${Math.round(v * 1000) / 10}%`;
-/** A moment as m:ss (h:mm:ss past an hour). */
-export function clockOf(seconds: number): string {
-  const s = Math.floor(seconds);
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const ss = String(s % 60).padStart(2, "0");
-  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
-}
 
 /** Where a comment points in a picture, a video or a PDF, in the agent's words (ADR 0208). */
 export function markWords(kind: string, s: LiveAskSelection): string {

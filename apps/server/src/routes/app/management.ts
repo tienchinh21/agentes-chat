@@ -358,6 +358,7 @@ const AgentDetail = z
     instructions: z.string(),
     model: z.string(),
     ownerUserId: z.string().nullable(),
+    ownerRoleId: z.uuid().nullable().openapi({ description: "A role that answers for it instead of a person." }),
     credentialId: z.uuid().nullable().openapi({ description: "Null = platform key (Cloud)." }),
     budgetUsedPercent: z
       .number()
@@ -1639,6 +1640,7 @@ export function managementRoutes(deps: AppDeps) {
           instructions: seesDetails ? v.instructions : "",
           model: v.model,
           ownerUserId: v.ownerUserId,
+          ownerRoleId: v.ownerRoleId ?? null,
           credentialId: seesDetails ? d.agent.credentialId : null,
           budgetUsedPercent: month.budgetUsedPercent,
           ...(seesCost

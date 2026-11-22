@@ -170,7 +170,7 @@ export function ActivityTab() {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
   const { org } = useOrg();
-  const { agent, g, viewer, ownerFirst, saved, can, pickRepos } = useAgentEdit();
+  const { agent, g, viewer, ownerLabel, saved, can, pickRepos } = useAgentEdit();
   const allowed = ownsOrManages(viewer);
   const runs = useRuns(org.id, agent.id, allowed);
   const detail = useAgentDetail(org.id, agent.id);
@@ -191,7 +191,7 @@ export function ActivityTab() {
       <Card className="agp-card">
         <div className="agp-empty">
           <Icon name="lock" />
-          <b>{t("agentPage.activity.hidden", { owner: ownerFirst ?? t("roles.adminLower") })}</b>
+          <b>{t("agentPage.activity.hidden", { owner: ownerLabel ?? t("roles.adminLower") })}</b>
         </div>
       </Card>
     );

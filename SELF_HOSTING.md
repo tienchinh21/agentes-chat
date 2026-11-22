@@ -757,6 +757,11 @@ internet instead, and need it public:
   panel in **Settings → Connectors** checks the installations with GitHub when it opens.
 - Composio's events (`/api/webhooks/composio`, with `COMPOSIO_API_KEY`): new mail for routines, and connector
   accounts that expired.
+- A Telegram bot's messages arrive at `/api/webhooks/telegram/…` when the internet reaches the instance; otherwise the
+  server asks Telegram for them every 30 seconds, which works on a private network too.
+- Threads' pictures and videos: Meta fetches them from a link of this server (`/api/connector-media/…`, good for an
+  hour). On a private network Threads posts text only. Meta's deauthorize and data deletion callbacks
+  (`/api/webhooks/meta/…`) need it too.
 - AI apps that call from their own servers (Apps de IA, below): claude.ai, the Claude apps and ChatGPT reach
   `/mcp` from the internet. Claude Code, Cursor and VS Code on a computer that reaches the server don't need it.
 
@@ -919,6 +924,11 @@ volume. With all four `S3_*` variables set they go to that bucket instead, and w
 Postgres. Choose before the first upload: a file stays in the store it was written to. An
 organization can also keep its files in a bucket of its own (**Settings → Storage**).
 
+**Social and ads connectors of our own (optional).** Telegram needs nothing from you: each workspace makes a bot with
+@BotFather and pastes its token in **Add connector → Telegram**. X, Threads, Meta Ads and TikTok each need a developer
+app you register with the vendor, their variables set as `docs/social-apps-checklist.md` says, step by step; without
+them the service doesn't show as connectable.
+
 **Services through Composio (optional).** Google Drive, Google Calendar, Sheets and Docs, Slack,
 Microsoft Teams, OneDrive, HubSpot, Salesforce, Zendesk, Instagram, Facebook Pages, LinkedIn, YouTube,
 Pinterest, Reddit and WhatsApp Business have no server that connects to us directly;
@@ -1079,7 +1089,16 @@ at one you name: one of the server's four sentences (`template`) or your own wor
 replies a request and 60 a day, and is recorded in the events feed and in that workspace's audit log
 (that you answered, whose request, and whether an AI assistant wrote the answer), never with its
 words, which the server forgets once the email is sent or given up. Write in a reply only what that
-member could read in the app. Setting the token makes you a reader of your workspaces' content: tell
+member could read in the app. To investigate a problem in a workspace, the same token also reads more
+than one field at a time, each call with a reason in one line and, if you like, your own case id
+(`caseRef`): `POST /reveal/orgs/{orgId}/conversations/{channelId}/messages` (a window of up to 48
+hours, 200 messages a page), `POST /reveal/orgs/{orgId}/runs/{runId}/transcript` (what the agent's
+model wrote, each tool call's input and result, 200 steps a page) and
+`POST /reveal/orgs/{orgId}/agents/{agentId}/settings` (an agent's instructions and settings). Each
+read is recorded first, in the events feed with your reason and in the workspace's audit log without
+it, and counts toward the door's limits. Credentials are masked, each message or step is cut at
+4,000 characters, and what a confidential thread holds or two people said to each other in a direct
+conversation is never returned. Setting the token makes you a reader of your workspaces' content: tell
 them before the first read what you may read it for, and say whether an AI assistant reads with you
 (`assistedByAi`). It also
 makes the server keep what members write in the feedback form, and what the thing they reported

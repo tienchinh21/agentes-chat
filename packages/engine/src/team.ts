@@ -45,6 +45,7 @@ const {
   channels,
   connectorConnections,
   organizationMembers,
+  orgRoles,
   users,
 } = schema;
 
@@ -142,6 +143,7 @@ type Teammate = Pick<
   | "role"
   | "instructions"
   | "ownerUserId"
+  | "ownerRoleId"
   | "audienceMode"
   | "audienceUserIds"
   | "audienceRoleIds"
@@ -171,6 +173,7 @@ export function loadTeam(db: Database, orgId: string): Promise<Teammate[]> {
         role: agents.role,
         instructions: agents.instructions,
         ownerUserId: agents.ownerUserId,
+        ownerRoleId: agents.ownerRoleId,
         audienceMode: agents.audienceMode,
         audienceUserIds: agents.audienceUserIds,
         audienceRoleIds: agents.audienceRoleIds,
@@ -412,10 +415,17 @@ export function createFindAgentToolSource(deps: { machines?: Pick<MachineCaller,
       }
       const ids = scored.map((x) => x.a.id);
       const ownerIds = [...new Set(scored.map((x) => x.a.ownerUserId).filter((id): id is string => !!id))];
-      const [scopes, owners, statuses] = await Promise.all([
+      const roleIds = [...new Set(scored.map((x) => x.a.ownerRoleId).filter((id): id is string => !!id))];
+      const [scopes, owners, ownerRoles, statuses] = await Promise.all([
         rosterScopeNames(db, deps.machines, ctx.orgId, ids),
         ownerIds.length
           ? db.select({ id: users.id, name: users.name }).from(users).where(inArray(users.id, ownerIds))
+          : Promise.resolve([]),
+        roleIds.length
+          ? db
+              .select({ id: orgRoles.id, name: orgRoles.name })
+              .from(orgRoles)
+              .where(and(eq(orgRoles.orgId, ctx.orgId), inArray(orgRoles.id, roleIds)))
           : Promise.resolve([]),
         loadAgentStatuses(db, ctx.orgId, new Date(), ids),
       ]);
@@ -424,11 +434,14 @@ export function createFindAgentToolSource(deps: { machines?: Pick<MachineCaller,
         .map(({ a }) => {
           const about = a.instructions.trim().replace(/\s+/g, " ");
           const owner = owners.find((o) => o.id === a.ownerUserId)?.name;
+          // A role answers for it (ADR 0085, addendum of 2026-11-21): anyone holding it is its responsible person.
+          const ownerRole = ownerRoles.find((r) => r.id === a.ownerRoleId)?.name;
           return [
             `@${a.handle}: ${a.name}${a.role ? `, ${a.role}` : ""}${presenceNote(statusOf.get(a.id))}`,
             `  Can: ${summarizeScopes(scopes.filter((s) => s.agentId === a.id).map((s) => s.scope))}`,
             a.groupName ? `  Department: ${a.groupName}` : "",
             owner ? `  Responsible person: ${owner}` : "",
+            ownerRole ? `  Responsible: whoever holds the ${ownerRole} role` : "",
             about ? `  About: ${about.length > 240 ? `${cutText(about, 237)}…` : about}` : "",
           ]
             .filter(Boolean)
@@ -572,6 +585,7 @@ export async function getTeam(db: Database, actorId: string, orgId: string) {
       role: agents.role,
       appearance: agents.appearance,
       ownerUserId: agents.ownerUserId,
+      ownerRoleId: agents.ownerRoleId,
       audienceMode: agents.audienceMode,
       audienceUserIds: agents.audienceUserIds,
       audienceRoleIds: agents.audienceRoleIds,
@@ -649,6 +663,7 @@ export async function getTeam(db: Database, actorId: string, orgId: string) {
         role: a.role,
         appearance: (a.appearance ?? null) as AgentAppearance | null,
         ownerUserId: a.ownerUserId,
+        ownerRoleId: a.ownerRoleId,
         reportsToAgentId: a.reportsToAgentId,
         capabilities: seesDetails ? capabilityKeys(scopes.filter((s) => s.agentId === a.id).map((s) => s.scope)) : [],
         busy: busyIds.has(a.id),

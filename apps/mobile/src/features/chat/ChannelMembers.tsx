@@ -44,7 +44,7 @@ import { router } from "@/ui/navigation";
 import { chooseAction, confirmAction, Gap, SettingsPage } from "../settings/parts";
 import { AgentFace, Face, OpensAgent } from "../shared/Face";
 import { LoadFailed } from "../shared/FirstUse";
-import { useColors, useDirectory, useMeId, useNow, useOrgId, usePullRefresh } from "../shared/hooks";
+import { useColors, useDirectory, useMeId, useNow, useOrgId, useOwnsAgent, usePullRefresh } from "../shared/hooks";
 import { PushedLargeTitle } from "../shared/PushedLargeTitle";
 import { goBack, Loaded, successHaptic, tapHaptic, useLatest } from "../shared/parts";
 import { usePresenceOf } from "../status/hooks";
@@ -570,7 +570,7 @@ export function AddChannelMembersScreen({ channelId }: { channelId: string }) {
   const api = useApi();
   const toast = useToast();
   const dir = useDirectory();
-  const meId = useMeId();
+  const owns = useOwnsAgent();
   const { org } = useOrg();
   const roster = useRoster(orgId, channelId);
   const refresh = useRefresh(channelId);
@@ -597,11 +597,12 @@ export function AddChannelMembersScreen({ channelId }: { channelId: string }) {
     new Set((roster.data ?? []).map((m) => `${m.type === "agent" ? "agent" : "person"}:${m.id}`)),
     add.isPending || add.isSuccess,
   );
-  // Only the agents this person may place here, as the server's `requirePlacesAgent`: their own, or one they manage
-  // (ADR 0085 addendum of 2026-11-17). Editing an agent, or talking to it, doesn't move it between channels.
+  // Only the agents this person may place here, as the server's `requirePlacesAgent`: their own (or their role's, ADR
+  // 0085, addendum of 2026-11-21), or one they manage (ADR 0085 addendum of 2026-11-17). Editing an agent, or talking
+  // to it, doesn't move it between channels.
   const candidates = [
     ...dir.agents
-      .filter((a) => joinsChannels(a) && ((meId !== null && a.ownerUserId === meId) || managesAgent(a)))
+      .filter((a) => joinsChannels(a) && (owns(a) || managesAgent(a)))
       .map((a) => ({ kind: "agent" as const, id: a.id, name: a.name, line: `@${a.handle}` })),
     ...[...dir.memberById.values()].map((m) => ({
       kind: "person" as const,

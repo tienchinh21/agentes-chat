@@ -149,7 +149,8 @@ test("outages: offline computers with computer-brain agents, waiting routines vs
     ],
   });
   expect(Date.parse(outages[0]?.offlineSince ?? "")).toBeLessThan(Date.now() - 3000_000);
-  // The PC is offline too, but nobody thinks on it: no outage; it is a target (offline).
+  // The PC is offline too, but nobody thinks on it: no outage; it is a target (offline). The Mac's runner brings the
+  // Antigravity CLI itself (protocol 76), so Gemini thinks there once an account signs in; Windows runs no Gemini.
   expect(targets).toEqual([
     {
       kind: "machine",
@@ -158,7 +159,7 @@ test("outages: offline computers with computer-brain agents, waiting routines vs
       platform: "mac",
       managed: false,
       online: true,
-      brains: ["claude_code"],
+      brains: ["claude_code", "antigravity"],
       reasonOff: null,
     },
     {

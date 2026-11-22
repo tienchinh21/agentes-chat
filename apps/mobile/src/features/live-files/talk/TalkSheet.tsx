@@ -20,7 +20,7 @@ type Place = { data: { index: number; position: number } };
  * behind it dimmed, the file in sight and in reach above it (a tap there marks a point, the quote over the composer
  * says which); pulled up it fills the screen and dims what is behind it; down, it goes. Its content is the conversation
  * itself (`ChatScreen` in its sheet mode): the bar with its title and ×, the messages, the composer with the file's
- * quote. The field raises the sheet to its full height as the person starts typing.
+ * quote. The keyboard raises the sheet as the person types, and lowers it as it goes.
  *
  * The file behind follows the sheet through the store (`showTalkSheet`): which file it is over, at which height, and
  * how much of the screen it takes. The file asks things of it the same way (`askTalkSheet`): come down to its first
@@ -109,16 +109,11 @@ export function FileTalkSheet({
     } else navigation.goBack();
   }, [ask, navigation]);
 
-  // The field taken: up to the full height, the composer over the keyboard and the conversation above it. Down again is
-  // the person's own pull (a sheet that moved by itself when the keyboard went was a surprise).
-  const onFieldFocus = useCallback(
-    (focused: boolean) => {
-      if (focused && place.current.detent !== 1) navigation.resize(1);
-    },
-    [navigation],
-  );
+  // The field taken, the system raises the sheet with the keyboard, on the keyboard's own curve, and lowers it again
+  // when the keyboard goes: one motion. The sheet sent to its full height as well moved twice at once (its own spring
+  // under the keyboard's rise) and, the full height being dimmed, shrank the file behind it.
   const close = useCallback(() => navigation.goBack(), [navigation]);
-  const mode = useMemo<ChatSheetMode>(() => ({ onClose: close, onFieldFocus, seek }), [close, onFieldFocus, seek]);
+  const mode = useMemo<ChatSheetMode>(() => ({ onClose: close, seek }), [close, seek]);
 
   return (
     <SheetSurface>

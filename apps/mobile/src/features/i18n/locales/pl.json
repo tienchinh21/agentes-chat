@@ -171,6 +171,7 @@
     "forwards": "Przekazuje dalej „{{subject}}”",
     "forwardsFrom": "Przekazuje dalej „{{subject}}”, od {{from}}",
     "onlyOwner": "Decyzję może podjąć tylko {{name}} albo administrator.",
+    "onlyOwnerRole": "Decydować mogą tylko osoby z rolą {{role}} albo administrator.",
     "onlyAdmins": "Decyzję może podjąć tylko administrator.",
     "notFound": "Ta prośba już nie istnieje albo nie masz do niej dostępu.",
     "trait": {
@@ -1729,6 +1730,7 @@
       "ruleBody": "{{name}} przestaje stosować tę regułę. Kto ją ustalił, może ustalić ją ponownie.",
       "ruleRemove": "Usuń",
       "footOwner": "Poprawiać to może tylko {{name}} albo administrator.",
+      "footOwnerRole": "Poprawić to mogą tylko osoby z rolą {{role}} albo administrator.",
       "footAdmins": "Poprawiać to może tylko administrator.",
       "emptyF": "{{name}} nie zapisała jeszcze nic o tobie.",
       "emptyM": "{{name}} nie zapisał jeszcze nic o tobie.",
@@ -1778,6 +1780,7 @@
       },
       "asksYou": "Merge i publikacja wymagają twojego zatwierdzenia, chyba że agent nigdy nie pyta.",
       "asksOwner": "Merge i publikacja wymagają zatwierdzenia, które daje {{name}}, chyba że agent nigdy nie pyta.",
+      "asksOwnerRole": "Merge i publikacja wymagają zatwierdzenia przez osobę z rolą {{role}}, chyba że agent nigdy nie pyta.",
       "asksAdmins": "Merge i publikacja wymagają zatwierdzenia przez administratora, chyba że agent nigdy nie pyta.",
       "empty": "Na razie tylko rozmowa."
     }

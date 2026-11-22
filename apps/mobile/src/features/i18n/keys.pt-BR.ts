@@ -171,6 +171,7 @@ export const featureKeysPtBR = {
     forwards: "Encaminha “{{subject}}”",
     forwardsFrom: "Encaminha “{{subject}}”, de {{from}}",
     onlyOwner: "Só {{name}} ou quem administra pode decidir.",
+    onlyOwnerRole: "Só quem tem {{role}} ou quem administra pode decidir.",
     onlyAdmins: "Só quem administra pode decidir.",
     notFound: "Este pedido não existe mais ou você não tem acesso.",
     trait: {
@@ -1613,6 +1614,7 @@ export const featureKeysPtBR = {
       ruleBody_female: "A {{name}} deixa de seguir essa regra. Quem a deu pode dar de novo.",
       ruleRemove: "Tirar",
       footOwner: "Só {{name}} ou quem administra pode corrigir.",
+      footOwnerRole: "Só quem tem {{role}} ou quem administra pode corrigir.",
       footAdmins: "Só quem administra pode corrigir.",
       emptyF: "A {{name}} ainda não guardou nada sobre você.",
       emptyM: "O {{name}} ainda não guardou nada sobre você.",
@@ -1655,6 +1657,7 @@ export const featureKeysPtBR = {
       },
       asksYou: "Merge e publicar pedem sua aprovação, a não ser que o agente nunca pergunte.",
       asksOwner: "Merge e publicar pedem a aprovação de {{name}}, a não ser que o agente nunca pergunte.",
+      asksOwnerRole: "Merge e publicar pedem a aprovação de quem tem {{role}}, a não ser que o agente nunca pergunte.",
       asksAdmins: "Merge e publicar pedem a aprovação de quem administra, a não ser que o agente nunca pergunte.",
       empty: "Por enquanto, só conversa.",
     },

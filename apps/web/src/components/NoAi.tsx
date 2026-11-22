@@ -1,5 +1,6 @@
 import type { Message } from "@agenteschat/client";
 import { useAiStatus, useAuthConfig, useMessages, useThreadMessages } from "@agenteschat/client";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { type FoundKey, withoutApiKeys } from "@agenteschat/client/lib/api-key-text";
 import { managesAgent } from "@agenteschat/client/lib/audience";
 import type { BillingHold } from "@agenteschat/client/lib/billing";
@@ -151,8 +152,12 @@ export function NoAiCard({ message }: { message: Message }) {
   const answering = answer === "answering";
   const state = aiStateOf(status.data, card.agentId);
   const ready = state !== undefined && state !== "no_ai" && answer !== "still_missing";
-  // The same people as "Continuar": who asked, the agent's owner or who manages it.
-  const mayAnswer = card.forUserId === me.user.id || agent?.ownerUserId === me.user.id || managesAgent(agent);
+  // The same people as "Continuar": who asked, the agent's owner (or who holds its owner role, ADR 0085, addendum of
+  // 2026-11-21) or who manages it.
+  const mayAnswer =
+    card.forUserId === me.user.id ||
+    (!!agent && ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id))) ||
+    managesAgent(agent);
   const owner = agent?.ownerUserId ? dir.memberById.get(agent.ownerUserId)?.name.split(" ")[0] : undefined;
   const title = answering
     ? t("noAi.card.answering", { name })
@@ -235,7 +240,10 @@ function KeptCard({ message, card, hold }: { message: Message; card: NoAiCardMet
   const ai = aiStateOf(status.data, card.agentId);
   const state = keptCardState({ hold, paid, ready: ai !== undefined && ai !== "no_ai" });
   const answer = connect?.answered[message.id];
-  const mayAnswer = card.forUserId === me.user.id || agent?.ownerUserId === me.user.id || managesAgent(agent);
+  const mayAnswer =
+    card.forUserId === me.user.id ||
+    (!!agent && ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id))) ||
+    managesAgent(agent);
   const replied = messages?.some(
     (m) => m.author.id === card.agentId && m.createdAt > message.createdAt && !noAiCardOf(m.meta),
   );

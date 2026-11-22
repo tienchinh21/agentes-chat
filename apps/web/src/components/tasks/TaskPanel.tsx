@@ -6,6 +6,7 @@ import { stopLine, stopperOf } from "@agenteschat/client/lib/notices";
 import {
   delegationText,
   endedState,
+  opensInChat,
   taskPlace,
   taskState,
   taskTime,
@@ -195,7 +196,7 @@ export function TaskPanel({
             {t("taskManager.delegated.stopNote", { name: nameOf(task.delegation.agentId) ?? "" })}
           </p>
         )}
-        {!source.background && (!source.betweenAgents || last?.delegation?.from) && (
+        {opensInChat({ ...source, delegation: last?.delegation }) && (
           <Button size="sm" variant="ghost" icon="message" onClick={() => openTask(source)}>
             {t("taskManager.actions.open")}
           </Button>

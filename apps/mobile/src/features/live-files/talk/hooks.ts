@@ -17,6 +17,7 @@ import {
   runsInChannel,
   type StreamsState,
   useApi,
+  useMessages,
   useThreadMessages,
 } from "@agenteschat/client";
 import { mayAsk } from "@agenteschat/client/lib/audience";
@@ -43,6 +44,7 @@ import {
   type TalkPin,
   talkKindOf,
   talkPins,
+  withSending,
 } from "./logic";
 import {
   afterTalkSheet,
@@ -179,6 +181,20 @@ export function useTalkMessages(talk: FileConversationRef | null | undefined): M
 }
 
 /**
+ * My comments still on their way in the file's conversation: they wait in the channel's latest page until the server's
+ * copy takes their place (`useSendMessage`). Read from what the phone keeps, never fetched here.
+ */
+function useTalkSending(talk: FileConversationRef | null | undefined): Message[] {
+  const orgId = useOrgId();
+  const channel = useMessages(orgId, talk?.channelId ?? "", false);
+  const rootId = talk?.rootId;
+  return useMemo(
+    () => (rootId ? (channel.data ?? []).filter((m) => m.local && m.threadId === rootId) : []),
+    [channel.data, rootId],
+  );
+}
+
+/**
  * The file's agent (ADR 0199), whom "Ask Atlas" calls: the one that made it, else the last agent that spoke in
  * its conversation, else the workspace's right hand; only one this person may ask. Null: none.
  */
@@ -240,22 +256,29 @@ export function useTalkPins(fileId: string, messages: readonly Message[]): TalkP
 
 /**
  * The comments with a pin on a picture, a video or a PDF (ADR 0208), from its conversation, numbered oldest first;
- * `shownVersion`: the version on screen (a pin made on an older one is faded).
+ * `shownVersion`: the version on screen (a pin made on an older one is faded). Mine still on their way count already:
+ * a comment's pin stays on its spot from the moment it is sent, never gone until the server answers.
  */
 export function useMediaPins(
   file: Pick<ArtifactDetail, "id" | "conversation" | "shownVersion"> | undefined,
 ): MediaPin[] {
   const messages = useTalkMessages(file?.conversation);
+  const sending = useTalkSending(file?.conversation);
   const id = file?.id ?? "";
   const version = file?.shownVersion ?? 0;
   return useMemo(
     () =>
       mediaPins(
         id,
-        messages.map((m) => ({ id: m.id, author: m.author, liveRef: messageLiveRef(m), meta: m.meta })),
+        withSending(messages, sending).map((m) => ({
+          id: m.id,
+          author: m.author,
+          liveRef: messageLiveRef(m),
+          meta: m.meta,
+        })),
         version,
       ),
-    [id, messages, version],
+    [id, messages, sending, version],
   );
 }
 

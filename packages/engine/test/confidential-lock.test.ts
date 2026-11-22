@@ -127,6 +127,7 @@ const KEPT = [
   "read_file",
   "read_skill_file",
   "read_wiki_page",
+  "review_media",
   "search_context",
   // Every tool of the connection that set the mark, its write too.
   "vault_change_record",

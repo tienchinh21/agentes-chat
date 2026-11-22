@@ -539,6 +539,21 @@ describe("the task manager page", () => {
     expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/dm/agent/${ADA_ID}`);
   });
 
+  test("a row's Abrir na conversa opens its conversation, before Ver passos and Parar; a routine's run has none", async () => {
+    const { router } = await open(seedState({ taskManager: busy() }), "task-manager");
+    await openAgent("Ada");
+    expect(within(rowOf("Backups")).queryByRole("button", { name: /^Abrir na conversa/ })).toBeNull();
+    const acts = [...rowOf("Corrigir o link de cancelar").querySelectorAll(".tm-cell--act button")];
+    expect(acts.map((b) => b.getAttribute("title"))).toEqual(["Abrir na conversa", "Ver passos", "Parar"]);
+    await click(
+      within(rowOf("Corrigir o link de cancelar")).getByRole("button", {
+        name: "Abrir na conversa: Corrigir o link de cancelar",
+      }),
+    );
+    await settle(4);
+    expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/dm/agent/${ADA_ID}`);
+  });
+
   test("the panel's Parar tarefa: the stopped state, then Add a reason; Esc closes it", async () => {
     const state = seedState({ taskManager: busy() });
     await open(state, "task-manager");
@@ -1274,6 +1289,7 @@ describe("work agents asked of each other", () => {
     const panel = document.querySelector(".tm-panel") as HTMLElement;
     expect(panel.textContent).toContain("Se parar, Atlas fica sabendo que você parou");
     expect(within(panel).queryByRole("button", { name: "Abrir na conversa" })).toBeNull();
+    expect(within(rowOf("Vê o log de ontem")).queryByRole("button", { name: /^Abrir na conversa/ })).toBeNull();
   });
 
   test("the row of a run with helpers stops it and them in one action, after a confirmation", async () => {
@@ -1685,7 +1701,9 @@ describe("why a task waits", () => {
     const css = readFileSync(join(import.meta.dir, "../src/pages/task-manager.css"), "utf8");
     const narrow = css.slice(css.indexOf("@container tm (max-width: 760px)"));
     expect(narrow).toContain('.tm-row:not(.tm-row--agent, .tm-row--ended, [data-look="flat"]) > .tm-cell--state,');
-    expect(narrow).toMatch(/\.tm-row\[data-look="flat"\] \{\s*grid-template-columns: minmax\(0, 1fr\) auto auto 40px;/);
+    expect(narrow).toMatch(
+      /\.tm-row\[data-look="flat"\] \{\s*grid-template-columns: minmax\(0, 1fr\) auto auto var\(--tm-act\);/,
+    );
   });
 
   test("a paused conversation says how long it has been paused, never a clock of days", async () => {

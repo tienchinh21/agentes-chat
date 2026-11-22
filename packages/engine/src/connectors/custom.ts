@@ -6,6 +6,7 @@ import { caches } from "../cache";
 import { type ConnectorEventId, connectorEventsOf } from "../connector-triggers";
 import { randomToken, sealSecret, sha256 } from "../crypto";
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from "../errors";
+import { valueAtPath } from "../format";
 import type { Judge } from "../judge";
 import { oneLine } from "../mail/text";
 import { assertPublicHttpsUrl } from "../net-guard";
@@ -382,11 +383,6 @@ export interface ProviderAccount {
   name: string | null;
 }
 
-const at = (value: unknown, path: string) =>
-  path
-    .split(".")
-    .reduce<unknown>((v, k) => (v && typeof v === "object" ? (v as Record<string, unknown>)[k] : undefined), value);
-
 /**
  * What a preset's account tool answers (JSON), as one account: the ids of all it lists, sorted and joined, and their
  * names in that order on one line; without `list`, the one account it answers (Composio's answer may hold it in
@@ -400,15 +396,15 @@ export function accountFrom(spec: AccountSpec, result: McpCallResult): ProviderA
   } catch {
     return null;
   }
-  const list = spec.list ? at(data, spec.list) : [at(data, "response_data") ?? data];
+  const list = spec.list ? valueAtPath(data, spec.list) : [valueAtPath(data, "response_data") ?? data];
   if (!Array.isArray(list) || list.length === 0) return null;
   const accounts = new Map<string, string>();
   for (const entry of list) {
-    const parts = spec.id.map((path) => at(entry, path));
+    const parts = spec.id.map((path) => valueAtPath(entry, path));
     if (typeof parts[0] !== "string" || !parts[0].trim() || parts.some((v) => v === undefined || v === null)) {
       return null;
     }
-    const name = at(entry, spec.name);
+    const name = valueAtPath(entry, spec.name);
     accounts.set(parts.map((v) => String(v).trim()).join(":"), typeof name === "string" ? name.trim() : "");
   }
   const ids = [...accounts.keys()].sort();

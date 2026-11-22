@@ -1,5 +1,6 @@
 import type { Agent, AgentSecret } from "@agenteschat/client";
 import { keys } from "@agenteschat/client";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { formatTime } from "@agenteschat/client/lib/format";
 import { edit, optimistic } from "@agenteschat/client/lib/optimistic";
 import { siteHost } from "@agenteschat/client/lib/secret-requests";
@@ -23,7 +24,7 @@ export function AgentSecretsList({ agent, editable }: { agent: Agent; editable: 
   const qc = useQueryClient();
   const toast = useToast();
   const dir = useDirectory(org.id);
-  const canManage = editable || (agent.ownerUserId != null && agent.ownerUserId === me.user.id);
+  const canManage = editable || ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id));
   const list = useQuery({
     queryKey: keys.agentSecrets(org.id, agent.id),
     queryFn: () => api.secrets.list(org.id, agent.id),

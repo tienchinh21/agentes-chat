@@ -1,5 +1,6 @@
 import { useAuthConfig, useChannels, useWikiTree } from "@agenteschat/client";
 import { AGENT_SECTIONS, AGENT_TABS, PERSONAL_AGENT_TABS } from "@agenteschat/client/lib/agent-edit";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { canTalk, listsAgent, managesAgent, opensDm } from "@agenteschat/client/lib/audience";
 import { joinable } from "@agenteschat/client/lib/channel-access";
 import { setDraftFor } from "@agenteschat/client/lib/drafts";
@@ -153,6 +154,8 @@ export function CommandMenu() {
     const tabs = AGENT_TABS.filter(
       (tab) => tab !== "advanced" && (!isPersonal(org) || (PERSONAL_AGENT_TABS as readonly string[]).includes(tab)),
     );
+    // The roles I hold: an agent one of them answers for is mine too (ADR 0085, addendum of 2026-11-21).
+    const myRoleIds = dir.members.find((m) => m.userId === me.user.id)?.roleIds ?? [];
     for (const a of dir.agents) {
       if (!listsAgent(org, a)) continue;
       const mark = <AgentAvatar agentId={a.id} size="sm" name={a.name} />;
@@ -161,7 +164,7 @@ export function CommandMenu() {
       // Who manages the agent changes everything; its owner who thinks, its look, audience and computer (the server's
       // rules, per agent: ADR 0085 addendum of 2026-11-17).
       const manages = managesAgent(a);
-      const edits = manages || a.ownerUserId === me.user.id;
+      const edits = manages || ownsAgentAs(a, me.user.id, myRoleIds);
       if (edits)
         list.push({
           key: `am:${a.id}`,

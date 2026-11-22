@@ -28,7 +28,7 @@ import {
 } from "@agenteschat/db";
 import { appLocale } from "@agenteschat/i18n/locale";
 import { getAgent, workspaceHomeId } from "./agents";
-import { listsAgentSql, managesAgent, managesAgentSql, REACH_COLUMNS } from "./audience";
+import { agentOwnerIds, listsAgentSql, managesAgent, managesAgentSql, ownsAgent, REACH_COLUMNS } from "./audience";
 import { type AuditEntry, recordAudit } from "./audit";
 import { isComputerBrain, isSandboxedBrain } from "./brains/types";
 import { caches } from "./cache";
@@ -447,7 +447,7 @@ export async function computerDriving(db: Database, userId: string, orgId: strin
     userId,
     admin: can(membership, "control_computers"),
     own: can(membership, "own_computers"),
-    owner: agent.ownerUserId === userId,
+    owner: ownsAgent(agent, userId, membership.roleIds),
     manages: managesAgent(agent, userId, membership),
     browsers: can(membership, "control_browsers"),
   };
@@ -472,7 +472,8 @@ export async function computerDrivers(db: Database, orgId: string, agentId: stri
   const [agent] = await db
     .select({
       machineId: agents.machineId,
-      owner: agents.ownerUserId,
+      ownerUserId: agents.ownerUserId,
+      ownerRoleId: agents.ownerRoleId,
       brain: agents.brain,
       account: agents.brainAccountId,
       builtin: agents.builtin,
@@ -484,7 +485,9 @@ export async function computerDrivers(db: Database, orgId: string, agentId: stri
   const machine = machineId ? await getMachine(db, orgId, machineId) : null;
   if (!agent || !machine) return [];
   const signIn = !home && lentAccount(agent) !== null;
-  const named = [agent.owner, machine.pairedByUserId].filter((id): id is string => !!id);
+  // Its owner, or whoever holds its owner role now (ADR 0085, addendum of 2026-11-21), as `computerDriving` reads it.
+  const owners = await agentOwnerIds(db, orgId, agent);
+  const named = [...owners, machine.pairedByUserId].filter((id): id is string => !!id);
   // Who may drive it (`control_computers`, `own_computers`, ADR 0085), read once per member, and the people named above;
   // `manages`: who manages this agent (`managesAgentSql`, ADR 0085 addendum of 2026-11-17).
   const everyone = await db
@@ -500,9 +503,10 @@ export async function computerDrivers(db: Database, orgId: string, agentId: stri
     .orderBy(organizationMembers.createdAt);
   const members = everyone.filter((m) => m.admin || named.includes(m.userId));
   const drivers = members
-    .filter((m) => drivesComputer(machine, { ...m, owner: m.userId === agent.owner }, signIn))
+    .filter((m) => drivesComputer(machine, { ...m, owner: owners.includes(m.userId) }, signIn))
     .map((m) => m.userId);
-  return agent.owner && drivers.includes(agent.owner) ? [agent.owner] : drivers;
+  const ownersDriving = drivers.filter((id) => owners.includes(id));
+  return ownersDriving.length > 0 ? ownersDriving : drivers;
 }
 
 /**
@@ -1057,7 +1061,7 @@ export async function setAgentComputerTarget(
     );
   }
   if (!admin) {
-    if (agent.ownerUserId !== actorId) {
+    if (!ownsAgent(agent, actorId, membership.roleIds)) {
       throw new ForbiddenError("Only an admin or the agent's owner can choose its computer", "machine.forbidden");
     }
     // The workspace's own computers (managed, host) are nobody's: any agent of the workspace may use them.

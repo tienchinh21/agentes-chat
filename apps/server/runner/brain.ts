@@ -2955,13 +2955,15 @@ export class BrainManager {
     );
     writeFileSync(systemFile, started.text, { mode: fileMode });
     let mcpConfigFile: string | undefined;
-    // A `chat` turn never holds the agent's secrets, nor reads the auto memory Claude Code keeps in the account's
-    // folder (whoever else that folder is lent to can write there), nor loads the plan's claude.ai connectors.
+    // A `chat` turn never holds the agent's secrets, nor loads the plan's claude.ai connectors.
+    // Claude Code's auto memory is off unless the owner's own settings load (`personalMcp`), where theirs decide. The
+    // workspace's memory is the agent's; Claude Code's sat in the sign-in's folder, which the agent's own tools can't
+    // list (ADR 0057) and whoever else that folder is lent to can write, and its prompt section (about 2.3k
+    // characters) names the folder, so sessions in two folders shared less of their cache (ADR 0043).
     const base: NodeJS.ProcessEnv = {
       ...process.env,
-      ...(mode === "chat"
-        ? { CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1", ENABLE_CLAUDEAI_MCP_SERVERS: "false" }
-        : (ctx.secrets?.env ?? {})),
+      ...(mode === "chat" ? { ENABLE_CLAUDEAI_MCP_SERVERS: "false" } : (ctx.secrets?.env ?? {})),
+      ...(launch.settingSources === undefined ? {} : { CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1" }),
     };
     const launched = delegated ? await delegated.launch(cwd) : null;
     // ADR 0041: the account's folder is this process's Claude Code home, and nothing else signs it in. Delegated: all

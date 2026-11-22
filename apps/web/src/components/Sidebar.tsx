@@ -40,6 +40,7 @@ import {
   useUnreadThreads,
 } from "@agenteschat/client";
 import { agentSections, groupOf } from "@agenteschat/client/lib/agent-groups";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { WORK_TICK_MS, workLine } from "@agenteschat/client/lib/agent-work";
 import {
   audienceChip,
@@ -1831,7 +1832,7 @@ function AgentRow({
   const agentEntries = useAgentMenu();
   const rowMenu = entityMenu(() => agentEntries(a, menuExtra));
   // Its owner and who manages it (ADR 0085 addendum of 2026-11-17): its settings on hover, like a channel's.
-  const edits = managesAgent(a) || a.ownerUserId === me.user.id;
+  const edits = managesAgent(a) || ownsAgentAs(a, me.user.id, dir.rolesOf(me.user.id));
   // Listed for who manages it though it doesn't talk to them (its DM opens, `opensDm`): the line says who it talks to.
   const locked = !canTalk(a);
   const names = locked ? audienceNames(a, (id) => dir.memberById.get(id)?.name, dir.roleName) : [];

@@ -1,4 +1,5 @@
 import { type Issue, type Message, useChannels, type WorkView } from "@agenteschat/client";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { managesAgent } from "@agenteschat/client/lib/audience";
 import { heldBack } from "@agenteschat/client/lib/issues";
 import {
@@ -35,7 +36,10 @@ function useWorkLine(work: WorkView, inUpdatesThread = false) {
   const agent = dir.agentById.get(work.agentId);
   // As `mayStopRun` decides (who asked, the agent's owner, who manages it); the server has the last word, said in a
   // toast.
-  const canStop = managesAgent(agent) || agent?.ownerUserId === me.user.id || work.requestedByUserId === me.user.id;
+  const canStop =
+    managesAgent(agent) ||
+    (!!agent && ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id))) ||
+    work.requestedByUserId === me.user.id;
   const stop = useMutation({
     mutationFn: (runId: string) => api.agents.cancelRun(org.id, runId),
     onError: () => toast.show(t("work.stopFailed"), "error"),

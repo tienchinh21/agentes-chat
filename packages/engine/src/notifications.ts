@@ -87,6 +87,13 @@ export const NOTIFICATION_KINDS = [
    */
   "plan_reset_unknown",
   /**
+   * An agent's work stopped on its monthly budget (`budget-pause.ts`): who manages it, its owner and the person behind
+   * the work, once per agent, month and budget. `source.agentId` the agent, its name in `label`, `channelId` /
+   * `threadId` the conversation the work started from; `latest.percent` the budget used, `latest.text` the line in
+   * the person's language (the push). Waiting; done once its budget changes or a new month lets it go on.
+   */
+  "budget_paused",
+  /**
    * An agent back from its plan or budget skipped catch-ups that looked handled (ADR 0136): its owner, one row per line
    * (`count` the conversations they can read), opening the latest skipped note. Inbox only (no category, no push).
    */

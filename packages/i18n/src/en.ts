@@ -2813,6 +2813,8 @@ export const en = {
     working_other: "{{count}} agents working",
   },
   channel: {
+    /** Above #general's composer, before who is out of budget (`notifications.teamWatch.budget_out`). */
+    teamStalled: "Team stalled",
     /** Channel settings' sections, for who manages it (ADR 0134). */
     settingsNav: {
       label: "Channel settings",
@@ -2943,6 +2945,9 @@ export const en = {
     noTopic: "No description",
     nameLabel: "Name",
     nameHelp: "Changes for everyone. Old links keep working.",
+    replyInThreads: "Agents reply in threads",
+    replyInThreadsHelp:
+      "An agent called in the channel answers in the thread under that message, and the channel shows one line for it. Work already going stays where it is.",
     nameTaken: "There is already #{{name}}.",
     generalName: "#general keeps its name.",
     archive: "Archive channel",
@@ -3353,6 +3358,8 @@ export const en = {
       anAgent: "An agent",
       none: "None",
       budgetDefault: "Workspace default",
+      /** After a budget on a settings card that is at or below the agent's spend this month. */
+      pausesNow: "pauses at once",
       anAccount: "An AI account",
       everyone: "Everyone",
       ownerOnly: "Only its owner",
@@ -6130,6 +6137,8 @@ export const en = {
       undo: "Undo",
       deadline: "Time left",
       decides: "Who decides",
+      /** A request of an agent a role answers for (ADR 0085, addendum of 2026-11-21): the first decision counts. */
+      decidesRole: "Anyone in {{role}}",
       state: "Status",
       why: "Why {{name}} asks",
       email: "The email",
@@ -7639,6 +7648,9 @@ export const en = {
     noOwnerShort: "Admins get the alerts and approve",
     noOwnerHelp: "Without an owner, admins get the alerts and approve sensitive actions.",
     ownerHelp: "Gets the budget alerts and approves sensitive actions.",
+    /** A role as its owner (ADR 0085, addendum of 2026-11-21): whoever holds it gets them, any of them decides. */
+    ownerRoleHelp:
+      "Whoever holds {{role}} gets its approval requests and notices. Any of them decides, including people who join the role later.",
     ownerYours: "Whoever creates the agent is its owner. An admin can hand it to someone else later.",
     accessAdmins: "Only admins give agents access to apps and mailboxes. Once it's created, ask an admin.",
     /** A personal workspace (ADR 0159): `keeper` is who runs it, as `agentPage.lock`. */
@@ -8588,6 +8600,50 @@ export const en = {
       label: "Write tools",
       description: "Use the write tools. Those marked sensitive always ask for approval.",
     },
+    telegram_messages_read: {
+      label: "Read messages",
+      description: "List the bot's chats and read what people wrote to it or where it is.",
+    },
+    telegram_messages_write: {
+      label: "Send messages",
+      description:
+        "Send, edit and pin messages and files as the bot. Deleting messages, banning people and invite links ask for approval.",
+    },
+    x_posts_read: {
+      label: "Read posts",
+      description: "Read the account's posts and mentions, posts by id and recent posts by search.",
+    },
+    x_posts_write: {
+      label: "Post",
+      description: "Post on the account, with pictures or a video from the Drive. Deleting a post asks for approval.",
+    },
+    threads_posts_read: {
+      label: "Read posts",
+      description: "Read the account's posts, their replies, mentions and results.",
+    },
+    threads_posts_write: {
+      label: "Post and reply",
+      description:
+        "Post with pictures or videos from the Drive, reply and hide replies. Deleting a post asks for approval.",
+    },
+    meta_ads_ads_read: {
+      label: "Read ads",
+      description: "List ad accounts, campaigns, ad sets and ads, and read their results.",
+    },
+    meta_ads_ads_write: {
+      label: "Manage ads",
+      description:
+        "Create campaigns, ad sets and ads (always paused), edit and pause them. Turning one on and changing a budget always ask. Archiving and deleting ask.",
+    },
+    tiktok_videos_read: {
+      label: "Read videos",
+      description: "Read the creator's profile, public videos and what they may post.",
+    },
+    tiktok_videos_write: {
+      label: "Send videos to drafts",
+      description:
+        "Send a Drive video to the creator's TikTok drafts, where they finish the post. Each upload asks for approval.",
+    },
   },
   issues: {
     /** A task another agent handed over: on its card and after its title in the list. */
@@ -8958,6 +9014,12 @@ export const en = {
       fromCreation: "At creation · {{when}}",
       fromComment: "{{name}}'s comment · {{when}}",
       linked: "Linked by {{name}}",
+      remove: "Remove {{name}} from the task",
+      removeShort: "Remove from the task",
+      removed: "{{name}} removed from the task. It's still in the Drive.",
+      added_one: "File added to the attachments",
+      added_other: "{{count}} files added to the attachments",
+      see: "See attachments",
     },
     history: { commented: "commented", commentedFiles: "commented with attachments" },
     event: {
@@ -9025,6 +9087,14 @@ export const en = {
         "The address answers only the methods checked. With GET, the URL's query parameters are the call's data.",
       /** After "Runs on every call…" on the routine's page: `methods` are HTTP methods ("GET, POST"). */
       methodsLine: "Accepts {{methods}}.",
+      groupBy: "Group calls by",
+      groupByHelp:
+        "A field in each call's data, like conversation.id. Calls with the same value run one at a time, in order. Different values run side by side.",
+      /** Under "Group calls by" when it is empty. */
+      groupByOff: "Every call waits in one line, in order.",
+      /** Under "Group calls by" when it is set: `path` is what was typed ("conversation.id"). */
+      groupByOn: "Calls with the same {{path}} run in order. Others run side by side.",
+      groupBySaved: "Grouping saved.",
       address: "Address",
       addressHelp:
         "Anyone with the address can start the agent. Keep it like a password and make a new one if it leaks.",
@@ -9443,6 +9513,7 @@ export const en = {
       "github.pr_opened": "PR opened on GitHub",
       "issue.created": "Task created in agentes",
       "deploy.succeeded": "Deploy finished",
+      "telegram.message": "Message to the Telegram bot",
     },
     when: { event: "When: {{event}}" },
     form: {
@@ -10425,6 +10496,8 @@ export const en = {
       reply: "Reply",
       replies_one: "{{count}} reply",
       replies_other: "{{count}} replies",
+      replying_one: "{{names}} is replying in the thread",
+      replying_other: "{{names}} are replying in the thread",
       closed_one: "Thread closed · {{title}} · {{count}} message",
       closed_other: "Thread closed · {{title}} · {{count}} messages",
       archived_one: "{{count}} archived thread isn't shown here",
@@ -11307,6 +11380,8 @@ export const en = {
       everyone: "Everyone in the workspace",
       people: "Only some people or roles",
       owner: "Only the owner",
+      /** "Only the owner" when a role answers for it (ADR 0085, addendum of 2026-11-21). */
+      ownerRole: "Only whoever holds {{role}}",
       /** `<key>Personal`: a personal workspace's plain words (ADR 0159), where a family picks people, not roles. */
       everyonePersonal: "Everyone here",
       peoplePersonal: "Only some people",
@@ -11316,6 +11391,8 @@ export const en = {
       people: "Pick the people and roles that can talk to {{name}}.",
       owner: "Only {{owner}} talks to {{name}}. Lists show {{name}} only to {{owner}}, admins and whoever can edit.",
       noOwner: "Set an owner to use this option.",
+      ownerRole:
+        "Only whoever holds {{role}} talks to {{name}}. Lists show {{name}} only to whoever holds {{role}}, admins and whoever can edit.",
       everyonePersonal: "Anyone here can call {{name}}.",
       peoplePersonal: "Pick the people who can talk to {{name}}.",
     },
@@ -11326,8 +11403,11 @@ export const en = {
     roleMembers_other: "{{count}} people",
     picked: "Picked",
     ownerAlways: "{{name}} always can, as the owner.",
+    ownerRoleAlways: "Whoever holds {{role}} always can, as the owner.",
+    whoHolds: "whoever holds {{role}}",
     onlyYouForNow: "Only you, for now",
     onlyOwnerForNow: "Only {{name}}, for now",
+    onlyOwnerRoleForNow: "Only whoever holds {{role}}, for now",
     search: "Search roles and people",
     /** With no role to pick (a personal workspace, ADR 0159): people only. */
     searchPeople: "Search people",
@@ -11340,6 +11420,7 @@ export const en = {
       everyone: "Everyone in the workspace",
       everyonePersonal: "Everyone here",
       owner: "Only {{name}}",
+      ownerRole: "Only whoever holds {{role}}",
       nobody: "No one for now",
       someone: "Some people",
       people: "{{names}}",
@@ -11368,6 +11449,8 @@ export const en = {
       /** `owner`: the owner's name. "owner" stays a plain label beside it: never give that person a gender. */
       owner: "{{owner}} (owner), admins and whoever edits agents and talks to {{name}}.",
       noOwner: "Admins and whoever edits agents and talks to {{name}}.",
+      /** A role as its owner (ADR 0085, addendum of 2026-11-21). */
+      ownerRole: "Whoever holds {{role}} (the owner role), admins and whoever edits agents and talks to {{name}}.",
       people: "Pick who else can change how {{name}} works.",
     },
     rolesHint: "Whoever has the role can edit, including people who join it later.",
@@ -12527,6 +12610,12 @@ export const en = {
     free: "Free",
     /** Under OpenCode Go's models: OpenCode's free tier answers only its own CLI (ADR 0132 §7). */
     opencodeFreeHint: "Other free models run through OpenCode on the agent's computer.",
+    /** Under the Gemini plan's models: why its newest model isn't there (`BrainOption.missing`). */
+    missingModel: {
+      app_old: "Update the agentes.chat app on the agent's computer to use {{model}}.",
+      cli_old: "{{model}} needs a newer Antigravity CLI on the agent's computer. Run agy update there.",
+      plan: "{{model}} comes with Google AI Pro and Ultra. No Gemini account on the agent's computer has that plan.",
+    },
     modelHelp: "Bigger models think more and use up the plan faster.",
     hidden: "{{owner}} or an admin chooses who thinks.",
     hiddenAdmins: "Only admins choose who thinks.",
@@ -13633,7 +13722,11 @@ export const en = {
       mixpanel: { "1": "Query events, reports and funnels" },
       amplitude: { "1": "See charts and dashboards", "2": "Create charts" },
       himetrica: { "1": "See visits, funnels and revenue", "2": "Create and edit funnels" },
-      meta_ads: { "1": "See campaigns and results", "2": "Create and adjust campaigns" },
+      meta_ads: {
+        "1": "See campaigns and results",
+        "2": "Create and adjust campaigns",
+        ask: "Turning ads on and changing budgets always ask for your approval",
+      },
       google_docs: { "1": "Search and read documents", "2": "Create and edit documents" },
       google_sheets: { "1": "Read spreadsheets", "2": "Add rows and update cells" },
       google_calendar: {
@@ -13703,6 +13796,26 @@ export const en = {
         ask: "Sending messages always asks for your approval",
       },
       database: { "1": "See the tables", "2": "Query the data to answer", "3": "Never changes anything" },
+      telegram: {
+        "1": "Read what people write to the bot",
+        "2": "Send messages and files as the bot",
+        ask: "Deleting, banning and invite links always ask for your approval",
+      },
+      x: {
+        "1": "Read the account's posts and mentions",
+        "2": "Post with pictures or a video",
+        ask: "Deleting posts always asks for your approval",
+      },
+      threads: {
+        "1": "See posts, replies and results",
+        "2": "Post with pictures or videos and reply",
+        ask: "Deleting posts always asks for your approval",
+      },
+      tiktok: {
+        "1": "See the profile and videos",
+        "2": "Send videos to your drafts to finish in TikTok",
+        ask: "Each upload always asks for your approval",
+      },
     },
     connectedList: "Connected",
     connected: "Connected",
@@ -13857,7 +13970,13 @@ export const en = {
       pinterest: "Pinterest pins, boards and analytics.",
       reddit: "Reddit posts, comments and communities.",
       whatsapp: "WhatsApp Business messages and templates.",
+      telegram: "A Telegram bot of yours: its chats, groups and channels.",
+      x: "Posts on your X account: write, read mentions and search.",
+      threads: "Posts and replies on your Threads account.",
+      tiktok: "Your TikTok profile and videos, and videos sent to your drafts.",
     },
+    needsApp:
+      "This server has no {{name}} app yet: whoever runs it registers one with {{name}} and sets its variables (docs/social-apps-checklist.md).",
   },
   toolNames: {
     /**
@@ -14718,6 +14837,38 @@ export const en = {
       ignore_usage_limit: "Ignore the usage limit",
       send_feedback: "Send feedback",
       offer_feedback: "Offer to report a problem",
+      list_chats: "List chats",
+      read_messages: "Read messages",
+      get_chat: "See chat",
+      send_file: "Send file",
+      edit_message: "Edit message",
+      pin_message: "Pin message",
+      ban_member: "Ban member",
+      create_invite_link: "Create invite link",
+      get_my_posts: "See my posts",
+      get_mentions: "See mentions",
+      search_recent: "Search recent posts",
+      get_replies: "See replies",
+      get_insights: "See results",
+      reply: "Reply",
+      hide_reply: "Hide reply",
+      list_ad_accounts: "List ad accounts",
+      list_campaigns: "List campaigns",
+      list_ad_sets: "List ad sets",
+      list_ads: "List ads",
+      create_campaign: "Create campaign",
+      create_ad_set: "Create ad set",
+      create_ad: "Create ad",
+      update: "Update",
+      pause: "Pause",
+      activate: "Turn on",
+      set_budget: "Set budget",
+      archive: "Archive",
+      delete: "Delete",
+      list_videos: "List videos",
+      get_creator_info: "See posting options",
+      get_post_status: "See upload status",
+      upload_draft: "Send to drafts",
     },
   },
   toolReview: {
@@ -14915,6 +15066,15 @@ export const en = {
       asks_other: "{{count}} actions ask for approval in the chat.",
       adjust: "Adjust",
       ok: "Done",
+    },
+    telegram: {
+      token: "Bot token",
+      steps:
+        "In Telegram, open @BotFather, send /newbot, pick a name and a username that ends in “bot”, then paste the token it gives you here. To read a group, add the bot to it. To post in a channel, make it an admin there.",
+    },
+    x: {
+      consent:
+        "Agents you give X post on this account by themselves. Deleting a post asks first, and each agent's page narrows what it may do. An X account works in one workspace at a time.",
     },
   },
   database: {
@@ -15782,6 +15942,7 @@ export const en = {
       takeOverNoAccess: "Join the routine's conversation before taking it over.",
       agentNotInChannel: "Add the agent to the conversation first.",
       webhookPaused: "Turn the routine on to test it.",
+      groupByInvalid: "Write a path such as conversation.id, with a field name between each dot.",
       continueExtraOff:
         "This plan's window is used up and this agent's long work doesn't use the plan's paid extra usage. It picks up after the reset.",
       continueExtraUsedUp:
@@ -15818,6 +15979,8 @@ export const en = {
       sharingEmpty: "Choose who sees it.",
       sharingTooMany: "Choose at most {{max}} people and {{max}} roles.",
       notInDrive: "This lives only in its conversation, so it can't be shared.",
+      viewOnly: "You can view this file but not change it. Ask whoever made it for edit access.",
+      accessInvalid: "This access couldn't be saved. Check who sees and who edits it and try again.",
     },
     drive: {
       folderIntoItself: "A folder can't go inside itself or a folder inside it.",
@@ -15929,6 +16092,10 @@ export const en = {
        * edit"), so are their Undo and Redo.
        */
       undoSkillsAdmins: "Only whoever can edit the agent can undo or redo a change to its skills.",
+      /** `agent.owner_both` (ADR 0085, addendum of 2026-11-21): a person or a role answers for an agent, never both. */
+      ownerBoth: "The owner is a person or a role, not both. Pick one.",
+      /** `agent.owner_role_unknown`: the role picked as owner is gone. */
+      ownerRoleUnknown: "That role no longer exists in this workspace. Pick another owner.",
     },
     account: {
       notRestorable: "This account can't be restored anymore.",
@@ -20076,6 +20243,10 @@ export const en = {
     seatsPaid_other: "{{count}} paid seats",
     noLimit: "No limit",
     ownBucket: "On your own bucket, with no limit from us",
+    /** X's posts and reads this month, against what the plan includes. */
+    connectors: "X this month",
+    /** `{{share}}`: a percentage, already formatted ("42%"). */
+    shareUsed: "{{share}} used",
   },
   /** The referral service (ADR 0192): this server knows nothing of the program, only the way there. */
   referrals: {
@@ -21286,13 +21457,7 @@ export const en = {
   share: {
     button: "Share",
     title: "Share {{name}}",
-    conversation: "Only the conversation",
-    people: "People and roles you choose",
-    /**
-     * `<key>Personal`: a personal workspace's words (ADR 0159); its people choice and its Add, while there is no role
-     * worth picking, name people only.
-     */
-    peoplePersonal: "People you choose",
+    /** `<key>Personal`: a personal workspace's words (ADR 0159). */
     everyone: "Everyone in the workspace",
     everyonePersonal: "Everyone here",
     whereDm: "The DM with {{name}}",
@@ -21300,14 +21465,9 @@ export const en = {
     /** For someone who isn't in the DM and got the file through Compartilhar. */
     whereDmBetween: "The DM between {{names}}",
     whereChannel: "Members of #{{name}}",
-    add: "Add a person or a role",
-    addPersonal: "Add a person",
-    addSearch: "Search people and roles",
-    addSearchPersonal: "Search people",
     noResults: "Nobody with that name",
     groupPeople: "People",
     groupRoles: "Roles",
-    access: "Who has access",
     you: "{{name}} (you)",
     agent: "Agent",
     role: "Role",
@@ -21316,35 +21476,48 @@ export const en = {
     adminsPersonal: "The people who run this space see it too.",
     copyLink: "Copy link",
     copied: "Link copied.",
-    done: "Done",
     /** Beside Copiar link while only a private conversation sees the file. */
     onlyHere: "People outside this conversation won't open the link.",
-    choosePeople: "Choose people",
     readOnly: "Only who's in the conversation changes who sees it.",
-    open: "Everyone in the workspace sees this file.",
-    openPersonal: "Everyone here sees this file.",
-    savedEveryone: "Everyone in the workspace sees the file now.",
-    savedEveryonePersonal: "Everyone here sees the file now.",
-    savedPeople: "The people you chose see the file now.",
-    savedConversation: "Only the conversation sees the file now.",
     /**
-     * A file of the Drive itself lives with its maker (ADR 0157): its first choice, who has access, the link's warning,
-     * who may change it and the saved toast. `Maker`: someone else opens it (an administrator), `name` is its maker.
+     * A file of the Drive itself lives with its maker (ADR 0157): the link's warning and who may change who sees it.
+     * `Maker`: someone else opens it (an administrator), `name` is its maker.
      */
-    onlyYou: "Only you",
-    onlyMaker: "Only {{name}}",
     onlyYouLink: "Only you can open this link.",
     onlyMakerLink: "Only {{name}} can open this link.",
     readOnlyDrive: "Only who made the file and administrators change who sees it.",
-    savedOnlyYou: "Only you see the file now.",
-    savedOnlyMaker: "Only {{name}} sees the file now.",
-    undo: "Undo",
     fileRef: "File {{title}}",
     fileRefNone: "File without access",
     /** Who sees the file (`text`, no full stop) and who Compartilhar added. */
     also: "{{text}}. Also shared with {{who}}.",
     /** Copiar links of several files, some only their conversation opens: the toast, with Compartilhar. */
     someOnlyHere: "Some of these links open only for who already sees the file.",
+    /**
+     * Compartilhar with levels (ADR 0202): what someone may do with the file, the rows always there (who reads it where
+     * it lives, everyone, the agents) and their words, adding someone, and the saved toast.
+     */
+    level: {
+      none: "No access",
+      view: "View",
+      edit: "Edit",
+    },
+    levelOf: "What {{name}} can do",
+    madeIt: "Made the file",
+    placeText: "Where the file lives",
+    everyoneText: "Anyone in this workspace",
+    everyoneTextPersonal: "Anyone here",
+    agentsAll: "All agents",
+    agentsAllText: "Any agent in the workspace",
+    agentsHere: "Agents in this conversation",
+    agentsHereText: "The agents where the file lives",
+    addAll: "Add a person, role or agent",
+    addAllPersonal: "Add a person or agent",
+    addAllSearch: "Search people, roles and agents",
+    addAllSearchPersonal: "Search people and agents",
+    groupAgents: "Agents",
+    /** On the phone, beside a row while everyone edits: a tap adds them (and limits it). */
+    addRow: "Add",
+    saved: "Access saved.",
   },
   /**
    * A link a person opens in a browser that the server refuses (ADR 0157): each cause's title and words, the button
@@ -21670,7 +21843,7 @@ export const en = {
     mark: "Beta",
     open: "Send feedback",
     ask: "What was missing, broke or got in your way?",
-    goesCloud: "What you write goes by email to the agentes.chat team.",
+    goesCloud: "What you write goes by email to the agentes.chat team, who may use an AI assistant to look into it.",
     goesServer: "What you write goes by email to whoever runs this server.",
     placeholder: "Write it your way",
     /** The last entry of a right-click menu: it opens this form about what was clicked. */
@@ -22155,6 +22328,13 @@ export const en = {
         inTrash: "In the trash. Restore it to change it.",
         closing: "The workspace is being deleted. Its files can only be read.",
       },
+      /**
+       * Beside Read-only when the file's access lets me only view it (ADR 0202): the file's conversation opens with these
+       * words for who made it (`name`'s @), or for anyone there when no person made it.
+       */
+      requestEdit: "Ask to edit",
+      requestEditText: "can you give me edit access to this file?",
+      requestEditAnyone: "Can someone give me edit access to this file?",
       present: "Present",
       download: "Download",
       /** What a live file downloads as (ADR 0198). */

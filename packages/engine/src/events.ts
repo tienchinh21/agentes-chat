@@ -40,7 +40,7 @@ export interface MemoryUpdate {
 }
 
 import type { AgentQuestion } from "./questions";
-import type { RunStatus } from "./runs";
+import type { AgentRun, RunStatus } from "./runs";
 import type { SecretRequestView } from "./secrets";
 import type { ThreadChange, ThreadInfo, ThreadState } from "./threads";
 
@@ -262,6 +262,18 @@ export type ChannelEvent =
       agentId: string;
       tool: string;
       said?: string;
+    }
+  /**
+   * What a run started on a person's message is about to do, in a few words of the workspace's small model
+   * (`announceIntent`): the bar's line until the agent's own words come. Never stored.
+   */
+  | {
+      type: "agent.intent";
+      channelId: string;
+      threadId: string | null;
+      runId: string;
+      agentId: string;
+      text: string;
     }
   /** What a computer command prints while it runs (throttled, ≤ 64 KB per call). */
   | {
@@ -760,14 +772,14 @@ export async function publishMessageCreated(pubsub: PubSub, message: MessageView
   }
 }
 
-/** Receipts of a routed message (`message.routed`), then "thinking" for each run it started, where the message is. */
+/** Receipts of a routed message (`message.routed`), then "thinking" for each run it started, where it answers. */
 export async function publishRouted(
   pubsub: PubSub | undefined,
   message: { id: string; channelId: string; threadId: string | null },
   routed: {
     strategy: "mention" | "dm" | "router" | "none";
     seenBy: string[];
-    runs: { id: string; agentId: string }[];
+    runs: Pick<AgentRun, "id" | "agentId" | "threadRootId" | "triggerMessageId" | "replyInThread">[];
     reason?: string;
     decidedBy?: DecidedBy;
     referenced?: string[];
@@ -787,11 +799,13 @@ export async function publishRouted(
     ...(decidedBy ? { decidedBy } : {}),
     ...intent,
   });
+  // Loaded on call: imported at the top, runs.ts closes a cycle back to this module that breaks the engine's start-up.
+  const { replyThreadOf } = await import("./runs");
   for (const run of runs) {
     await publishChannelEvent(pubsub, {
       type: "agent.thinking",
       channelId: message.channelId,
-      threadId: message.threadId,
+      threadId: replyThreadOf(run),
       agentId: run.agentId,
       runId: run.id,
     });

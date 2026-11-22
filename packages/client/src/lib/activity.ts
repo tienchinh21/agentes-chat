@@ -195,6 +195,7 @@ const BUILTIN: Record<string, ActivityKind> = {
   run_code: "runningCode",
   write_file: "pcFiles",
   read_file: "pcFiles",
+  review_media: "pcFiles",
   list_files: "pcFiles",
   export_file: "exportingFile",
   upload_file: "exportingFile",

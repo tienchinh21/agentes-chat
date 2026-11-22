@@ -388,7 +388,7 @@ function Title({ n, lines }: { n: AppNotification; lines: number }) {
 const useLine = (n: AppNotification) => {
   const { t } = useTranslation();
   // What the right hand found is its headline: nothing under it says it again.
-  return n.kind === "team_watch" ? "" : noticeLine(n, (kind) => mediaWord(t, kind));
+  return n.kind === "team_watch" || n.kind === "budget_paused" ? "" : noticeLine(n, (kind) => mediaWord(t, kind));
 };
 
 /** Closed: the face, who did what and the line; how many more; "Ver" (where it happened) at its end. */

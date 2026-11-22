@@ -31,10 +31,13 @@ import { type Agent, getAgent, updateAgent } from "../agents";
 import {
   agentEditorIds,
   agentManagerIds,
+  agentOwnerIds,
   audienceNotice,
   canTalkTo,
   editsAgent,
   managesAgent,
+  OWNER_COLUMNS,
+  ownsAgent,
   seesAgentDetails,
   speakerFor,
 } from "../audience";
@@ -64,6 +67,7 @@ import {
   settingLines,
   settingsDeciders,
   settingsGroup,
+  settingsHold,
   settingsRows,
   type WantedLine,
 } from "../settings-proposals";
@@ -344,8 +348,8 @@ async function deciders(db: Database, p: Proposal) {
   if (p.agentId && p.target === "agent_instructions") {
     for (const id of await agentEditorIds(db, p.orgId, p.agentId)) ids.add(id);
   } else if (p.agentId && ownerDecides(p)) {
-    const [agent] = await db.select({ owner: agents.ownerUserId }).from(agents).where(eq(agents.id, p.agentId));
-    if (agent?.owner) ids.add(agent.owner);
+    const [agent] = await db.select(OWNER_COLUMNS).from(agents).where(eq(agents.id, p.agentId));
+    if (agent) for (const id of await agentOwnerIds(db, p.orgId, agent)) ids.add(id);
   }
   return [...ids];
 }
@@ -416,7 +420,7 @@ async function mayDecide(db: Database, actorId: string, p: Proposal, known?: Mem
     if (!agent) return can(membership, "manage_agents");
     if (managesAgent(agent, actorId, membership)) return true;
     if (p.target === "agent_role") return editsAgent(agent, actorId, membership);
-    return ownerDecides(p) && agent.ownerUserId === actorId;
+    return ownerDecides(p) && ownsAgent(agent, actorId, membership.roleIds);
   }
   if (p.target === "org_context") return can(membership, "configure");
   // A file that runs on agents' computers is a skill change of its own: who manages skills, as an update from its
@@ -469,8 +473,9 @@ export async function listProposals(
 }
 
 /**
- * Open rows accepting can only fail: their text changed since, or their agent was archived (a settings row can still
- * delete it). They show as stale, and nobody is asked to decide.
+ * Open rows accepting can only fail: their text or a setting's value changed since, a budget would now stop the agent
+ * without the card saying so, or their agent was archived (a settings row can still delete it). They show as stale,
+ * and nobody is asked to decide.
  */
 async function outdatedIds(db: Database, orgId: string, rows: Proposal[]) {
   const open = rows.filter((r) => r.status === "pending");
@@ -491,7 +496,7 @@ async function outdatedIds(db: Database, orgId: string, rows: Proposal[]) {
     if (r.target === "agent_role") return byId.get(r.agentId ?? "")?.role;
     return undefined;
   };
-  return new Set(
+  const out = new Set(
     open
       .filter((r) => {
         if (r.target !== "agent_settings" && byId.get(r.agentId ?? "")?.archivedAt) return true;
@@ -500,6 +505,12 @@ async function outdatedIds(db: Database, orgId: string, rows: Proposal[]) {
       })
       .map((r) => r.id),
   );
+  for (const r of open) {
+    if (r.target !== "agent_settings" || !r.agentId || deletes(r)) continue;
+    const agent = await getAgent(db, orgId, r.agentId);
+    if (agent && !agent.archivedAt && !(await settingsHold(db, agent, r.settings ?? []))) out.add(r.id);
+  }
+  return out;
 }
 
 /**
@@ -542,7 +553,7 @@ export async function decideProposal(
   const finalText = options.finalText ?? p.proposedText;
   if (options.finalText !== undefined) {
     checkContent(options.finalText);
-    await checkPermissionText(options.judge, orgId, options.finalText);
+    await checkPermissionText(options.judge, orgId, options.finalText, { db, userId: actorId });
   }
   const blobs = options.blobs && p.skillPath ? await pinBlobs(options.blobs, orgId) : options.blobs;
   const events = holdEvents(options.pubsub);

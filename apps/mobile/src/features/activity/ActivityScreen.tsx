@@ -566,7 +566,7 @@ const ActivityRow = memo(function ActivityRow({
     : n.kind === "usage_limit"
       ? usageLimitLine(t, n)
       : // What the right hand found (ADR 0177 §1) is the title itself: nothing under it says it again.
-        n.kind === "team_watch"
+        n.kind === "team_watch" || n.kind === "budget_paused"
         ? ""
         : failed
           ? failed.sub

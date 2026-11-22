@@ -16,6 +16,7 @@ import {
   liveSubLine,
   surfaceOf,
 } from "@agenteschat/client/lib/agent-computer";
+import { ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { managesAgent } from "@agenteschat/client/lib/audience";
 import { computerName, READY_FLASH_MS, WORKSPACE_COMPUTER_KIND } from "@agenteschat/client/lib/computer";
 import { clockAt } from "@agenteschat/client/lib/format";
@@ -315,9 +316,11 @@ function ComputerStage({
   const oneClick = useToolOneClick(machine);
   const browserOneClick = Boolean(machine && oneClick && oneClick.kind !== "outdated");
   const computer = computerName(t, org.name, machine, isPersonal(org));
-  const manages = managesAgent(agent) || agent.ownerUserId === me.user.id;
+  // Its owner: the person, or whoever holds the role that answers for it (ADR 0085, addendum of 2026-11-21).
+  const owns = ownsAgentAs(agent, me.user.id, dir.rolesOf(me.user.id));
+  const manages = managesAgent(agent) || owns;
   // Whose role gives no browser here gets Fechar, never "Assumir o navegador" (ADR 0085 §12).
-  const mayBrowser = can(org, agent.ownerUserId === me.user.id ? "own_browsers" : "control_browsers");
+  const mayBrowser = can(org, owns ? "own_browsers" : "control_browsers");
   const person = (id: string | null) => (id ? dir.memberById.get(id)?.name : undefined) ?? t("channel.unknownPerson");
   const paused = f?.edition === "selfhost" && machine && isPaused(machine, now) ? machine.paused : null;
   const waiting = waitingFor && isWaitingHandoff(waitingFor, now) ? waitingFor : null;

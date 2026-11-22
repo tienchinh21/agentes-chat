@@ -824,6 +824,10 @@ export function turnMeans(names: ReadonlySet<string>, teammates: string[] = [], 
       "your browser (`browser_*`): any website or web app, search engines included, used as a person would, signed in to their account with their help (a service with no connector but a web version)",
     );
   if (names.has("run_code")) out.push("your computer's terminal (`run_code`): commands, scripts, files");
+  if (names.has("review_media"))
+    out.push(
+      "watching videos and hearing recordings (`review_media`): frames across all of it and what is said, timed",
+    );
   if (names.has("vault_list"))
     out.push(
       "the Vault (`vault_list`): logins, keys and contact details people saved for you, used without ever seeing a password or a key",

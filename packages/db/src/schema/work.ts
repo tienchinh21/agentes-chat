@@ -334,6 +334,11 @@ export const routineHooks = pgTable("routine_hooks", {
   source: jsonb(),
   /** The HTTP methods the address answers (GET passes its query string as the call's data). */
   methods: text().array().notNull().default(sql`'{POST}'::text[]`),
+  /**
+   * "Group calls by": a dot path into a call's data (`conversation.id`). Calls with the same value there run one
+   * after another, in order; different values run side by side. Null: one line for every call.
+   */
+  groupBy: text(),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });

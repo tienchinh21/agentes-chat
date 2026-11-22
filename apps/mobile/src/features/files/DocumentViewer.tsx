@@ -183,7 +183,8 @@ export function DocumentViewer({
           }
         />
       )}
-      {pdfTalk ? <FileTalkLine file={pdfTalk} /> : null}
+      {/* Under the sheet it keeps its place, unseen: the pages never lay out again as the sheet comes and goes. */}
+      {pdfTalk ? <FileTalkLine file={pdfTalk} keepPlace /> : null}
     </>
   );
 }

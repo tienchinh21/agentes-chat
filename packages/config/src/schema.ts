@@ -460,8 +460,9 @@ export const envVars = {
     section: "Agents",
   },
   AGENT_MAX_OUTPUT_TOKENS: {
-    schema: z.coerce.number().int().min(256).max(128_000).default(16_000),
-    description: "Upper bound on tokens an agent may generate in one reply.",
+    schema: z.coerce.number().int().min(256).max(128_000).optional(),
+    description:
+      "Upper bound on tokens an agent may generate in one model call, thinking included. Unset: 64,000 on models whose limit is known (up to 128,000 at maximum effort), 16,000 on the rest. The agent's monthly budget is still reserved before each call.",
     section: "Agents",
   },
   CLAUDE_PLAN_CONCURRENCY: {
@@ -837,6 +838,66 @@ export const envVars = {
   CONNECTOR_LINEAR_CLIENT_SECRET: {
     schema: z.string().optional(),
     description: "Client secret of the Linear OAuth app for the Linear connector.",
+    section: "Connectors",
+    secret: true,
+  },
+  CONNECTOR_X_CLIENT_ID: {
+    schema: z.string().optional(),
+    description:
+      "OAuth 2.0 client id of this server's X app (console.x.com, type Web App, Automated App or Bot; Read and write), for the X connector (ADR 0170). Set together with `CONNECTOR_X_CLIENT_SECRET`. Callback URL: `{PUBLIC_URL}/api/app/connectors/oauth/callback`. Without it, X isn't offered. Steps: docs/social-apps-checklist.md.",
+    section: "Connectors",
+  },
+  CONNECTOR_X_CLIENT_SECRET: {
+    schema: z.string().optional(),
+    description: "OAuth 2.0 client secret of this server's X app (not its API key).",
+    section: "Connectors",
+    secret: true,
+  },
+  CONNECTOR_X_CALLS_PER_MONTH: {
+    schema: z.coerce.number().int().min(0).default(0),
+    description:
+      "X calls a workspace may make per calendar month (UTC): X bills this server's app per post written and read. At the cap its X tools stop until the next month. 0: no cap.",
+    section: "Connectors",
+  },
+  CONNECTOR_THREADS_APP_ID: {
+    schema: z.string().optional(),
+    description:
+      "Threads app id of this server's Meta app with the Threads use case (its own id, not the main app's), for the Threads connector (ADR 0170). Set together with `CONNECTOR_THREADS_APP_SECRET`. Redirect URI: `{PUBLIC_URL}/api/app/connectors/oauth/callback`; uninstall and delete callbacks: `{PUBLIC_URL}/api/webhooks/meta/deauthorize` and `/api/webhooks/meta/data-deletion`. Without it, Threads isn't offered. Steps: docs/social-apps-checklist.md.",
+    section: "Connectors",
+  },
+  CONNECTOR_THREADS_APP_SECRET: {
+    schema: z.string().optional(),
+    description: "Threads app secret of this server's Meta app for Threads.",
+    section: "Connectors",
+    secret: true,
+  },
+  CONNECTOR_META_ADS_APP_ID: {
+    schema: z.string().optional(),
+    description:
+      "App id of this server's Meta business app (Marketing API), for the Meta Ads connector (ADR 0170). Set together with `CONNECTOR_META_ADS_APP_SECRET` and `CONNECTOR_META_ADS_CONFIG_ID`. Valid OAuth redirect URI: `{PUBLIC_URL}/api/app/connectors/oauth/callback`; deauthorize and data deletion callbacks as for Threads. Without them, Meta Ads isn't offered.",
+    section: "Connectors",
+  },
+  CONNECTOR_META_ADS_APP_SECRET: {
+    schema: z.string().optional(),
+    description: "App secret of this server's Meta business app for Meta Ads.",
+    section: "Connectors",
+    secret: true,
+  },
+  CONNECTOR_META_ADS_CONFIG_ID: {
+    schema: z.string().optional(),
+    description:
+      "Configuration ID of the app's Facebook Login for Business configuration (a system-user token that doesn't expire; ad accounts and Pages).",
+    section: "Connectors",
+  },
+  CONNECTOR_TIKTOK_CLIENT_KEY: {
+    schema: z.string().optional(),
+    description:
+      "Client key of this server's TikTok for Developers app (Login Kit for Web and the Content Posting API), for the TikTok connector (ADR 0170). Set together with `CONNECTOR_TIKTOK_CLIENT_SECRET`. Redirect URI: `{PUBLIC_URL}/api/app/connectors/oauth/callback`. Without it, TikTok isn't offered.",
+    section: "Connectors",
+  },
+  CONNECTOR_TIKTOK_CLIENT_SECRET: {
+    schema: z.string().optional(),
+    description: "Client secret of this server's TikTok app.",
     section: "Connectors",
     secret: true,
   },

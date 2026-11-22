@@ -2,7 +2,7 @@ import { type AgentScope, DESKTOP_PROTOCOL, type PubSub } from "@agenteschat/ada
 import { and, type Database, type Executor, eq, gte, inArray, schema, sql } from "@agenteschat/db";
 import { announceAgentStatus } from "./agent-status";
 import { publishApproval } from "./approvals";
-import { managesAgent, REACH_COLUMNS } from "./audience";
+import { managesAgent, ownsAgent, REACH_COLUMNS } from "./audience";
 import { recordAudit } from "./audit";
 import { personOfMessage } from "./authority";
 import { lineMachineOf, publishQueueChanged } from "./computer-queue";
@@ -194,8 +194,14 @@ interface StoppableRun {
   run: { orgId: string; agentId: string; triggerMessageId: string };
   requester: string | null;
   ownerUserId: string | null;
+  /** Its agent's owner role (ADR 0085, addendum of 2026-11-21): whoever holds it may as its owner. */
+  ownerRoleId?: string | null;
   agent?: RunAgent;
 }
+
+/** Whether the person answers for the run's agent (`ownsAgent`): its owner, or holding its owner role. */
+const ownsRunAgent = (row: Pick<StoppableRun, "ownerUserId" | "ownerRoleId">, userId: string, membership: Membership) =>
+  ownsAgent({ ownerUserId: row.ownerUserId, ownerRoleId: row.ownerRoleId ?? null }, userId, membership.roleIds);
 
 /**
  * Who may stop a run, continue it, or start it again ("Responder agora"): who asked for it (`runRequester`), the
@@ -203,7 +209,7 @@ interface StoppableRun {
  * the agent (`managesRunAgent`). A caller checking many runs passes each one's `agent`: nothing is read for it then.
  */
 export async function mayStopRun(db: Executor, userId: string, membership: Membership, row: StoppableRun) {
-  if (row.requester === userId || row.ownerUserId === userId) return true;
+  if (row.requester === userId || ownsRunAgent(row, userId, membership)) return true;
   if (await managesRunAgent(db, userId, membership, row)) return true;
   return (await personOfMessage(db, row.run.orgId, row.run.triggerMessageId)) === userId;
 }
@@ -267,6 +273,7 @@ export async function cancelRun(
       run: agentRuns,
       agent: REACH_COLUMNS,
       ownerUserId: agents.ownerUserId,
+      ownerRoleId: agents.ownerRoleId,
       requester: runRequester,
       channelKind: channels.kind,
     })
@@ -290,7 +297,7 @@ export async function cancelRun(
     return { id: row.run.id, status: row.run.status, previousStatus: row.run.status };
   }
   // The agent's owner or who manages it decides for the whole conversation; who asked, only for what they sent.
-  const forAll = row.ownerUserId === userId || (await managesRunAgent(db, userId, membership, row));
+  const forAll = ownsRunAgent(row, userId, membership) || (await managesRunAgent(db, userId, membership, row));
   const stopped = await stopRun(
     deps,
     orgId,

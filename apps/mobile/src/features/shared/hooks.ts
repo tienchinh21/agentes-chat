@@ -3,6 +3,7 @@ import {
   type Edition,
   type FormerAgent,
   type Member,
+  type OrgRole,
   type RealtimeConnection,
   useAllAgents,
   useAuthConfig,
@@ -11,7 +12,9 @@ import {
   useMachines,
   useMe,
   useMembers,
+  useRoles,
 } from "@agenteschat/client";
+import { type AgentOwnerLike, ownsAgentAs } from "@agenteschat/client/lib/agent-owner";
 import { computerEdition } from "@agenteschat/client/lib/computer";
 import { formerById } from "@agenteschat/client/lib/directory";
 import { errorText } from "@agenteschat/client/lib/errors";
@@ -26,6 +29,7 @@ import { useRealtime } from "@/providers/realtime";
 import { haptics, rememberAgentLooks, useTheme, useToast } from "@/ui";
 import { usePane } from "@/ui/pane";
 import { agentLook, daysAgo, type PacedClock, pacedClock, whenKind } from "./logic";
+import { roleIdsOf } from "./owner";
 
 /** The current organization's id, from its own context: a change of `me` doesn't draw its readers again. */
 export { useOrgId };
@@ -146,6 +150,29 @@ export function useDirectory(): Directory {
     members.data ?? NO_MEMBERS,
     agents.isLoading || members.isLoading,
   );
+}
+
+/** The signed-in person's roles (their member row's), for `ownsAgentAs`; none while they load. */
+export function useMyRoleIds(): readonly string[] {
+  return roleIdsOf(useDirectory().memberById, useMeId());
+}
+
+/**
+ * Whether I answer for an agent: its owner, or holding the role that answers for it (the server's `ownsAgent`, ADR
+ * 0085, addendum of 2026-11-21).
+ */
+export function useOwnsAgent() {
+  const meId = useMeId();
+  const roleIds = useMyRoleIds();
+  return useCallback(
+    (a: AgentOwnerLike | null | undefined) => Boolean(a && meId && ownsAgentAs(a, meId, roleIds)),
+    [meId, roleIds],
+  );
+}
+
+/** The workspace's roles, for the name and mark of a role that answers for an agent (undefined while they load). */
+export function useOwnerRoles(): OrgRole[] | undefined {
+  return useRoles(useOrgId()).data?.roles;
 }
 
 /** Toasts and other places that only know an agent's id draw it from these looks (once, at the app's root). */

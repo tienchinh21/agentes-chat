@@ -2630,6 +2630,7 @@
     "working_other": "{{count}} Agenten arbeiten"
   },
   "channel": {
+    "teamStalled": "Team steht still",
     "settingsNav": {
       "label": "Kanaleinstellungen",
       "overview": "Übersicht",
@@ -2757,6 +2758,8 @@
     "noTopic": "Keine Beschreibung",
     "nameLabel": "Name",
     "nameHelp": "Ändert sich für alle. Alte Links funktionieren weiter.",
+    "replyInThreads": "Agenten antworten in Threads",
+    "replyInThreadsHelp": "Ein Agent, der im Kanal gerufen wird, antwortet im Thread unter dieser Nachricht, und der Kanal zeigt dafür eine Zeile. Laufende Arbeit bleibt, wo sie ist.",
     "nameTaken": "#{{name}} gibt es schon.",
     "generalName": "#general behält seinen Namen.",
     "archive": "Kanal archivieren",
@@ -3108,6 +3111,7 @@
       "anAgent": "Ein Agent",
       "none": "Keins",
       "budgetDefault": "Standard des Workspace",
+      "pausesNow": "pausiert sofort",
       "anAccount": "Ein KI-Konto",
       "everyone": "Alle",
       "ownerOnly": "Nur der Verantwortliche",
@@ -5696,6 +5700,7 @@
       "undo": "Rückgängig",
       "deadline": "Verbleibende Zeit",
       "decides": "Wer entscheidet",
+      "decidesRole": "Alle mit der Rolle {{role}}",
       "state": "Status",
       "why": "Warum {{name}} fragt",
       "email": "Die E-Mail",
@@ -7164,6 +7169,8 @@
     "noOwnerShort": "Admins bekommen die Warnungen und geben frei",
     "noOwnerHelp": "Ohne Inhaber bekommen Admins die Warnungen und geben heikle Aktionen frei.",
     "ownerHelp": "Bekommt die Budget-Warnungen und gibt heikle Aktionen frei.",
+    "ownerRoleHelp": "Alle mit der Rolle {{role}} bekommen die Freigabeanfragen und Hinweise. Entscheiden darf jede Person davon, auch wer die Rolle später bekommt.",
+    "ownerRoleHelp_female": "Alle mit der Rolle {{role}} bekommen die Freigabeanfragen und Hinweise. Entscheiden darf jede Person davon, auch wer die Rolle später bekommt.",
     "ownerYours": "Wer den Agenten erstellt, ist sein Inhaber. Ein Admin kann ihn später jemand anderem übergeben.",
     "accessAdmins": "Nur Admins geben Agenten Zugriff auf Apps und Postfächer. Sobald er erstellt ist, frag einen Admin.",
     "accessAdminsKeeper": "Nur {{keeper}} gibt Agenten Zugriff auf Apps und Postfächer. Sobald er erstellt ist, frag {{keeper}}.",
@@ -8096,6 +8103,46 @@
     "custom_write": {
       "label": "Schreib-Tools",
       "description": "Die Schreib-Tools nutzen. Als sensibel markierte fragen immer nach Freigabe."
+    },
+    "telegram_messages_read": {
+      "label": "Nachrichten lesen",
+      "description": "Die Chats des Bots auflisten und lesen, was Leute ihm oder dort geschrieben haben, wo er ist."
+    },
+    "telegram_messages_write": {
+      "label": "Nachrichten senden",
+      "description": "Nachrichten und Dateien als Bot senden, bearbeiten und anheften. Nachrichten löschen, Leute sperren und Einladungslinks fragen nach Freigabe."
+    },
+    "x_posts_read": {
+      "label": "Beiträge lesen",
+      "description": "Die Beiträge und Erwähnungen des Kontos lesen, Beiträge per ID und neue Beiträge per Suche."
+    },
+    "x_posts_write": {
+      "label": "Posten",
+      "description": "Auf dem Konto posten, mit Bildern oder einem Video aus dem Drive. Einen Beitrag löschen fragt nach Freigabe."
+    },
+    "threads_posts_read": {
+      "label": "Beiträge lesen",
+      "description": "Die Beiträge des Kontos, ihre Antworten, Erwähnungen und Ergebnisse lesen."
+    },
+    "threads_posts_write": {
+      "label": "Posten und antworten",
+      "description": "Mit Bildern oder Videos aus dem Drive posten, antworten und Antworten ausblenden. Einen Beitrag löschen fragt nach Freigabe."
+    },
+    "meta_ads_ads_read": {
+      "label": "Anzeigen lesen",
+      "description": "Werbekonten, Kampagnen, Anzeigengruppen und Anzeigen auflisten und ihre Ergebnisse lesen."
+    },
+    "meta_ads_ads_write": {
+      "label": "Anzeigen verwalten",
+      "description": "Kampagnen, Anzeigengruppen und Anzeigen anlegen (immer pausiert), bearbeiten und pausieren. Einschalten und Budget ändern fragen immer. Archivieren und Löschen fragen."
+    },
+    "tiktok_videos_read": {
+      "label": "Videos lesen",
+      "description": "Das Profil, die öffentlichen Videos und die Post-Optionen der Person lesen."
+    },
+    "tiktok_videos_write": {
+      "label": "Videos in die Entwürfe senden",
+      "description": "Ein Video aus dem Drive in die TikTok-Entwürfe senden, wo die Person den Post fertigstellt. Jeder Upload fragt nach Freigabe."
     }
   },
   "issues": {
@@ -8480,7 +8527,13 @@
       "empty": "Zieh Dateien hierher, füg einen Screenshot ein oder schick sie in der Unterhaltung der Aufgabe.",
       "fromCreation": "Beim Erstellen · {{when}}",
       "fromComment": "Kommentar von {{name}} · {{when}}",
-      "linked": "Verknüpft von {{name}}"
+      "linked": "Verknüpft von {{name}}",
+      "remove": "{{name}} aus der Aufgabe entfernen",
+      "removeShort": "Aus der Aufgabe entfernen",
+      "removed": "{{name}} ist nicht mehr in der Aufgabe. Die Datei bleibt im Drive.",
+      "added_one": "Datei bei den Anhängen",
+      "added_other": "{{count}} Dateien bei den Anhängen",
+      "see": "Anhänge ansehen"
     },
     "history": {
       "commented": "hat kommentiert",
@@ -8546,6 +8599,11 @@
       "methods": "Akzeptierte Methoden",
       "methodsHelp": "Die Adresse antwortet nur auf die markierten Methoden. Bei GET sind die Query-Parameter der URL die Daten des Aufrufs.",
       "methodsLine": "Akzeptiert {{methods}}.",
+      "groupBy": "Aufrufe gruppieren nach",
+      "groupByHelp": "Ein Feld in den Daten jedes Aufrufs, etwa conversation.id. Aufrufe mit demselben Wert laufen nacheinander, in ihrer Reihenfolge. Verschiedene Werte laufen gleichzeitig.",
+      "groupByOff": "Alle Aufrufe warten in einer Reihe, in ihrer Reihenfolge.",
+      "groupByOn": "Aufrufe mit demselben {{path}} laufen in ihrer Reihenfolge. Die anderen laufen gleichzeitig.",
+      "groupBySaved": "Gruppierung gespeichert.",
       "address": "Adresse",
       "addressHelp": "Wer die Adresse hat, kann den Agenten starten. Behandle sie wie ein Passwort und erstelle eine neue, falls sie bekannt wird.",
       "copied": "Adresse kopiert.",
@@ -8963,6 +9021,9 @@
       },
       "deploy": {
         "succeeded": "Deploy abgeschlossen"
+      },
+      "telegram": {
+        "message": "Nachricht an den Telegram-Bot"
       }
     },
     "when": {
@@ -9977,6 +10038,8 @@
       "reply": "Antworten",
       "replies_one": "{{count}} Antwort",
       "replies_other": "{{count}} Antworten",
+      "replying_one": "{{names}} antwortet im Thread",
+      "replying_other": "{{names}} antworten im Thread",
       "closed_one": "Thread geschlossen · {{title}} · {{count}} Nachricht",
       "closed_other": "Thread geschlossen · {{title}} · {{count}} Nachrichten",
       "archived_one": "{{count}} archivierter Thread wird hier nicht angezeigt",
@@ -10873,6 +10936,7 @@
       "everyone": "Alle im Workspace",
       "people": "Nur bestimmte Personen oder Rollen",
       "owner": "Nur der Inhaber",
+      "ownerRole": "Nur Personen mit der Rolle {{role}}",
       "everyonePersonal": "Alle hier",
       "peoplePersonal": "Nur bestimmte Personen"
     },
@@ -10881,6 +10945,8 @@
       "people": "Wähle die Personen und Rollen, die mit {{name}} schreiben dürfen.",
       "owner": "Nur {{owner}} schreibt mit {{name}}. In Listen sehen {{name}} nur {{owner}}, Admins und wer bearbeiten darf.",
       "noOwner": "Leg einen Inhaber fest, um diese Option zu nutzen.",
+      "ownerRole": "Nur Personen mit der Rolle {{role}} schreiben mit {{name}}. In Listen sehen {{name}} nur Personen mit der Rolle {{role}}, Admins und wer bearbeiten darf.",
+      "ownerRole_female": "Nur Personen mit der Rolle {{role}} schreiben mit {{name}}. In Listen sehen {{name}} nur Personen mit der Rolle {{role}}, Admins und wer bearbeiten darf.",
       "everyonePersonal": "Alle hier können {{name}} rufen.",
       "peoplePersonal": "Wähle die Personen, die mit {{name}} schreiben dürfen."
     },
@@ -10891,8 +10957,11 @@
     "roleMembers_other": "{{count}} Personen",
     "picked": "Ausgewählt",
     "ownerAlways": "{{name}} darf es als Inhaber immer.",
+    "ownerRoleAlways": "Personen mit der Rolle {{role}} dürfen es als Inhaber immer.",
+    "whoHolds": "Personen mit der Rolle {{role}}",
     "onlyYouForNow": "Vorerst nur du",
     "onlyOwnerForNow": "Vorerst nur {{name}}",
+    "onlyOwnerRoleForNow": "Vorerst nur Personen mit der Rolle {{role}}",
     "search": "Rollen und Personen suchen",
     "searchPeople": "Personen suchen",
     "noMatch": "Keine Rolle oder Person mit diesem Namen.",
@@ -10907,6 +10976,7 @@
       "everyone": "Alle im Workspace",
       "everyonePersonal": "Alle hier",
       "owner": "Nur {{name}}",
+      "ownerRole": "Nur Personen mit der Rolle {{role}}",
       "nobody": "Vorerst niemand",
       "someone": "Einige Personen",
       "people": "{{names}}",
@@ -10930,6 +11000,8 @@
     "modeText": {
       "owner": "{{owner}} (Inhaber), Admins und alle, die Agenten bearbeiten und mit {{name}} schreiben dürfen.",
       "noOwner": "Admins und alle, die Agenten bearbeiten und mit {{name}} schreiben dürfen.",
+      "ownerRole": "Personen mit der Rolle {{role}} (Inhaber-Rolle), Admins und alle, die Agenten bearbeiten und mit {{name}} schreiben dürfen.",
+      "ownerRole_female": "Personen mit der Rolle {{role}} (Inhaber-Rolle), Admins und alle, die Agenten bearbeiten und mit {{name}} schreiben dürfen.",
       "people": "Wähle, wer sonst noch ändern darf, wie {{name}} arbeitet."
     },
     "rolesHint": "Alle mit dieser Rolle dürfen bearbeiten, auch wer sie später bekommt.",
@@ -12111,6 +12183,11 @@
     "recommended": "Empfohlen",
     "free": "Kostenlos",
     "opencodeFreeHint": "Andere kostenlose Modelle laufen über OpenCode auf dem Computer des Agenten.",
+    "missingModel": {
+      "app_old": "Aktualisiere die agentes.chat-App auf dem Computer des Agenten, um {{model}} zu nutzen.",
+      "cli_old": "{{model}} braucht eine neuere Version der Antigravity CLI auf dem Computer des Agenten. Führe dort agy update aus.",
+      "plan": "{{model}} ist in Google AI Pro und Ultra enthalten. Kein Gemini-Konto auf dem Computer des Agenten hat diesen Plan."
+    },
     "modelHelp": "Größere Modelle denken mehr nach und verbrauchen das Abo schneller.",
     "hidden": "{{owner}} oder ein Admin wählt, wer denkt.",
     "hiddenAdmins": "Nur Admins wählen, wer denkt.",
@@ -13279,7 +13356,8 @@
       },
       "meta_ads": {
         "1": "Kampagnen und Ergebnisse ansehen",
-        "2": "Kampagnen erstellen und anpassen"
+        "2": "Kampagnen erstellen und anpassen",
+        "ask": "Anzeigen einschalten und Budgets ändern fragt immer nach deiner Freigabe"
       },
       "google_docs": {
         "1": "Dokumente suchen und lesen",
@@ -13411,6 +13489,26 @@
         "1": "Tabellen ansehen",
         "2": "Daten abfragen, um zu antworten",
         "3": "Ändert nie etwas"
+      },
+      "telegram": {
+        "1": "Lesen, was Leute dem Bot schreiben",
+        "2": "Nachrichten und Dateien als Bot senden",
+        "ask": "Löschen, Sperren und Einladungslinks fragen immer nach deiner Freigabe"
+      },
+      "x": {
+        "1": "Beiträge und Erwähnungen des Kontos lesen",
+        "2": "Mit Bildern oder einem Video posten",
+        "ask": "Beiträge löschen fragt immer nach deiner Freigabe"
+      },
+      "threads": {
+        "1": "Beiträge, Antworten und Ergebnisse ansehen",
+        "2": "Mit Bildern oder Videos posten und antworten",
+        "ask": "Beiträge löschen fragt immer nach deiner Freigabe"
+      },
+      "tiktok": {
+        "1": "Profil und Videos ansehen",
+        "2": "Videos in deine Entwürfe senden, fertig in TikTok",
+        "ask": "Jeder Upload fragt immer nach deiner Freigabe"
       }
     },
     "connectedList": "Verbunden",
@@ -13558,8 +13656,13 @@
       "youtube": "Videos, Kommentare, Playlists und Statistiken des YouTube-Kanals.",
       "pinterest": "Pins, Pinnwände und Statistiken auf Pinterest.",
       "reddit": "Beiträge, Kommentare und Communitys auf Reddit.",
-      "whatsapp": "Nachrichten und Vorlagen von WhatsApp Business."
-    }
+      "whatsapp": "Nachrichten und Vorlagen von WhatsApp Business.",
+      "telegram": "Ein eigener Telegram-Bot: seine Chats, Gruppen und Kanäle.",
+      "x": "Beiträge auf deinem X-Konto: schreiben, Erwähnungen lesen und suchen.",
+      "threads": "Beiträge und Antworten auf deinem Threads-Konto.",
+      "tiktok": "Dein TikTok-Profil und deine Videos, und Videos in deinen Entwürfen."
+    },
+    "needsApp": "Dieser Server hat noch keine {{name}}-App: Wer ihn betreibt, registriert eine bei {{name}} und setzt ihre Variablen (docs/social-apps-checklist.md)."
   },
   "toolNames": {
     "order": "head-first",
@@ -14389,7 +14492,39 @@
       "get_my_usage": "Meine Nutzung anzeigen",
       "ignore_usage_limit": "Nutzungslimit ignorieren",
       "send_feedback": "Feedback senden",
-      "offer_feedback": "Problemmeldung anbieten"
+      "offer_feedback": "Problemmeldung anbieten",
+      "list_chats": "Chats auflisten",
+      "read_messages": "Nachrichten lesen",
+      "get_chat": "Chat ansehen",
+      "send_file": "Datei senden",
+      "edit_message": "Nachricht bearbeiten",
+      "pin_message": "Nachricht anheften",
+      "ban_member": "Mitglied sperren",
+      "create_invite_link": "Einladungslink erstellen",
+      "get_my_posts": "Meine Beiträge ansehen",
+      "get_mentions": "Erwähnungen ansehen",
+      "search_recent": "Neue Beiträge suchen",
+      "get_replies": "Antworten ansehen",
+      "get_insights": "Ergebnisse ansehen",
+      "reply": "Antworten",
+      "hide_reply": "Antwort ausblenden",
+      "list_ad_accounts": "Werbekonten auflisten",
+      "list_campaigns": "Kampagnen auflisten",
+      "list_ad_sets": "Anzeigengruppen auflisten",
+      "list_ads": "Anzeigen auflisten",
+      "create_campaign": "Kampagne anlegen",
+      "create_ad_set": "Anzeigengruppe anlegen",
+      "create_ad": "Anzeige anlegen",
+      "update": "Aktualisieren",
+      "pause": "Pausieren",
+      "activate": "Einschalten",
+      "set_budget": "Budget festlegen",
+      "archive": "Archivieren",
+      "delete": "Löschen",
+      "list_videos": "Videos auflisten",
+      "get_creator_info": "Post-Optionen ansehen",
+      "get_post_status": "Upload-Status ansehen",
+      "upload_draft": "In die Entwürfe senden"
     }
   },
   "toolReview": {
@@ -14591,6 +14726,13 @@
       "asks_other": "{{count}} Aktionen fragen im Chat nach Freigabe.",
       "adjust": "Anpassen",
       "ok": "Fertig"
+    },
+    "telegram": {
+      "token": "Bot-Token",
+      "steps": "Öffne in Telegram @BotFather, sende /newbot, wähle einen Namen und einen Benutzernamen, der auf „bot“ endet, und füge hier das Token ein, das er dir gibt. Um eine Gruppe zu lesen, füge den Bot hinzu. Um in einem Kanal zu posten, mach ihn dort zum Admin."
+    },
+    "x": {
+      "consent": "Agenten mit Zugriff auf X posten selbstständig auf diesem Konto. Einen Beitrag löschen fragt vorher, und die Seite jedes Agenten schränkt ein, was er darf. Ein X-Konto funktioniert in jeweils einem Workspace."
     }
   },
   "database": {
@@ -15473,6 +15615,7 @@
       "takeOverNoAccess": "Tritt der Unterhaltung der Routine bei, bevor du sie übernimmst.",
       "agentNotInChannel": "Füg den Agent zuerst zur Unterhaltung hinzu.",
       "webhookPaused": "Schalte die Routine ein, um sie zu testen.",
+      "groupByInvalid": "Gib einen Pfad wie conversation.id ein, mit einem Feldnamen zwischen jedem Punkt.",
       "continueExtraOff": "Das Zeitfenster dieses Abos ist aufgebraucht, und die lange Arbeit dieses Agenten nutzt keine bezahlte Zusatznutzung des Abos. Sie geht nach dem Zurücksetzen weiter.",
       "continueExtraUsedUp": "Das Zeitfenster dieses Abos ist aufgebraucht, und seine bezahlte Zusatznutzung ist aufgebraucht oder nicht verfügbar. Es geht nach dem Zurücksetzen weiter.",
       "actionsNeedApprover": "Nur der Inhaber des Agenten oder wer seine Aktionen genehmigt, kann eine Routine selbstständig handeln lassen.",
@@ -15503,7 +15646,9 @@
       "sharingForbidden": "Nur wer in der Unterhaltung der Datei ist, ändert, wer sie sieht.",
       "sharingEmpty": "Wähle, wer es sieht.",
       "sharingTooMany": "Wähle höchstens {{max}} Personen und {{max}} Rollen.",
-      "notInDrive": "Das gibt es nur in seiner Unterhaltung, deshalb kann es nicht geteilt werden."
+      "notInDrive": "Das gibt es nur in seiner Unterhaltung, deshalb kann es nicht geteilt werden.",
+      "viewOnly": "Du kannst diese Datei ansehen, aber nicht ändern. Bitte die Person, die sie erstellt hat, um Bearbeitungszugriff.",
+      "accessInvalid": "Dieser Zugriff ließ sich nicht speichern. Prüfe, wer sie sieht und wer sie bearbeitet, und versuche es erneut."
     },
     "drive": {
       "folderIntoItself": "Ein Ordner kann nicht in sich selbst oder in einen Ordner darin verschoben werden."
@@ -15599,7 +15744,9 @@
       "ownerOrAdmin": "Nur der Inhaber des Agenten oder ein Admin kann das tun.",
       "detailsHidden": "Nur wer mit {{agentName}} spricht, sieht, wie es funktioniert.",
       "undoForbidden": "Nur die Person, für die der Agent gearbeitet hat, sein Inhaber oder ein Admin kann das rückgängig machen.",
-      "undoSkillsAdmins": "Nur wer den Agenten bearbeiten darf, kann eine Änderung an seinen Skills rückgängig machen oder wiederholen."
+      "undoSkillsAdmins": "Nur wer den Agenten bearbeiten darf, kann eine Änderung an seinen Skills rückgängig machen oder wiederholen.",
+      "ownerBoth": "Inhaber ist eine Person oder eine Rolle, nicht beides. Wähle eins aus.",
+      "ownerRoleUnknown": "Diese Rolle gibt es in diesem Workspace nicht mehr. Wähle einen anderen Inhaber."
     },
     "account": {
       "notRestorable": "Dieses Konto kann nicht mehr wiederhergestellt werden.",
@@ -19434,7 +19581,9 @@
     "seatsPaid_one": "{{count}} bezahlter Platz",
     "seatsPaid_other": "{{count}} bezahlte Plätze",
     "noLimit": "Kein Limit",
-    "ownBucket": "In deinem eigenen Bucket, ohne Limit von uns"
+    "ownBucket": "In deinem eigenen Bucket, ohne Limit von uns",
+    "connectors": "X diesen Monat",
+    "shareUsed": "{{share}} verbraucht"
   },
   "referrals": {
     "open": "Empfehlen und verdienen",
@@ -20590,23 +20739,15 @@
   "share": {
     "button": "Teilen",
     "title": "{{name}} teilen",
-    "conversation": "Nur die Unterhaltung",
-    "people": "Personen und Rollen deiner Wahl",
-    "peoplePersonal": "Personen, die du auswählst",
     "everyone": "Der ganze Workspace",
     "everyonePersonal": "Alle hier",
     "whereDm": "Die Direktnachricht mit {{name}}",
     "whereDmGone": "Eine Direktnachricht",
     "whereDmBetween": "Die Direktnachricht zwischen {{names}}",
     "whereChannel": "Mitglieder von #{{name}}",
-    "add": "Person oder Rolle hinzufügen",
-    "addPersonal": "Person hinzufügen",
-    "addSearch": "Personen und Rollen suchen",
-    "addSearchPersonal": "Personen suchen",
     "noResults": "Niemand mit diesem Namen",
     "groupPeople": "Personen",
     "groupRoles": "Rollen",
-    "access": "Wer Zugriff hat",
     "you": "{{name}} (du)",
     "agent": "Agent",
     "role": "Rolle",
@@ -20615,28 +20756,36 @@
     "adminsPersonal": "Wer hier alles verwaltet, sieht es auch.",
     "copyLink": "Link kopieren",
     "copied": "Link kopiert.",
-    "done": "Fertig",
     "onlyHere": "Wer nicht in dieser Unterhaltung ist, kann den Link nicht öffnen.",
-    "choosePeople": "Personen wählen",
     "readOnly": "Nur wer in der Unterhaltung ist, ändert, wer es sieht.",
-    "open": "Der ganze Workspace sieht diese Datei.",
-    "openPersonal": "Alle hier sehen diese Datei.",
-    "savedEveryone": "Jetzt sieht der ganze Workspace die Datei.",
-    "savedEveryonePersonal": "Jetzt sehen alle hier die Datei.",
-    "savedPeople": "Jetzt sehen die gewählten Personen die Datei.",
-    "savedConversation": "Jetzt sieht nur die Unterhaltung die Datei.",
-    "onlyYou": "Nur du",
-    "onlyMaker": "Nur {{name}}",
     "onlyYouLink": "Nur du kannst diesen Link öffnen.",
     "onlyMakerLink": "Nur {{name}} kann diesen Link öffnen.",
     "readOnlyDrive": "Nur wer die Datei erstellt hat und Administratoren ändern, wer sie sieht.",
-    "savedOnlyYou": "Jetzt siehst nur du die Datei.",
-    "savedOnlyMaker": "Jetzt sieht nur {{name}} die Datei.",
-    "undo": "Rückgängig",
     "fileRef": "Datei {{title}}",
     "fileRefNone": "Datei ohne Zugriff",
     "also": "{{text}}. Auch geteilt mit {{who}}.",
-    "someOnlyHere": "Einige dieser Links öffnen sich nur für Personen, die die Datei schon sehen."
+    "someOnlyHere": "Einige dieser Links öffnen sich nur für Personen, die die Datei schon sehen.",
+    "level": {
+      "none": "Kein Zugriff",
+      "view": "Ansehen",
+      "edit": "Bearbeiten"
+    },
+    "levelOf": "Was {{name}} tun kann",
+    "madeIt": "Hat die Datei erstellt",
+    "placeText": "Wo die Datei liegt",
+    "everyoneText": "Alle in diesem Workspace",
+    "everyoneTextPersonal": "Alle hier",
+    "agentsAll": "Alle Agenten",
+    "agentsAllText": "Jeder Agent im Workspace",
+    "agentsHere": "Agenten in diesem Gespräch",
+    "agentsHereText": "Die Agenten dort, wo die Datei liegt",
+    "addAll": "Person, Rolle oder Agent hinzufügen",
+    "addAllPersonal": "Person oder Agent hinzufügen",
+    "addAllSearch": "Personen, Rollen und Agenten suchen",
+    "addAllSearchPersonal": "Personen und Agenten suchen",
+    "groupAgents": "Agenten",
+    "addRow": "Hinzufügen",
+    "saved": "Zugriff gespeichert."
   },
   "linkErrors": {
     "signIn": {
@@ -20946,7 +21095,7 @@
     "mark": "Beta",
     "open": "Feedback senden",
     "ask": "Was hat gefehlt, ist kaputtgegangen oder hat gestört?",
-    "goesCloud": "Was du schreibst, geht per E-Mail an das Team von agentes.chat.",
+    "goesCloud": "Was du schreibst, geht per E-Mail an das Team von agentes.chat, das es mit einem KI-Assistenten prüfen kann.",
     "goesServer": "Was du schreibst, geht per E-Mail an die Person, die diesen Server betreibt.",
     "placeholder": "Schreib es, wie du magst",
     "report": "Hier ein Problem melden",
@@ -21389,6 +21538,9 @@
         "inTrash": "Im Papierkorb. Stell die Datei wieder her, um sie zu ändern.",
         "closing": "Der Workspace wird gelöscht. Seine Dateien können nur noch gelesen werden."
       },
+      "requestEdit": "Bearbeitung anfragen",
+      "requestEditText": "kannst du mir Bearbeitungszugriff für diese Datei geben?",
+      "requestEditAnyone": "Kann mir jemand Bearbeitungszugriff für diese Datei geben?",
       "present": "Präsentieren",
       "download": "Herunterladen",
       "formats": {

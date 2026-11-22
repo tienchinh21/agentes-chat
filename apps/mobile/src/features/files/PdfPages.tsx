@@ -1,9 +1,8 @@
-import { type ArtifactDetail, useApi } from "@agenteschat/client";
-import { useQuery } from "@tanstack/react-query";
+import type { ArtifactDetail } from "@agenteschat/client";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
-import { type PageDim, PdfUtil, PdfView } from "react-native-pdf-light";
+import { type PageDim, PdfView } from "react-native-pdf-light";
 import { type SharedValue, useSharedValue } from "react-native-reanimated";
 import { SCREEN_X, Text } from "@/ui";
 import { useMediaPins, useOpenFileTalk, useRevealHere } from "../live-files/talk/hooks";
@@ -11,9 +10,9 @@ import { commentSelection, draftPin, type MediaPin, pagePins, pinUnder, pointMar
 import { PicturePins } from "../live-files/talk/PicturePins";
 import { useTalkAbout, useTalkSheet } from "../live-files/talk/store";
 import { LoadFailed } from "../shared/FirstUse";
-import { useColors, useMeId, useOrgId } from "../shared/hooks";
+import { useColors, useMeId } from "../shared/hooks";
 import { PageBones } from "./PageBones";
-import { pdfCopy } from "./source";
+import { usePdfCopy } from "./pdf-preview";
 
 /** Between two pages, and above the first and under the last. */
 const GAP = 12;
@@ -28,18 +27,10 @@ const GAP = 12;
  */
 export function PdfPages({ detail }: { detail: ArtifactDetail }) {
   const { t } = useTranslation();
-  const api = useApi();
-  const orgId = useOrgId();
   const c = useColors();
   const { width } = useWindowDimensions();
-  const copy = useQuery({
-    queryKey: ["org", orgId, "artifacts", "pdf", detail.id, detail.shownVersion] as const,
-    queryFn: async () => {
-      const path = await pdfCopy(api, orgId, detail);
-      return { path, sizes: await PdfUtil.getPageSizes(path) };
-    },
-    staleTime: Number.POSITIVE_INFINITY,
-  });
+  // The copy its cards' first page was drawn from, when one was (`usePdfCopy`): one download for both.
+  const copy = usePdfCopy(detail);
   const pageWidth = Math.max(0, width - SCREEN_X * 2);
   const heights = useMemo(
     () => (copy.data?.sizes ?? []).map((s) => (s.width > 0 ? Math.round((pageWidth * s.height) / s.width) : pageWidth)),
@@ -95,8 +86,11 @@ export function PdfPages({ detail }: { detail: ArtifactDetail }) {
         data={sizes}
         keyExtractor={(_, i) => String(i)}
         style={[styles.fill, { backgroundColor: c.grouped }]}
-        // The line under the screen (or the sheet's room, while it is up) keeps the bottom's room.
+        // The line under the screen keeps the bottom's room; while the sheet is up the pages run on past their end by
+        // the sheet's room, so the last one still scrolls above it. Only what is past the end grows: nothing in sight
+        // moves as the sheet comes up (the screen kept its size, `keepPlace` on its line).
         contentContainerStyle={styles.pages}
+        ListFooterComponent={sheet ? <View style={{ height: sheet.reserve }} /> : undefined}
         getItemLayout={(_, i) => ({ length: (heights[i] ?? 0) + GAP, offset: offsets[i] ?? 0, index: i })}
         initialNumToRender={2}
         windowSize={5}

@@ -48,7 +48,7 @@ import { openAgentAi } from "../ai/AgentAiScreen";
 import { openComputer } from "../computer/AgentComputerRow";
 import { boardHref, routineHref } from "../links/logic";
 import { useFailed } from "../routines/hooks";
-import { useDirectory, useMeId, useOrgId, usePullRefresh } from "../shared/hooks";
+import { useDirectory, useOrgId, useOwnsAgent, usePullRefresh } from "../shared/hooks";
 import { FocusLive, goBack, PushedHeader, successHaptic } from "../shared/parts";
 import { useAgentLook, useWidgetAiWay, useWidgetWords } from "./hooks";
 import { HOME, shownWidgetTitle } from "./logic";
@@ -391,8 +391,9 @@ function WaitFix({ agentId, wait }: { agentId: string; wait: WidgetWait }) {
   const { t } = useTranslation();
   const { orgId } = useOrg();
   const dir = useDirectory();
-  const meId = useMeId();
-  const owner = dir.anyAgent(agentId)?.ownerUserId === meId;
+  // Its owner, or one who holds the role that answers for it (ADR 0085, addendum of 2026-11-21).
+  const owns = useOwnsAgent();
+  const owner = owns(dir.anyAgent(agentId));
   // Its budget for who manages the agent (the server's `canManage`); its AI for them and its owner.
   const fix = widgetWaitFix(wait, { admin: managesAgent(dir.agentById.get(agentId)), owner });
   const watches = useDesktopStatus(orgId, agentId, { enabled: fix === "openComputer" }).isSuccess;

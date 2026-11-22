@@ -77,6 +77,9 @@ export * from "./connectors/connections";
 export * from "./connectors/custom";
 export * from "./connectors/listing";
 export * from "./connectors/mcp";
+export * from "./connectors/native";
+export * from "./connectors/native/media";
+export { purgeTelegramUpdates, telegramWebhookPath } from "./connectors/native/telegram";
 export * from "./connectors/oauth-mcp";
 export * from "./connectors/oauth-return";
 export * from "./connectors/personal";
@@ -163,6 +166,7 @@ export * from "./host-computer";
 export * from "./hosts";
 export * from "./id-refs";
 export * from "./imports";
+export * from "./intent-line";
 export * from "./invite-choices";
 export * from "./invite-requests";
 export * from "./issue-assignees";
@@ -233,6 +237,7 @@ export * from "./notifications";
 export * from "./office";
 export * from "./open-requests";
 export * from "./operator";
+export * from "./operator-content-reads";
 export * from "./operator-events";
 export {
   OPERATOR_JOB_COUNTS,

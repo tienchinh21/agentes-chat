@@ -2630,6 +2630,7 @@
     "working_other": "{{count}} ajan çalışıyor"
   },
   "channel": {
+    "teamStalled": "Ekip durdu",
     "settingsNav": {
       "label": "Kanal ayarları",
       "overview": "Genel bakış",
@@ -2757,6 +2758,8 @@
     "noTopic": "Açıklama yok",
     "nameLabel": "Ad",
     "nameHelp": "Herkes için değişir. Eski bağlantılar çalışmaya devam eder.",
+    "replyInThreads": "Ajanlar ileti dizilerinde yanıtlar",
+    "replyInThreadsHelp": "Kanalda çağrılan bir ajan, o mesajın altındaki ileti dizisinde yanıt verir ve kanal bunun için tek satır gösterir. Süren işler olduğu yerde kalır.",
     "nameTaken": "#{{name}} zaten var.",
     "generalName": "#general adını korur.",
     "archive": "Kanalı arşivle",
@@ -3104,6 +3107,7 @@
       "anAgent": "Bir ajan",
       "none": "Yok",
       "budgetDefault": "Çalışma alanı varsayılanı",
+      "pausesNow": "hemen duraklar",
       "anAccount": "Bir yapay zekâ hesabı",
       "everyone": "Herkes",
       "ownerOnly": "Yalnızca sorumlusu",
@@ -5672,6 +5676,7 @@
       "undo": "Geri alma",
       "deadline": "Kalan süre",
       "decides": "Kim karar verir",
+      "decidesRole": "{{role}} rolüne sahip herkes",
       "state": "Durum",
       "why": "{{name}} neden istiyor",
       "email": "E-posta",
@@ -7121,6 +7126,8 @@
     "noOwnerShort": "Uyarıları yöneticiler alır ve onaylar",
     "noOwnerHelp": "Sahip olmadan uyarıları yöneticiler alır ve hassas işlemleri onaylar.",
     "ownerHelp": "Bütçe uyarılarını alır ve hassas işlemleri onaylar.",
+    "ownerRoleHelp": "{{role}} rolüne sahip olanlar onay isteklerini ve bildirimleri alır. İçlerinden herkes karar verebilir, rolü sonradan alanlar da dahil.",
+    "ownerRoleHelp_female": "{{role}} rolüne sahip olanlar onay isteklerini ve bildirimleri alır. İçlerinden herkes karar verebilir, rolü sonradan alanlar da dahil.",
     "ownerYours": "Ajanı oluşturan kişi onun sahibidir. Bir yönetici daha sonra başka birine devredebilir.",
     "accessAdmins": "Ajanlara uygulama ve posta kutusu erişimini yalnızca yöneticiler verir. Oluşturulduktan sonra bir yöneticiye sorun.",
     "accessAdminsKeeper": "Ajanlara uygulama ve posta kutusu erişimini yalnızca {{keeper}} verir. Oluşturulduktan sonra {{keeper}} ile konuşun.",
@@ -8049,6 +8056,46 @@
     "custom_write": {
       "label": "Yazma araçları",
       "description": "Yazma araçlarını kullanma. Hassas olarak işaretlenenler her zaman onay ister."
+    },
+    "telegram_messages_read": {
+      "label": "Mesajları okuma",
+      "description": "Botun sohbetlerini listeler, ona veya bulunduğu yerde yazılanları okur."
+    },
+    "telegram_messages_write": {
+      "label": "Mesaj gönderme",
+      "description": "Bot olarak mesaj ve dosya gönderir, düzenler ve sabitler. Mesaj silme, kişi yasaklama ve davet bağlantıları onay ister."
+    },
+    "x_posts_read": {
+      "label": "Gönderileri okuma",
+      "description": "Hesabın gönderilerini ve bahsetmelerini, kimliğe göre gönderileri ve aramayla son gönderileri okur."
+    },
+    "x_posts_write": {
+      "label": "Paylaşma",
+      "description": "Drive'dan görseller veya bir videoyla hesapta paylaşır. Gönderi silmek onay ister."
+    },
+    "threads_posts_read": {
+      "label": "Gönderileri okuma",
+      "description": "Hesabın gönderilerini, yanıtlarını, bahsetmelerini ve sonuçlarını okur."
+    },
+    "threads_posts_write": {
+      "label": "Paylaşma ve yanıtlama",
+      "description": "Drive'dan görsel veya videolarla paylaşır, yanıtlar ve yanıtları gizler. Gönderi silmek onay ister."
+    },
+    "meta_ads_ads_read": {
+      "label": "Reklamları okuma",
+      "description": "Reklam hesaplarını, kampanyaları, reklam setlerini ve reklamları listeler, sonuçlarını okur."
+    },
+    "meta_ads_ads_write": {
+      "label": "Reklamları yönetme",
+      "description": "Kampanya, reklam seti ve reklam oluşturur (her zaman duraklatılmış), düzenler ve duraklatır. Etkinleştirmek ve bütçe değiştirmek her zaman onay ister. Arşivleme ve silme de ister."
+    },
+    "tiktok_videos_read": {
+      "label": "Videoları okuma",
+      "description": "Üreticinin profilini, herkese açık videolarını ve neleri paylaşabileceğini okur."
+    },
+    "tiktok_videos_write": {
+      "label": "Videoları taslaklara gönderme",
+      "description": "Drive'daki bir videoyu üreticinin TikTok taslaklarına gönderir, paylaşımı orada tamamlar. Her yükleme onay ister."
     }
   },
   "issues": {
@@ -8433,7 +8480,13 @@
       "empty": "Dosyaları buraya sürükleyin, bir ekran görüntüsü yapıştırın ya da görevin sohbetinde gönderin.",
       "fromCreation": "Oluşturulurken · {{when}}",
       "fromComment": "{{name}} yorumu · {{when}}",
-      "linked": "{{name}} bağladı"
+      "linked": "{{name}} bağladı",
+      "remove": "{{name}} dosyasını görevden çıkar",
+      "removeShort": "Görevden çıkar",
+      "removed": "{{name}} görevden çıkarıldı. Dosya Drive'da duruyor.",
+      "added_one": "Dosya eklere eklendi",
+      "added_other": "{{count}} dosya eklere eklendi",
+      "see": "Ekleri gör"
     },
     "history": {
       "commented": "yorum yaptı",
@@ -8499,6 +8552,11 @@
       "methods": "Kabul edilen yöntemler",
       "methodsHelp": "Adres yalnızca işaretli yöntemlere yanıt verir. GET ile URL'nin sorgu parametreleri çağrının verisi olur.",
       "methodsLine": "{{methods}} kabul eder.",
+      "groupBy": "Çağrıları şuna göre grupla",
+      "groupByHelp": "Her çağrının verisindeki bir alan, örneğin conversation.id. Aynı değere sahip çağrılar sırayla, tek tek çalışır. Farklı değerler aynı anda çalışır.",
+      "groupByOff": "Tüm çağrılar tek bir sırada, sırayla bekler.",
+      "groupByOn": "Aynı {{path}} değerine sahip çağrılar sırayla çalışır. Diğerleri aynı anda çalışır.",
+      "groupBySaved": "Gruplama kaydedildi.",
       "address": "Adres",
       "addressHelp": "Adrese sahip olan herkes ajanı başlatabilir. Onu bir şifre gibi saklayın ve sızarsa yenisini oluşturun.",
       "copied": "Adres kopyalandı.",
@@ -8913,6 +8971,9 @@
       },
       "deploy": {
         "succeeded": "Dağıtım tamamlandı"
+      },
+      "telegram": {
+        "message": "Telegram botuna mesaj"
       }
     },
     "when": {
@@ -9915,6 +9976,8 @@
       "reply": "Yanıtla",
       "replies_one": "{{count}} yanıt",
       "replies_other": "{{count}} yanıt",
+      "replying_one": "{{names}} ileti dizisinde yanıtlıyor",
+      "replying_other": "{{names}} ileti dizisinde yanıtlıyor",
       "closed_one": "İleti dizisi kapatıldı · {{title}} · {{count}} mesaj",
       "closed_other": "İleti dizisi kapatıldı · {{title}} · {{count}} mesaj",
       "archived_one": "Arşivlenmiş {{count}} ileti dizisi burada gösterilmiyor",
@@ -10810,6 +10873,7 @@
       "everyone": "Çalışma alanındaki herkes",
       "people": "Yalnızca bazı kişiler veya roller",
       "owner": "Yalnızca sahibi",
+      "ownerRole": "Yalnızca {{role}} rolüne sahip olanlar",
       "everyonePersonal": "Buradaki herkes",
       "peoplePersonal": "Yalnızca bazı kişiler"
     },
@@ -10818,6 +10882,8 @@
       "people": "{{name}} ile konuşabilecek kişileri ve rolleri seçin.",
       "owner": "{{name}} ile yalnızca {{owner}} konuşur. Listelerde {{name}} ajanını yalnızca {{owner}}, yöneticiler ve düzenleyebilenler görür.",
       "noOwner": "Bu seçeneği kullanmak için bir sahip belirleyin.",
+      "ownerRole": "{{name}} ile yalnızca {{role}} rolüne sahip olanlar konuşur. Listelerde {{name}} yalnızca {{role}} rolüne sahip olanlara, yöneticilere ve düzenleyebilenlere görünür.",
+      "ownerRole_female": "{{name}} ile yalnızca {{role}} rolüne sahip olanlar konuşur. Listelerde {{name}} yalnızca {{role}} rolüne sahip olanlara, yöneticilere ve düzenleyebilenlere görünür.",
       "everyonePersonal": "Buradaki herkes {{name}} ajanına seslenebilir.",
       "peoplePersonal": "{{name}} ile konuşabilecek kişileri seçin."
     },
@@ -10828,8 +10894,11 @@
     "roleMembers_other": "{{count}} kişi",
     "picked": "Seçilenler",
     "ownerAlways": "{{name}}, sahibi olarak her zaman konuşabilir.",
+    "ownerRoleAlways": "{{role}} rolüne sahip olanlar, sahip olarak her zaman konuşabilir.",
+    "whoHolds": "{{role}} rolüne sahip olanlar",
     "onlyYouForNow": "Şimdilik yalnızca siz",
     "onlyOwnerForNow": "Şimdilik yalnızca {{name}}",
+    "onlyOwnerRoleForNow": "Şimdilik yalnızca {{role}} rolüne sahip olanlar",
     "search": "Rol ve kişi ara",
     "searchPeople": "Kişi ara",
     "noMatch": "Bu adda bir rol veya kişi yok.",
@@ -10844,6 +10913,7 @@
       "everyone": "Çalışma alanındaki herkes",
       "everyonePersonal": "Buradaki herkes",
       "owner": "Yalnızca {{name}}",
+      "ownerRole": "Yalnızca {{role}} rolüne sahip olanlar",
       "nobody": "Şimdilik kimse",
       "someone": "Bazı kişiler",
       "people": "{{names}}",
@@ -10867,6 +10937,8 @@
     "modeText": {
       "owner": "{{owner}} (sahip), yöneticiler ve ajanları düzenleyip {{name}} ile konuşabilen herkes.",
       "noOwner": "Yöneticiler ve ajanları düzenleyip {{name}} ile konuşabilen herkes.",
+      "ownerRole": "{{role}} rolüne sahip olanlar (sahip rolü), yöneticiler ve ajanları düzenleyip {{name}} ile konuşabilen herkes.",
+      "ownerRole_female": "{{role}} rolüne sahip olanlar (sahip rolü), yöneticiler ve ajanları düzenleyip {{name}} ile konuşabilen herkes.",
       "people": "{{name}} ajanının çalışma şeklini başka kimlerin değiştirebileceğini seçin."
     },
     "rolesHint": "Bu role sahip herkes düzenleyebilir, rolü sonradan alanlar da dahil.",
@@ -12044,6 +12116,11 @@
     "recommended": "Önerilen",
     "free": "Ücretsiz",
     "opencodeFreeHint": "Diğer ücretsiz modeller ajanın bilgisayarındaki OpenCode ile çalışır.",
+    "missingModel": {
+      "app_old": "{{model}} kullanmak için ajanın bilgisayarındaki agentes.chat uygulamasını güncelleyin.",
+      "cli_old": "{{model}} için ajanın bilgisayarında daha yeni bir Antigravity CLI sürümü gerekir. Orada agy update çalıştırın.",
+      "plan": "{{model}}, Google AI Pro ve Ultra ile gelir. Ajanın bilgisayarındaki hiçbir Gemini hesabında bu plan yok."
+    },
     "modelHelp": "Büyük modeller daha çok düşünür ve planı daha hızlı tüketir.",
     "hidden": "Düşünen yapay zekayı {{owner}} veya bir yönetici seçer.",
     "hiddenAdmins": "Düşünen yapay zekayı yalnızca yöneticiler seçer.",
@@ -13208,7 +13285,8 @@
       },
       "meta_ads": {
         "1": "Kampanyaları ve sonuçları görür",
-        "2": "Kampanya oluşturur ve ayarlar"
+        "2": "Kampanya oluşturur ve ayarlar",
+        "ask": "Reklamları etkinleştirmek ve bütçe değiştirmek her zaman onayınızı ister"
       },
       "google_docs": {
         "1": "Belgeleri arar ve okur",
@@ -13340,6 +13418,26 @@
         "1": "Tabloları görür",
         "2": "Yanıt vermek için verileri sorgular",
         "3": "Hiçbir şeyi değiştirmez"
+      },
+      "telegram": {
+        "1": "İnsanların bota yazdıklarını okuma",
+        "2": "Bot olarak mesaj ve dosya gönderme",
+        "ask": "Silme, yasaklama ve davet bağlantıları her zaman onayınızı ister"
+      },
+      "x": {
+        "1": "Hesabın gönderilerini ve bahsetmelerini okuma",
+        "2": "Görsel veya videoyla paylaşma",
+        "ask": "Gönderi silmek her zaman onayınızı ister"
+      },
+      "threads": {
+        "1": "Gönderileri, yanıtları ve sonuçları görme",
+        "2": "Görsel veya videoyla paylaşma ve yanıtlama",
+        "ask": "Gönderi silmek her zaman onayınızı ister"
+      },
+      "tiktok": {
+        "1": "Profili ve videoları görme",
+        "2": "Videoları TikTok'ta tamamlamak için taslaklara gönderme",
+        "ask": "Her yükleme her zaman onayınızı ister"
       }
     },
     "connectedList": "Bağlı",
@@ -13487,8 +13585,13 @@
       "youtube": "YouTube kanalının videoları, yorumları, oynatma listeleri ve analizleri.",
       "pinterest": "Pinterest pinleri, panoları ve analizleri.",
       "reddit": "Reddit gönderileri, yorumları ve toplulukları.",
-      "whatsapp": "WhatsApp Business mesajları ve şablonları."
-    }
+      "whatsapp": "WhatsApp Business mesajları ve şablonları.",
+      "telegram": "Size ait bir Telegram botu: sohbetleri, grupları ve kanalları.",
+      "x": "X hesabınızdaki gönderiler: yazma, bahsetmeleri okuma ve arama.",
+      "threads": "Threads hesabınızdaki gönderiler ve yanıtlar.",
+      "tiktok": "TikTok profiliniz ve videolarınız, taslaklarınıza gönderilen videolar."
+    },
+    "needsApp": "Bu sunucunun henüz bir {{name}} uygulaması yok: sunucuyu yöneten kişi {{name}}'de bir uygulama kaydeder ve değişkenlerini ayarlar (docs/social-apps-checklist.md)."
   },
   "toolNames": {
     "order": "modifiers-first",
@@ -14318,7 +14421,39 @@
       "get_my_usage": "Kullanımımı görüntüle",
       "ignore_usage_limit": "Kullanım sınırını yok say",
       "send_feedback": "Geri bildirim gönder",
-      "offer_feedback": "Sorun bildirmeyi öner"
+      "offer_feedback": "Sorun bildirmeyi öner",
+      "list_chats": "Sohbetleri listele",
+      "read_messages": "Mesajları oku",
+      "get_chat": "Sohbeti gör",
+      "send_file": "Dosya gönder",
+      "edit_message": "Mesajı düzenle",
+      "pin_message": "Mesajı sabitle",
+      "ban_member": "Üyeyi yasakla",
+      "create_invite_link": "Davet bağlantısı oluştur",
+      "get_my_posts": "Gönderilerimi gör",
+      "get_mentions": "Bahsetmeleri gör",
+      "search_recent": "Son gönderileri ara",
+      "get_replies": "Yanıtları gör",
+      "get_insights": "Sonuçları gör",
+      "reply": "Yanıtla",
+      "hide_reply": "Yanıtı gizle",
+      "list_ad_accounts": "Reklam hesaplarını listele",
+      "list_campaigns": "Kampanyaları listele",
+      "list_ad_sets": "Reklam setlerini listele",
+      "list_ads": "Reklamları listele",
+      "create_campaign": "Kampanya oluştur",
+      "create_ad_set": "Reklam seti oluştur",
+      "create_ad": "Reklam oluştur",
+      "update": "Güncelle",
+      "pause": "Duraklat",
+      "activate": "Etkinleştir",
+      "set_budget": "Bütçe belirle",
+      "archive": "Arşivle",
+      "delete": "Sil",
+      "list_videos": "Videoları listele",
+      "get_creator_info": "Paylaşım seçeneklerini gör",
+      "get_post_status": "Yükleme durumunu gör",
+      "upload_draft": "Taslaklara gönder"
     }
   },
   "toolReview": {
@@ -14520,6 +14655,13 @@
       "asks_other": "{{count}} işlem sohbette onay ister.",
       "adjust": "Ayarla",
       "ok": "Tamam"
+    },
+    "telegram": {
+      "token": "Bot token'ı",
+      "steps": "Telegram'da @BotFather'ı açın, /newbot gönderin, bir ad ve “bot” ile biten bir kullanıcı adı seçin, sonra verdiği token'ı buraya yapıştırın. Bir grubu okumak için botu gruba ekleyin. Bir kanalda paylaşmak için orada yönetici yapın."
+    },
+    "x": {
+      "consent": "X verilen ajanlar bu hesapta kendi başına paylaşım yapar. Gönderi silmek önce sorar ve her ajanın sayfası neler yapabileceğini daraltır. Bir X hesabı aynı anda tek bir çalışma alanında çalışır."
     }
   },
   "database": {
@@ -15402,6 +15544,7 @@
       "takeOverNoAccess": "Rutini devralmadan önce onun konuşmasına katılın.",
       "agentNotInChannel": "Önce ajanı konuşmaya ekleyin.",
       "webhookPaused": "Test etmek için rutini açın.",
+      "groupByInvalid": "conversation.id gibi, her noktanın arasında bir alan adı olan bir yol yazın.",
       "continueExtraOff": "Bu planın kullanım dönemi doldu ve bu ajanın uzun işleri planın ücretli ek kullanımını kullanmıyor. Sıfırlamadan sonra kaldığı yerden sürer.",
       "continueExtraUsedUp": "Bu planın kullanım dönemi doldu ve ücretli ek kullanımı da bitti ya da kullanılamıyor. Sıfırlamadan sonra kaldığı yerden sürer.",
       "actionsNeedApprover": "Bir rutinin kendi başına hareket etmesine yalnızca ajanın sahibi veya eylemlerini onaylayan kişi izin verebilir.",
@@ -15432,7 +15575,9 @@
       "sharingForbidden": "Kimin göreceğini yalnızca dosyanın sohbetindekiler değiştirebilir.",
       "sharingEmpty": "Kimin göreceğini seçin.",
       "sharingTooMany": "En fazla {{max}} kişi ve {{max}} rol seçin.",
-      "notInDrive": "Bu yalnızca kendi sohbetinde yaşıyor, bu yüzden paylaşılamaz."
+      "notInDrive": "Bu yalnızca kendi sohbetinde yaşıyor, bu yüzden paylaşılamaz.",
+      "viewOnly": "Bu dosyayı görebilirsin ama değiştiremezsin. Düzenleme erişimini dosyayı oluşturan kişiden iste.",
+      "accessInvalid": "Bu erişim kaydedilemedi. Kimin gördüğünü ve kimin düzenlediğini kontrol edip tekrar dene."
     },
     "drive": {
       "folderIntoItself": "Bir klasör kendi içine ya da içindeki bir klasöre taşınamaz."
@@ -15528,7 +15673,9 @@
       "ownerOrAdmin": "Bunu yalnızca ajanın sahibi veya bir yönetici yapabilir.",
       "detailsHidden": "Nasıl çalıştığını yalnızca {{agentName}} ile konuşanlar görür.",
       "undoForbidden": "Bunu yalnızca ajanın çalıştığı kişi, sahibi veya bir yönetici geri alabilir.",
-      "undoSkillsAdmins": "Becerilerindeki bir değişikliği yalnızca ajanı düzenleyebilenler geri alabilir veya yineleyebilir."
+      "undoSkillsAdmins": "Becerilerindeki bir değişikliği yalnızca ajanı düzenleyebilenler geri alabilir veya yineleyebilir.",
+      "ownerBoth": "Sahip bir kişi ya da bir roldür, ikisi birden olamaz. Birini seçin.",
+      "ownerRoleUnknown": "Bu rol artık bu çalışma alanında yok. Başka bir sahip seçin."
     },
     "account": {
       "notRestorable": "Bu hesap artık geri yüklenemez.",
@@ -19357,7 +19504,9 @@
     "seatsPaid_one": "{{count}} ücreti ödenmiş yer",
     "seatsPaid_other": "{{count}} ücreti ödenmiş yer",
     "noLimit": "Sınırsız",
-    "ownBucket": "Kendi depolama alanınızda, bizden bir sınır olmadan"
+    "ownBucket": "Kendi depolama alanınızda, bizden bir sınır olmadan",
+    "connectors": "Bu ay X",
+    "shareUsed": "{{share}} kullanıldı"
   },
   "referrals": {
     "open": "Önerin ve kazanın",
@@ -20513,23 +20662,15 @@
   "share": {
     "button": "Paylaş",
     "title": "{{name}} paylaş",
-    "conversation": "Yalnızca sohbet",
-    "people": "Seçtiğiniz kişiler ve roller",
-    "peoplePersonal": "Seçtiğiniz kişiler",
     "everyone": "Tüm çalışma alanı",
     "everyonePersonal": "Buradaki herkes",
     "whereDm": "{{name}} ile doğrudan mesaj",
     "whereDmGone": "Bir doğrudan mesaj",
     "whereDmBetween": "{{names}} arasındaki doğrudan mesaj",
     "whereChannel": "#{{name}} üyeleri",
-    "add": "Kişi veya rol ekle",
-    "addPersonal": "Kişi ekle",
-    "addSearch": "Kişi ve rol ara",
-    "addSearchPersonal": "Kişi ara",
     "noResults": "Bu adda kimse yok",
     "groupPeople": "Kişiler",
     "groupRoles": "Roller",
-    "access": "Kimlerin erişimi var",
     "you": "{{name}} (siz)",
     "agent": "Ajan",
     "role": "Rol",
@@ -20538,28 +20679,36 @@
     "adminsPersonal": "Burayı yöneten kişiler de görür.",
     "copyLink": "Bağlantıyı kopyala",
     "copied": "Bağlantı kopyalandı.",
-    "done": "Bitti",
     "onlyHere": "Bu sohbette olmayanlar bağlantıyı açamaz.",
-    "choosePeople": "Kişi seç",
     "readOnly": "Kimin göreceğini yalnızca sohbettekiler değiştirebilir.",
-    "open": "Tüm çalışma alanı bu dosyayı görüyor.",
-    "openPersonal": "Buradaki herkes bu dosyayı görüyor.",
-    "savedEveryone": "Artık tüm çalışma alanı dosyayı görüyor.",
-    "savedEveryonePersonal": "Artık buradaki herkes dosyayı görüyor.",
-    "savedPeople": "Artık seçtiğiniz kişiler dosyayı görüyor.",
-    "savedConversation": "Artık dosyayı yalnızca sohbet görüyor.",
-    "onlyYou": "Yalnızca siz",
-    "onlyMaker": "Yalnızca {{name}}",
     "onlyYouLink": "Bu bağlantıyı yalnızca siz açabilirsiniz.",
     "onlyMakerLink": "Bu bağlantıyı yalnızca {{name}} açabilir.",
     "readOnlyDrive": "Dosyayı kimin göreceğini yalnızca onu oluşturan kişi ve yöneticiler değiştirebilir.",
-    "savedOnlyYou": "Dosyayı artık yalnızca siz görüyorsunuz.",
-    "savedOnlyMaker": "Dosyayı artık yalnızca {{name}} görüyor.",
-    "undo": "Geri al",
     "fileRef": "Dosya {{title}}",
     "fileRefNone": "Erişim olmayan dosya",
     "also": "{{text}}. {{who}} ile de paylaşıldı.",
-    "someOnlyHere": "Bu bağlantılardan bazılarını yalnızca dosyayı zaten görenler açabilir."
+    "someOnlyHere": "Bu bağlantılardan bazılarını yalnızca dosyayı zaten görenler açabilir.",
+    "level": {
+      "none": "Erişim yok",
+      "view": "Görüntüleme",
+      "edit": "Düzenleme"
+    },
+    "levelOf": "{{name}} neler yapabilir",
+    "madeIt": "Dosyayı oluşturdu",
+    "placeText": "Dosyanın bulunduğu yer",
+    "everyoneText": "Bu çalışma alanındaki herkes",
+    "everyoneTextPersonal": "Buradaki herkes",
+    "agentsAll": "Tüm ajanlar",
+    "agentsAllText": "Çalışma alanındaki herhangi bir ajan",
+    "agentsHere": "Bu konuşmadaki ajanlar",
+    "agentsHereText": "Dosyanın bulunduğu yerdeki ajanlar",
+    "addAll": "Kişi, rol ya da ajan ekle",
+    "addAllPersonal": "Kişi ya da ajan ekle",
+    "addAllSearch": "Kişi, rol ve ajan ara",
+    "addAllSearchPersonal": "Kişi ve ajan ara",
+    "groupAgents": "Ajanlar",
+    "addRow": "Ekle",
+    "saved": "Erişim kaydedildi."
   },
   "linkErrors": {
     "signIn": {
@@ -20869,7 +21018,7 @@
     "mark": "Beta",
     "open": "Geri bildirim gönder",
     "ask": "Ne eksikti, ne bozuldu ya da ne rahatsız etti?",
-    "goesCloud": "Yazdıklarınız e-postayla agentes.chat ekibine gider.",
+    "goesCloud": "Yazdıklarınız e-postayla agentes.chat ekibine gider. Ekip, incelemek için bir yapay zeka asistanı kullanabilir.",
     "goesServer": "Yazdıklarınız e-postayla bu sunucuyu yöneten kişiye gider.",
     "placeholder": "İçinizden geldiği gibi yazın",
     "report": "Burada bir sorun bildir",
@@ -21312,6 +21461,9 @@
         "inTrash": "Çöp kutusunda. Değiştirmek için geri yükleyin.",
         "closing": "Çalışma alanı siliniyor. Dosyaları yalnızca okunabilir."
       },
+      "requestEdit": "Düzenleme iste",
+      "requestEditText": "bu dosyayı düzenlemem için bana erişim verebilir misin?",
+      "requestEditAnyone": "Biri bu dosyayı düzenlemem için bana erişim verebilir mi?",
       "present": "Sun",
       "download": "İndir",
       "formats": {

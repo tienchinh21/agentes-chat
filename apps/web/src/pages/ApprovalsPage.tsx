@@ -39,6 +39,7 @@ import {
   aheadEndLine,
   approvalDoing,
   approvalGroupWaitsFor,
+  approvalOwnerOf,
   approvalWaitsFor,
   requesterDecidesLine,
 } from "@agenteschat/client/lib/approval-words";
@@ -488,10 +489,7 @@ export function ApprovalsPage() {
                     const partial = approveAllPartial(
                       t,
                       items,
-                      approvalGroupWaitsFor(
-                        items,
-                        dir.memberById.get(first.ownerUserId ?? agent?.ownerUserId ?? "")?.name,
-                      ),
+                      approvalGroupWaitsFor(items, dir.ownerName(approvalOwnerOf(first, agent))),
                     );
                     return (
                       <section key={first.messageId ?? first.id} className="ap-group" aria-label={agent?.name}>
@@ -1021,7 +1019,8 @@ function ReqRow({ approval: a, selected, onOpen }: { approval: Approval; selecte
   const place = useLinePlace(a);
   const via = useApprovalVia(a);
   const leftMs = new Date(a.expiresAt).getTime() - Date.now();
-  const waits = approvalWaitsFor(a, dir.memberById.get(a.ownerUserId ?? agent?.ownerUserId ?? "")?.name);
+  // Its owner by name, a person's or a role's (ADR 0085, addendum of 2026-11-21): "Waiting for Engineering".
+  const waits = approvalWaitsFor(a, dir.ownerName(approvalOwnerOf(a, agent)));
   const where = approvalTarget(a) ?? via.name;
   // On its way (waiting for you, in line, running): when it was asked; decided: who decided and when.
   const live = p === "waiting" || p === "queued" || p === "running";
@@ -1252,7 +1251,11 @@ function ReviewBody({ approval: a, channel }: { approval: Approval; channel: str
   const why = approvalWords(a);
   const pr = prLink(a);
   const leftMs = new Date(a.expiresAt).getTime() - Date.now();
-  const waits = approvalWaitsFor(a, dir.memberById.get(a.ownerUserId ?? agent?.ownerUserId ?? "")?.name);
+  const owner = approvalOwnerOf(a, agent);
+  const waits = approvalWaitsFor(a, dir.ownerName(owner));
+  // A role answers for it (ADR 0085, addendum of 2026-11-21): who can decide reads that anyone holding it may, and the
+  // first decision counts. A request that named its deciders (`approvers`) is theirs.
+  const ownerRole = owner.ownerRoleId && !a.approvers?.label ? dir.roleName(owner.ownerRoleId) : undefined;
   const facts: Fact[] = [
     {
       key: "where",
@@ -1300,6 +1303,16 @@ function ReviewBody({ approval: a, channel }: { approval: Approval; channel: str
           value: t(`approvals.status.${PHASE_STATUS[p]}`),
           tone: p === "done" ? "done" : p === "failed" ? "waiting" : undefined,
         },
+    ...(p === "waiting" && a.canDecide && ownerRole
+      ? [
+          {
+            key: "decides",
+            icon: "person" as const,
+            label: t("approvals.review.decides"),
+            value: t("approvals.review.decidesRole", { role: ownerRole }),
+          },
+        ]
+      : []),
   ];
 
   const logo = useCallLogo();

@@ -165,6 +165,7 @@
     "forwards": "Reenvía “{{subject}}”",
     "forwardsFrom": "Reenvía “{{subject}}”, de {{from}}",
     "onlyOwner": "Solo {{name}} o un admin puede decidir.",
+    "onlyOwnerRole": "Solo quien tenga el rol {{role}} o un admin puede decidir.",
     "onlyAdmins": "Solo un admin puede decidir.",
     "notFound": "Esta solicitud ya no existe o no puedes verla.",
     "trait": {
@@ -1634,6 +1635,7 @@
       "ruleBody": "{{name}} deja de seguir esta regla. Quien la dio puede volver a darla.",
       "ruleRemove": "Quitar",
       "footOwner": "Solo {{name}} o un admin puede corregir esto.",
+      "footOwnerRole": "Solo quien tenga el rol {{role}} o un admin puede corregir esto.",
       "footAdmins": "Solo un admin puede corregir esto.",
       "emptyF": "{{name}} todavía no guardó nada sobre ti.",
       "emptyM": "{{name}} todavía no guardó nada sobre ti.",
@@ -1683,6 +1685,7 @@
       },
       "asksYou": "Hacer merge y publicar piden tu aprobación, salvo que el agente no pregunte nunca.",
       "asksOwner": "Hacer merge y publicar piden la aprobación de {{name}}, salvo que el agente no pregunte nunca.",
+      "asksOwnerRole": "Hacer merge y publicar piden la aprobación de quien tenga el rol {{role}}, salvo que el agente no pregunte nunca.",
       "asksAdmins": "Hacer merge y publicar piden la aprobación de un admin, salvo que el agente no pregunte nunca.",
       "empty": "Por ahora, solo conversación."
     }

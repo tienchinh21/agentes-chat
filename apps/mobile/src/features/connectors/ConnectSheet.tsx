@@ -750,7 +750,9 @@ function ConnectStep({
   const busy = start.isPending || complete.isPending || withKey.isPending || connect.isPending || installer.busy;
   const serverUrl = fixed ?? (def?.kind === "remote_mcp" ? def.serverUrl : url.trim());
   const shownName = name || serverUrl.replace(/^https:\/\//, "").split("/")[0] || "";
-  const keyLabel = t("mobile.connectors.keyLabel", { name: shownName });
+  // A Telegram bot connects with the token @BotFather gives, not an API key.
+  const telegram = def?.id === "telegram";
+  const keyLabel = telegram ? t("connectFlow.telegram.token") : t("mobile.connectors.keyLabel", { name: shownName });
   // The service's name: the server names another account after it ("Stripe 2"). A catalog entry's goes in English,
   // so each viewer reads a name nobody changed in their own language.
   const first = fixed ? (servers.data ?? []).find((s) => sameServer(s.serverUrl, fixed)) : undefined;
@@ -946,6 +948,11 @@ function ConnectStep({
         <Text variant="small" tone="muted">
           {t("connectFlow.github.accountText")}
         </Text>
+      ) : def?.id === "x" ? (
+        // X wants the account owner's express consent before agents post for them: connecting after this is it.
+        <Text variant="small" tone="muted">
+          {t("connectFlow.x.consent")}
+        </Text>
       ) : null}
       {askUrl ? (
         // The address it will enter, typed on the step before (a flick down goes back to change it).
@@ -967,7 +974,7 @@ function ConnectStep({
           <Locked when={busy} style={styles.fieldBox}>
             <InfoHint
               name={t("common.about", { label: keyLabel })}
-              text={t("mobile.connectors.keyHelp")}
+              text={telegram ? t("connectFlow.telegram.steps") : t("mobile.connectors.keyHelp")}
               variant="footnote"
             >
               <Text variant="footnote" tone="faint">

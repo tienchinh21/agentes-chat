@@ -14,7 +14,7 @@ import type { useAwayAsk } from "../asks";
 import type { OpenedMessages } from "../ClippedMessage";
 import { composerLift, createDockHeight } from "../dock-height";
 import { timesOnPull } from "../look";
-import { appendedKeys, bandAim, lastSeenKey, type ScrollRow, type Unseen, unseenBelow } from "../scroll";
+import { appendedKeys, arrivesNow, bandAim, lastSeenKey, type ScrollRow, type Unseen, unseenBelow } from "../scroll";
 import { useSwipeTimePan } from "../swipe-time";
 import { FRESH_MS } from "./constants";
 import { createValueStore, useLatest } from "./hooks";
@@ -220,15 +220,23 @@ export function useFollowEnd({
     if (href) router.push(href);
   }, [waitingFirst]);
 
-  // Rows that arrive at the bottom while the screen is open rise in; older pages and the first load don't.
+  // Rows that arrive at the bottom while the screen is open rise in; older pages, the first load and what the server
+  // sends right after opening (messages written before it opened, `arrivesNow`) don't.
   const prevKeysRef = useRef<string[]>([]);
   const freshRef = useRef(new Map<string, number>());
+  const openedAt = useRef(Date.now());
   const rowKeys = useMemo(() => rows.map(rowKey), [rows]);
   useMemo(() => {
     const now = Date.now();
-    for (const key of appendedKeys(prevKeysRef.current, rowKeys)) freshRef.current.set(key, now);
+    const appended = appendedKeys(prevKeysRef.current, rowKeys);
+    const byKey = appended.length > 0 ? new Map(rows.map((r) => [rowKey(r), r])) : null;
+    for (const key of appended) {
+      const row = byKey?.get(key);
+      if (row?.kind === "message" && !arrivesNow(row.message.createdAt, openedAt.current)) continue;
+      freshRef.current.set(key, now);
+    }
     for (const [key, t0] of freshRef.current) if (now - t0 > FRESH_MS) freshRef.current.delete(key);
-  }, [rowKeys]);
+  }, [rowKeys, rows]);
   useEffect(() => {
     prevKeysRef.current = rowKeys;
   }, [rowKeys]);

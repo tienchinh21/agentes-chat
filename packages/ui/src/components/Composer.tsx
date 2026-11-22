@@ -27,6 +27,7 @@ import {
 import { useScrollSides } from "../hooks/useScrollSides";
 import { Icon, type IconName } from "../icons/Icon";
 import { selectionRect } from "../selection-rect";
+import { typeInto } from "../type-into";
 import { Button } from "./Button";
 import { type EmojiPickerLabels, EmojiPickerPopover, type PickerTab } from "./EmojiPicker";
 import { useAutoGrow, useLocked } from "./Field";
@@ -590,6 +591,10 @@ export function Composer({
     }
   }, [value]);
 
+  /** Every change the box makes itself (a pick, a format, an emoji) goes through here, so ⌘Z undoes it. */
+  const put = (next: string) => {
+    if (!ref.current || !typeInto(ref.current, next)) onChange(next);
+  };
   /** Replaces the text and selection (formatting, emoji), keeping the focus in the box. */
   const edit = (next: TextEdit) => {
     const el = ref.current;
@@ -600,7 +605,7 @@ export function Composer({
       return;
     }
     selectAfter.current = [next.start, next.end];
-    onChange(next.value);
+    put(next.value);
   };
   const selection = () => {
     const el = ref.current;
@@ -679,7 +684,7 @@ export function Composer({
     if (isSlash) {
       const command = commands?.list.find((c) => c.key === item.key);
       caretAfter.current = item.insert.length;
-      onChange(item.insert);
+      put(item.insert);
       command?.onPick?.();
       return;
     }
@@ -689,7 +694,7 @@ export function Composer({
       const next = value.slice(0, linkToken.start) + inserted + value.slice(end).replace(/^\]\]\s?/, "");
       caretAfter.current = linkToken.start + inserted.length;
       setLinkToken(null);
-      onChange(next);
+      put(next);
       links?.onPick?.(item);
       return;
     }
@@ -697,7 +702,7 @@ export function Composer({
       const next = insertChannelRef(value, channelToken, item.insert);
       caretAfter.current = next.caret;
       setChannelToken(null);
-      onChange(next.text);
+      put(next.text);
       channels?.onPick?.(item);
       return;
     }
@@ -707,7 +712,7 @@ export function Composer({
     const next = value.slice(0, token.start) + inserted + value.slice(caret).replace(/^ /, "");
     caretAfter.current = token.start + inserted.length;
     setToken(null);
-    onChange(next);
+    put(next);
     mentions?.onPick?.(item);
   };
 
