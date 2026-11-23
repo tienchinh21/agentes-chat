@@ -5,7 +5,7 @@ WORKDIR /app
 # A named volume mounted on an empty image directory takes its owner: FILES_DIR in docker-compose.yml.
 RUN install -d -o bun -g bun /data/files
 COPY . .
-RUN bun install --frozen-lockfile \
+RUN bun install --frozen-lockfile --backend=copyfile \
  && bun run --filter '@agenteschat/web' build \
  && bun build apps/server/runner/main.ts --target=node --banner '#!/usr/bin/env node' --outfile apps/web/dist/runner/agentes-runner.mjs \
  && rm -rf /root/.bun/install/cache
