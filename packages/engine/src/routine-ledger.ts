@@ -491,6 +491,8 @@ export async function reapRoutineRuns(deps: LedgerDeps, now = new Date()): Promi
     .where(
       and(
         inArray(routineRuns.status, ["queued", "starting"]),
+        // Always true of these states: it lets the open runs' partial index serve the sweep.
+        isNull(routineRuns.finishedAt),
         isNull(routineRuns.agentRunId),
         lt(routineRuns.createdAt, before),
         // Waiting to start (gathered while another worked, or held emails): no job yet, on purpose.
@@ -510,7 +512,13 @@ export async function reapRoutineRuns(deps: LedgerDeps, now = new Date()): Promi
   const gathered = await db
     .selectDistinct({ routineId: routineRuns.routineId })
     .from(routineRuns)
-    .where(and(eq(routineRuns.status, "queued"), sql`${routineRuns.event}->>'gathered' = 'true'`))
+    .where(
+      and(
+        eq(routineRuns.status, "queued"),
+        isNull(routineRuns.finishedAt),
+        sql`${routineRuns.event}->>'gathered' = 'true'`,
+      ),
+    )
     .limit(100);
   for (const g of gathered) await startGatheredRun(deps, g.routineId).catch(() => false);
   return closed;

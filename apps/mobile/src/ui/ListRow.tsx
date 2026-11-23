@@ -37,6 +37,8 @@ export interface ListRowProps extends Omit<PressableProps, "style" | "children">
   leading: ReactNode;
   /** Line 1 (a string is drawn as the semibold name; bold when unread). */
   title: ReactNode;
+  /** Right after a title in words, on its line (an agent's role as a `Tag`): it gives way before the title does. */
+  titleAside?: ReactNode;
   /** Lines of the title (default 1). */
   titleLines?: number;
   /** On the right of line 1 (the time, faint; darker when unread). */
@@ -79,6 +81,7 @@ export function ListRow({
   leading,
   title,
   titleLines = 1,
+  titleAside,
   time,
   over,
   sub,
@@ -105,7 +108,14 @@ export function ListRow({
       <View style={styles.avatar}>{leading}</View>
       <View style={styles.tx}>
         <View style={styles.l1}>
-          {typeof title === "string" ? (
+          {typeof title === "string" && titleAside ? (
+            <View style={[styles.shrink, styles.titleRow, { minHeight: titleLine }]}>
+              <Text variant="title" numberOfLines={1} style={[styles.titleFirst, unread && styles.unreadName]}>
+                {title}
+              </Text>
+              {titleAside}
+            </View>
+          ) : typeof title === "string" ? (
             <Text variant="title" numberOfLines={titleLines} style={[styles.shrink, unread && styles.unreadName]}>
               {title}
             </Text>
@@ -166,6 +176,9 @@ const styles = StyleSheet.create({
   trailing: { justifyContent: "center" },
   grow: { flex: 1, minWidth: 0 },
   shrink: { flexShrink: 1 },
+  // A title and what stands after it on its line: the title keeps its words, the aside ends in "…" first.
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  titleFirst: { flexShrink: 0, maxWidth: "70%" },
   unreadName: { fontWeight: weights.bold },
   time: { flexShrink: 0, marginLeft: "auto", justifyContent: "center" },
   timeRow: { flexDirection: "row", alignItems: "center", gap: 4 },

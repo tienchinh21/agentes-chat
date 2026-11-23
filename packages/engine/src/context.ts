@@ -27,6 +27,7 @@ import { isSandboxedBrain } from "./brains/types";
 import { caches } from "./cache";
 import { summarizeScopes } from "./capabilities";
 import { peopleAllIn } from "./channels";
+import { codeSessionBrief } from "./code-sessions";
 import {
   CONFIDENTIAL_NOT_SHOWN,
   confidentialThreadSql,
@@ -75,7 +76,7 @@ import { linePrompt } from "./reporting";
 import { wikiPersonOf } from "./requester";
 import { isRightHand } from "./right-hand";
 import { rightHandPrompt, rightHandTools } from "./right-hand-prompt";
-import { seatState } from "./right-hand-seats";
+import { seatPlace } from "./right-hand-seats";
 import { isRoutineRoomKey, type RoutineBrief, routineAccessOf, routineBriefOf, routineReportOf } from "./routine-brief";
 import { WEBHOOK_EVENT, webhookEventText } from "./routine-hooks";
 import { heldHere } from "./run-inbox";
@@ -209,6 +210,13 @@ export const WORK_IN_BACKGROUND_LINE =
  */
 export const SAY_NOW_LINE =
   "- Before work that takes more than a few seconds, make say_now your very first call: one short line on what you'll do, in the same response as your first work call, then work: your final message brings the result. Once per request; never for a quick answer, nor with work_in_background (its `say` is that line).";
+
+/**
+ * A code session suggested in the chat (ADR 0215 §11): the line of "How you work" for an agent that programs on a
+ * computer, answering a person outside a session, with `suggest_code_session` listed.
+ */
+export const CODE_SESSION_LINE =
+  "- When someone asks you to change code in a project (fix a bug, build or refactor something), suggest a code session with suggest_code_session before changing anything here, and say in a sentence or two why it fits; wait for their choice. Questions, explanations and quick looks you answer here, as usual.";
 
 export const finishWhatYouStart = (followUp: boolean) =>
   `- Before you end your turn, reread your reply. A promise or something left to check ('I'll send the numbers', 'vou checar de novo', 'I'll keep an eye on it'): do it now; a command of yours still running (tests, a build): wait for it. ${
@@ -358,6 +366,8 @@ const QUIET_TOOLS = [
   "react",
   // The line before slow work (ADR 0207) is in its conversation already.
   "say_now",
+  // A suggested code session (ADR 0215 §11) is its reply's card already.
+  "suggest_code_session",
   // A GIF or a sticker (ADR 0091) is in its conversation already: not work to recall elsewhere.
   "send_gif",
   "send_sticker",
@@ -652,6 +662,8 @@ export async function buildRunContext(
     work?: boolean;
     /** `say_now` is available and people read this conversation as it goes (ADR 0207): one line before slow work. */
     sayNow?: boolean;
+    /** `suggest_code_session` applies (ADR 0215 §11): a change to a project's code gets a session suggested first. */
+    codeSessions?: boolean;
     /** `show_block` and `start_poll` are available: when to use them (a routine's run is refused them). */
     blocks?: boolean;
     /**
@@ -1126,6 +1138,14 @@ export async function buildRunContext(
     root && channel.kind === "file"
       ? await fileConversationBrief(db, run.orgId, root.meta, agent.id).catch(() => null)
       : null;
+  // A code session's conversation (ADR 0215): the repository, branch and worktree it works in, read from the session
+  // now. Its first turn is told to install the project when the worktree is new.
+  const codeBrief =
+    channel.kind === "code"
+      ? await codeSessionBrief(db, run.orgId, channel.id, agent.id, {
+          first: !history.some((m) => m.authorType === "agent"),
+        }).catch(() => null)
+      : null;
 
   // A routine's background run: its routine block, time line and where it reports (ADR 0053 §4).
   const routine = background ? await routineContext(db, run, agent, trigger, zone, personal) : null;
@@ -1140,8 +1160,9 @@ export async function buildRunContext(
 
   const capabilities = await options.capabilities;
   // The right hand's own block (ADR 0137), in place of instructions: read live for the person behind the run.
+  const place = isRightHand(agent) ? await seatPlace(db, run) : null;
   const rightHand =
-    isRightHand(agent) && requester
+    place && requester
       ? await rightHandPrompt(
           { db, ai: options.ai, workspaceComputer: options.workspaceComputer },
           {
@@ -1149,7 +1170,8 @@ export async function buildRunContext(
             agent,
             personId: requester,
             inDm: channel.kind === "dm",
-            computer: await seatState(db, run),
+            computer: place.state,
+            oneUser: place.oneUser,
           },
         )
       : null;
@@ -1160,7 +1182,7 @@ export async function buildRunContext(
     {
       text: [
         options.toolsAvailable
-          ? `${howYouWork(agent.approvalsLevel, personal)}\n${finishWhatYouStart(Boolean(options.followUp))}${options.sayNow ? `\n${SAY_NOW_LINE}` : ""}${options.work ? `\n${WORK_IN_BACKGROUND_LINE}` : ""}`
+          ? `${howYouWork(agent.approvalsLevel, personal)}\n${finishWhatYouStart(Boolean(options.followUp))}${options.sayNow ? `\n${SAY_NOW_LINE}` : ""}${options.codeSessions ? `\n${CODE_SESSION_LINE}` : ""}${options.work ? `\n${WORK_IN_BACKGROUND_LINE}` : ""}`
           : "",
         [
           "# How to reply",
@@ -1230,7 +1252,7 @@ export async function buildRunContext(
           `You are ${agent.name} (@${agent.handle})${agent.role ? `, ${agent.role}` : ""}, ${personal ? "one of this person's AI agents" : "an AI agent of this organization"}.`,
           agent.instructions.trim() ? `# Your instructions\n${agent.instructions.trim()}` : "",
           // The right hand with nobody behind the run (another agent's message) still keeps to its tools.
-          isRightHand(agent) ? rightHandTools(await seatState(db, run)) : "",
+          place ? rightHandTools(place.state, place.oneUser) : "",
         ]
           .filter(Boolean)
           .join("\n\n"),
@@ -1307,6 +1329,7 @@ export async function buildRunContext(
     ...(briefing ? await briefing.then((text) => (text ? [{ conversation: true, text }] : [])) : []),
     ...(issueBrief ? [{ conversation: true, text: issueBrief }] : []),
     ...(fileBrief ? [{ conversation: true, text: fileBrief }] : []),
+    ...(codeBrief ? [{ conversation: true, text: codeBrief }] : []),
     ...(machineAccess
       ? await machineAccess.then((a) =>
           a

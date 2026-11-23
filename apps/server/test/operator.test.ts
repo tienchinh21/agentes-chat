@@ -441,7 +441,7 @@ test("user detail: workspaces and at most the 10 newest sessions", async () => {
   const user = await body<{ sessions: { ip: string | null; userAgent: string | null; createdAt: string }[] }>(
     await op(`/users/${acme.ownerId}`),
   );
-  expect(user).toMatchObject({ id: acme.ownerId, email: "owner@acme.test", name: "owner", emailVerified: false });
+  expect(user).toMatchObject({ id: acme.ownerId, email: "owner@acme.test", name: "owner", emailVerified: true });
   expect(user).toMatchObject({
     orgs: [{ orgId: acme.orgId, name: "Acme", role: "owner", joinedAt: expect.any(String), lastSeenAt: null }],
   });

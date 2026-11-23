@@ -309,6 +309,8 @@ export const routineRuns = pgTable(
     index().on(t.routineId, t.createdAt),
     // A run's routine, joined per run by the task list.
     index().on(t.agentRunId),
+    // The open runs (few of all ever made), read by the reaper and the stall sweep every tick (`reapRoutineRuns`).
+    index("routine_runs_open_idx").on(t.status, t.createdAt).where(sql`${t.finishedAt} is null`),
   ],
 );
 

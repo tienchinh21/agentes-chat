@@ -1187,6 +1187,14 @@ html:not([data-pointer]) .sidebar__user:focus-visible {
   flex-direction: column;
   padding: 16px 8px 24px;
 }
+/* The scrollbar's room is kept while the list fits too: the kit's scrollbar takes width under a mouse (and Windows'
+   own does), and showing and hiding it narrowed and widened every row, so a message measured at one width and not the
+   other (ClippedBody) flipped with it on every frame. A touch screen's scrollbar takes no room: none kept there. */
+@media (hover: hover) and (pointer: fine) {
+  .channel__messages {
+    scrollbar-gutter: stable;
+  }
+}
 /* A message that @mentions the viewer: a tinted row, its corners all round. No accent bar on its left edge: the tint
    and the name in the words say it. No other row carries a plate at rest (only a hover on someone else's row, an open
    menu or a linked message, and those pass). */
@@ -3781,7 +3789,7 @@ html:not([data-pointer]) .channel-ref:focus-visible {
  * its lines.
  */
 .msg-clip--cut {
-  max-height: 360px;
+  max-height: 480px;
   overflow-y: clip;
   -webkit-mask-image: linear-gradient(#000 calc(100% - 128px), transparent calc(100% - 20px));
   mask-image: linear-gradient(#000 calc(100% - 128px), transparent calc(100% - 20px));
@@ -13910,27 +13918,6 @@ html:not([data-pointer]) .channel__latest-btn.ac-btn:focus-visible {
   }
   .channel__latest[data-shown] .channel__latest-at {
     transform: none;
-  }
-}
-
-/* Above the box when the connection drops, then "Conectado de novo". */
-.channel__conn {
-  min-height: 30px;
-  margin: 0 4px 6px;
-  padding: 4px 10px;
-  border-radius: 10px 10px 10px 3px;
-  background: var(--warn-soft);
-  color: var(--warn);
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.channel__conn[data-back] {
-  background: color-mix(in srgb, var(--ok) 14%, transparent);
-  color: var(--ok);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .channel__conn {
-    animation: ac-msg-enter 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 }
 

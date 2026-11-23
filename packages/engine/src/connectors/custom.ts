@@ -973,12 +973,14 @@ export async function beginMcpOAuth(
   const redirectUri = oauthRedirectUri(deps.publicUrl);
   // Worked out again each time: a client still in use keeps the scope it was registered with, maybe without
   // offline_access.
-  const scope = oauthScope(meta, input.scopes);
-  const client = await ensureOAuthClient(deps, orgId, input.issuer, meta, { redirectUri, scope });
+  const asked = oauthScope(meta, input.scopes);
+  const client = await ensureOAuthClient(deps, orgId, input.issuer, meta, { redirectUri, scope: asked });
   if (client && "notApproved" in client) {
     return { status: "needs_key", reason: "not_approved", ...(client.detail ? { detail: client.detail } : {}) };
   }
   if (!client) return { status: "needs_key" };
+  // An admin's own app asks for the scopes they typed, when they typed any.
+  const scope = (client.providedByPerson && client.scope) || asked;
   const state = randomToken(32);
   const verifier = randomToken(48);
   const challenge = createHash("sha256").update(verifier).digest("base64url");

@@ -48,7 +48,8 @@ describe("pickers are the app's sheet, never the system's alert list", () => {
     // The audit's agent is one of many: it is picked on the shared agent picker's pushed screen instead
     // (settings-sweep.test.ts).
     for (const file of [
-      "features/me/MeScreen.tsx",
+      // Sons and Aparência, shared by Você and the settings search.
+      "features/me/pickers.ts",
       "features/routines/RoutineForm.tsx",
       "features/computer/usePickComputer.ts",
       "features/vault/VaultConnectScreen.tsx",

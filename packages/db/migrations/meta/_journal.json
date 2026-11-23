@@ -2192,6 +2192,41 @@
       "when": 1795315046665,
       "tag": "0317_routine_hook_group_by",
       "breakpoints": true
+    },
+    {
+      "idx": 315,
+      "version": "7",
+      "when": 1795359714826,
+      "tag": "0318_sweep_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 316,
+      "version": "7",
+      "when": 1795369719064,
+      "tag": "0319_own_oauth_clients",
+      "breakpoints": true
+    },
+    {
+      "idx": 317,
+      "version": "7",
+      "when": 1795376935126,
+      "tag": "0320_brain_model_of_its_plan",
+      "breakpoints": true
+    },
+    {
+      "idx": 318,
+      "version": "7",
+      "when": 1795379566183,
+      "tag": "0321_code_sessions",
+      "breakpoints": true
+    },
+    {
+      "idx": 319,
+      "version": "7",
+      "when": 1795383445167,
+      "tag": "0322_run_cli",
+      "breakpoints": true
     }
   ]
 }

@@ -1109,7 +1109,7 @@ const SETUP_TOOLS_PERSONAL: Record<string, string> = {
   [OFFER_INVITES_TOOL]:
     "Offer to invite someone the person trusts (family, a partner, someone who helps them) to this workspace with a card in this conversation: its button opens the app's invite dialog with these addresses filled in, as members. A person who may invite sends it there (and may change roles); you send nothing. Use it when they ask to invite or add someone by email, never on your own.",
   [PROPOSE_SETTINGS_TOOL]:
-    "Change agents' settings with one card in this conversation: the model, the AI account it thinks with, its monthly budget, its owner, who may talk to it, the channels it joins or leaves and whether it answers there without a mention, the skills it has on, its name, its look, its department, who it reports to, or archiving it. A change the person who asked may make, with nothing read from outside this turn, applies at once with Undo. Any other waits on the card for who may make it, and one they can't make they send from there. The result says which: never say it is done before it does. Instructions, a role or apps go through propose_instruction_change.",
+    "Change agents' settings with one card in this conversation: the model and its effort, the AI account it thinks with, its monthly budget, its owner, who may talk to it, the channels it joins or leaves and whether it answers there without a mention, the skills it has on, its name, its look, its department, who it reports to, or archiving it. A change the person who asked may make, with nothing read from outside this turn, applies at once with Undo. Any other waits on the card for who may make it, and one they can't make they send from there. The result says which: never say it is done before it does. Instructions, a role or apps go through propose_instruction_change.",
   [OFFER_ANSWERS_TOOL]:
     "Ask the person one short question with answers to tap under it, in this conversation: each tap sends the answer as their own message (several at once with `multiple`), and they can always type instead. Use it for the questions that set their agents up (what they want help with, what takes most of their time, when they want to hear from their agents), one per turn, with `step` and `of` ('Pergunta 2 de 3'). The question shows as your message: write nothing else in this turn and end it. Their answer comes as their next message.",
   [PROPOSE_TEAM_TOOL]:
@@ -1496,6 +1496,7 @@ const WEEK_DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "frid
 interface SettingsChangeInput {
   agent?: unknown;
   model?: unknown;
+  effort?: unknown;
   ai_account?: unknown;
   budget_usd?: unknown;
   budget_cut?: unknown;
@@ -1523,6 +1524,8 @@ const names = (v: unknown) => (Array.isArray(v) ? v.map((x) => str(x).trim()).fi
 async function wantedLines(ctx: ToolContext, change: SettingsChangeInput): Promise<WantedLine[] | string> {
   const lines: WantedLine[] = [];
   if (typeof change.model === "string") lines.push({ field: "model", to: change.model.trim() });
+  if (typeof change.effort === "string")
+    lines.push({ field: "effort", to: change.effort === "default" ? null : change.effort });
   const cut = change.budget_cut === true ? { pausesNow: true } : {};
   if (change.budget_default === true) lines.push({ field: "budget", to: null, ...cut });
   else if (typeof change.budget_usd === "number")
@@ -1675,7 +1678,19 @@ async function wantedLines(ctx: ToolContext, change: SettingsChangeInput): Promi
 
 /** What one agent's change may hold, for both settings tools. */
 const CHANGE_PROPERTIES = {
-  model: { type: "string", minLength: 1, maxLength: 200, description: 'A model id, or "auto".' },
+  model: {
+    type: "string",
+    minLength: 1,
+    maxLength: 200,
+    description:
+      "A model id, or \"auto\". On a plan only its maker's models run (Claude's on a Claude plan, GPT on ChatGPT, Gemini on Gemini): another maker's needs an ai_account of that maker first, in its own card.",
+  },
+  effort: {
+    type: "string",
+    enum: ["auto", "low", "medium", "high", "xhigh", "max", "default"],
+    description:
+      'How hard it thinks: "auto" picks per task (as the Automático model does), "default" leaves it to its model. A fixed model takes a level; on an API key low to high.',
+  },
   ai_account: {
     type: "string",
     minLength: 1,
@@ -1808,8 +1823,8 @@ function settingsTool(deps: { pubsub?: PubSub }, own = false): ToolDefinition {
   return {
     name: own ? REQUEST_SETTINGS_TOOL : PROPOSE_SETTINGS_TOOL,
     description: own
-      ? "Ask a person to change a setting of your own, with one card in this conversation: turn on or off a skill installed here, join or leave a channel or how you answer there, your model, the AI account you think with, your monthly budget, your owner, who may talk to you, your name, your look, the department you are in or who you report to. Use it whenever a request needs a setting of yours you don't have, instead of telling the person how to change it by hand or saying you can't ask. Nothing changes until a person clicks, even when the person who asked could change it: the card waits for whoever may (they send one they can't decide from there), and the result says which. Apps and permissions: request_permission. A skill not installed yet: offer_install_skill."
-      : "Change teammates' settings with one card in this conversation: the model, the AI account it thinks with, its monthly budget, its owner, who may talk to it, the channels it joins or leaves and whether it answers there without a mention, the skills it has on, its name, its look, its department, who it reports to, or archiving it. A change the person who asked may make, with nothing read from outside this turn, applies at once with Undo. Any other waits on the card for who may make it, and one they can't make they send from there. The result says which: never say it is done before it does. Instructions, a role or apps go through propose_instruction_change.",
+      ? "Ask a person to change a setting of your own, with one card in this conversation: turn on or off a skill installed here, join or leave a channel or how you answer there, your model and its effort, the AI account you think with, your monthly budget, your owner, who may talk to you, your name, your look, the department you are in or who you report to. Use it whenever a request needs a setting of yours you don't have, instead of telling the person how to change it by hand or saying you can't ask. Nothing changes until a person clicks, even when the person who asked could change it: the card waits for whoever may (they send one they can't decide from there), and the result says which. Apps and permissions: request_permission. A skill not installed yet: offer_install_skill."
+      : "Change teammates' settings with one card in this conversation: the model and its effort, the AI account it thinks with, its monthly budget, its owner, who may talk to it, the channels it joins or leaves and whether it answers there without a mention, the skills it has on, its name, its look, its department, who it reports to, or archiving it. A change the person who asked may make, with nothing read from outside this turn, applies at once with Undo. Any other waits on the card for who may make it, and one they can't make they send from there. The result says which: never say it is done before it does. Instructions, a role or apps go through propose_instruction_change.",
     scope: own ? "" : SETUP_SCOPE,
     inputSchema: own
       ? {

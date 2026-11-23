@@ -65,7 +65,8 @@ describe("the system's lists", () => {
     expect(TILE_TINTS.bell).toBe("red");
     expect(TILE_TINTS.agent).toBe("agent");
     const tile = src("src/ui/IconTile.tsx");
-    expect(tile).toContain('backgroundColor: colors.tiles[danger ? "red" : (TILE_TINTS[icon] ?? "gray")],');
+    // A subject's own color, or a row's (`tint`: what always asks for approval is orange), else the system's gray.
+    expect(tile).toContain('backgroundColor: colors.tiles[danger ? "red" : (tint ?? TILE_TINTS[icon] ?? "gray")],');
     expect(tile).toContain("<Icon name={icon} size={Math.round(size * glyphShare(icon))} color={ON_TILE} filled />");
     expect(tile).toContain("const glyphShare = (icon: IconName) => (IOS ? 0.73 : MATERIAL_NAMES[icon] ? 0.66 : 0.6);");
     expect(src("src/features/shared/parts.tsx")).toContain(

@@ -217,6 +217,9 @@ export const SHOWN_ONLY: Record<Condition, readonly string[]> = {
     "errors.reauth.code",
     // An address held for an account that just left it (`changeAccountEmail`): only a server that sends e-mail holds it.
     "auth.flow.emailHeld",
+    // An address never confirmed holds anything back only where the server sends e-mail (`emailConfirmation`).
+    "auth.confirm.",
+    "errors.org.createUnconfirmed",
   ],
   apiKey: [],
   // A message nobody mentions still gets an agent: routing.mine (the chip and its help line), routing.by (Settings),

@@ -393,9 +393,11 @@ export async function postStretchCard(deps: { db: Database; pubsub?: PubSub }, o
         and(
           eq(messages.orgId, orgId),
           hold.messageId
-            ? sql`(${messages.channelId} = ${hold.channelId}::uuid or ${messages.channelId} in (
-            select distinct ${agentRuns.channelId} from ${agentRuns}
-            where ${agentRuns.orgId} = ${orgId}::uuid and ${agentRuns.stretchId} = ${hold.stretchId}::uuid))`
+            ? // One list of channels, not `channel = x or channel in (…)`: the planner can't take an OR into the
+              // channel index, and read every message of the week instead.
+              sql`${messages.channelId} in (select ${hold.channelId}::uuid union
+            select ${agentRuns.channelId} from ${agentRuns}
+            where ${agentRuns.orgId} = ${orgId}::uuid and ${agentRuns.stretchId} = ${hold.stretchId}::uuid)`
             : eq(messages.channelId, hold.channelId),
           gt(messages.createdAt, new Date(Date.now() - 7 * 86_400_000)),
           isNull(messages.deletedAt),

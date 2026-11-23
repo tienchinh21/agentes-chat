@@ -25,7 +25,7 @@ import {
   agentStateOfRun,
   browserHandoffOf,
   browserTrailOf,
-  type ConnectionStatus,
+  codeSuggestionOf,
   consultsIn,
   desktopTrailOf,
   fileConversationOf,
@@ -146,7 +146,7 @@ import { supersededBrainNotices } from "@agenteschat/client/lib/machine-outages"
 import { hasWideBlock } from "@agenteschat/client/lib/markdown";
 import { isMediaAfterReply, isMediaAlone, messageMediaOf, quoteText } from "@agenteschat/client/lib/media";
 import { serverBody } from "@agenteschat/client/lib/message-body";
-import { joinDrafts, tooLongToSend } from "@agenteschat/client/lib/message-length";
+import { answerIds, joinDrafts, tooLongToSend } from "@agenteschat/client/lib/message-length";
 import {
   isOpenMission,
   missionCommandOf,
@@ -178,7 +178,8 @@ import { usageWaitOf } from "@agenteschat/client/lib/usage-pause";
 import { appVia, surfaceVia } from "@agenteschat/client/lib/via";
 import { listedText, voiceOf } from "@agenteschat/client/lib/voice";
 import { waitingAway, waitingNotification } from "@agenteschat/client/lib/waiting";
-import { barStep, makingImage, showsActivity, splitCanceled } from "@agenteschat/client/lib/work";
+import { barStep, makingImage, splitCanceled } from "@agenteschat/client/lib/work";
+import { CodeConversation, useShowsWork } from "@agenteschat/client/lib/work-context";
 import {
   AffixInput,
   Avatar,
@@ -216,6 +217,7 @@ import {
   mayTakeFocus,
   OPEN_LAYER,
   PixelSpinner,
+  pastedFiles,
   SavedNote,
   SettingRow,
   Skeleton,
@@ -255,7 +257,6 @@ import { ClippedBody } from "@/chat/ClippedBody";
 import { LongDraftNotice } from "@/chat/LongDraftNotice";
 import { useConversationLook, useConversationWallpaper } from "@/chat/look";
 import { MessageBody } from "@/chat/MessageBody";
-import { useBrowserOffline } from "@/chat/offline";
 import { readingLanding } from "@/chat/reading";
 import {
   blockRowByRun,
@@ -285,6 +286,7 @@ import { HeldBrowserCard, RunBrowserCard, useHeldTakeover } from "@/components/b
 import { BrowserHandoffCard } from "@/components/browser/BrowserHandoffCard";
 import { BrowserTrailCard } from "@/components/browser/BrowserTrailCard";
 import { requestBrowserCard } from "@/components/browser/open";
+import { ScreenPanelContext } from "@/components/browser/screen-panel";
 import { CategorySelect } from "@/components/ChannelCategoryDialogs";
 import { ChannelHeader } from "@/components/ChannelHeader";
 import { ChannelPermissions } from "@/components/ChannelPermissions";
@@ -318,6 +320,7 @@ import {
 } from "@/components/ConsultGroup";
 import { CorrectionAsk } from "@/components/CorrectionAsk";
 import { type ChannelActions, ChannelActionsContext, useChannelActions } from "@/components/channel-actions";
+import { CodeSuggestionCard } from "@/components/code/CodeSuggestionCard";
 import { DatePill, type DatePillHandle } from "@/components/DatePill";
 import { DeleteChannelDialog } from "@/components/DeleteChannelDialog";
 import { MenuEntries } from "@/components/DesktopMenus";
@@ -395,7 +398,7 @@ import { TeamChecks } from "@/components/TeamChecks";
 import { ReplyChips } from "@/components/TeamPlan";
 import { TeamStalledBanner } from "@/components/TeamStalled";
 import { ToLatest } from "@/components/ToLatest";
-import { LiveTools, SavedTools } from "@/components/ToolCalls";
+import { LiveSubagents, LiveTools, SavedTools } from "@/components/ToolCalls";
 import { AgentTasksPanel } from "@/components/tasks/AgentTasksPanel";
 import { AgentTasksContext } from "@/components/tasks/agent-tasks-context";
 import { RangeBar, RangeRows, useRangeAdjust } from "@/components/threads/RangeSelect";
@@ -437,7 +440,6 @@ import { useToast } from "@/lib/toast";
 import {
   reconcileChannelRuns,
   useChannelRealtime,
-  useConnectionStatus,
   useDismissRun,
   useLive,
   useLiveStore,
@@ -519,6 +521,8 @@ export interface ChannelChrome {
   composerReplacement?: ReactNode;
   /** Under the composer (a mission someone only reads: "para pedir algo, peça para participar"). */
   composerNote?: ReactNode;
+  /** Behind the composer and what sits on it, from the conversation's floor (a code session's light sky). */
+  composerSky?: ReactNode;
   /** A thread in the panel beside its channel: a section, not the page's main. */
   panel?: boolean;
   /** A thread view where a person's reply makes it a "Responder" thread (`openThread` on the post). */
@@ -559,6 +563,8 @@ interface PendingFile {
   /** An image's local thumbnail (an object URL, revoked when the file leaves the composer). */
   preview?: string;
   status: "uploading" | "done" | "failed";
+  /** The share sent so far, 0 to 1, once the upload reports it. */
+  progress?: number;
   ref?: ArtifactRef;
 }
 
@@ -1240,7 +1246,6 @@ function ChannelView({
     onRefused: (error) =>
       toast.show(errorCode(error) === "voice_limit" ? t("voice.limit") : errorText(t, error), "error"),
   });
-  const status = useConnectionStatus();
 
   const api = useApi();
   // Reading the channel marks it read: the sidebar's badges (channel and DM) clear at once. Only while the tab is
@@ -1396,12 +1401,14 @@ function ChannelView({
       // The thread's conversation. One made from a range: not its root (the channel's marker) nor the
       // moved messages (written before the root; the context block lists them).
       const mine = (channelMessages.data ?? []).filter((m) => m.local && m.threadId === thread.id);
-      // A task's conversation: not its root, which stands for the task beside it (ADR 0145); a live file's the same
-      // (ADR 0199).
+      // A task's conversation: not its root, which stands for the task beside it (ADR 0145); a live file's and a code
+      // session's the same (ADR 0199, 0215).
       const list = mergeTimeline(threadMessages.data ?? [], [mine]).filter(
         (m) =>
           !taskConversationOf(m.meta) &&
           !fileConversationOf(m.meta) &&
+          // A code session's root stands for the session, whose page is around it (ADR 0215).
+          !(m.meta && "codeSession" in m.meta) &&
           (!thread.context || m.local || (m.id !== thread.id && m.createdAt > thread.createdAt)),
       );
       const passed = supersededBrainNotices(list);
@@ -2163,7 +2170,7 @@ function ChannelView({
         { key, name: file.name, icon: fileIcon(file.name, file.type), size: file.size, preview, status: "uploading" },
       ]);
       api.artifacts
-        .upload(org.id, file, { channelId: channel.id })
+        .upload(org.id, file, { channelId: channel.id }, { onProgress: (progress) => update({ progress }) })
         .then((saved) => update({ status: "done", ref: { id: saved.id, version: saved.version, title: saved.title } }))
         .catch((error) => {
           update({ status: "failed" });
@@ -2191,7 +2198,7 @@ function ChannelView({
       const target = e.target;
       if (e.defaultPrevented || !(target instanceof Element) || inTextField(target)) return;
       if (target !== document.body && !column.current?.contains(target)) return;
-      const pasted = Array.from(e.clipboardData?.files ?? []);
+      const pasted = pastedFiles(e.clipboardData);
       if (pasted.length === 0) return;
       e.preventDefault();
       addFilesNow.current(pasted);
@@ -2731,6 +2738,7 @@ function ChannelView({
                             rightHandId,
                             dm: Boolean(chrome?.dmAgentId || chrome?.dmPersonId || thread?.channelKind === "dm"),
                           }}
+                          code={thread?.channelKind === "code"}
                         >
                           <section
                             ref={scroller}
@@ -2920,7 +2928,7 @@ function ChannelView({
                           </div>
                         )}
                         <div className="channel__composer">
-                          <ConnectionBanner status={status} />
+                          {chrome?.composerSky}
                           {!chrome?.intro && !org.deletion && (
                             <NoAiBanner agentIds={channelAgents.map((a) => a.id)} dmAgentId={chrome?.dmAgentId} />
                           )}
@@ -3008,6 +3016,7 @@ function ChannelView({
                                           preview={f.preview}
                                           detail={formatBytes(i18n.language, f.size)}
                                           status={f.status}
+                                          progress={f.progress}
                                           statusLabel={
                                             f.status === "uploading"
                                               ? t("channel.uploading")
@@ -3499,6 +3508,11 @@ const Timeline = memo(function Timeline({
     [heldPlaces, channelId, runVisible, slots, lastByRun],
   );
   const shownMessages = useMemo(() => items.flatMap((i) => (i.kind === "message" ? [i.message] : [])), [items]);
+  const myId = useOrg().me.user.id;
+  const answers = useMemo(
+    () => answerIds(shownMessages.map((m) => ({ id: m.id, mine: m.author.type === "person" && m.author.id === myId }))),
+    [shownMessages, myId],
+  );
   // One stop, one pill: a stopped task's notice goes into its reply's pill while that reply (or its block) is here.
   const stops = useMemo(() => stopsOf(shownMessages, slots), [shownMessages, slots]);
   const rows: ReactElement<{ message?: MessageType }>[] = [];
@@ -3559,6 +3573,7 @@ const Timeline = memo(function Timeline({
           replyContext={item.context}
           lastOfRun={lastByRun.get(m.agentRunId) === item.key}
           run={run}
+          answer={answers.has(m.id)}
         />
       ) : (
         <TimelineMessage
@@ -3574,6 +3589,7 @@ const Timeline = memo(function Timeline({
           seen={m.id === seenId}
           helping={m.agentRunId && !isMediaAfterReply(m.meta) ? consultGroups.helping.get(m.agentRunId) : undefined}
           run={run}
+          answer={answers.has(m.id)}
         />
       ),
     );
@@ -3672,6 +3688,7 @@ function RunBlock({
   replyContext?: ReplyRef;
   lastOfRun?: boolean;
   run?: RunPosition;
+  answer?: boolean;
 }) {
   const run = useStreams((s) => (message ? undefined : s.runs[runId]));
   const last = useRef<LiveRun | undefined>(undefined);
@@ -3785,29 +3802,34 @@ const RowStopContext = createContext<string | undefined>(undefined);
 const RowDrawnContext = createContext<(() => void) | undefined>(undefined);
 
 /**
- * What the conversation's rows read from their view: the requests' registry, which row stops, "a row drew", and
- * which place the right hand's cards in them show (`seat`: its work here is on that one, not on the viewer's own).
+ * What the conversation's rows read from their view: the requests' registry, which row stops, "a row drew", which
+ * place the right hand's cards in them show (`seat`: its work here is on that one, not on the viewer's own) and
+ * whether it is a code session's (`code`: the agents' work always shows, ADR 0215).
  */
 function RowsProvider({
   asks,
   stop,
   drawn,
   seat,
+  code,
   children,
 }: {
   asks: AskRegistry;
   stop: string | undefined;
   drawn: () => void;
   seat: Omit<Parameters<typeof ConversationSeat>[0], "children">;
+  code: boolean;
   children: ReactNode;
 }) {
   return (
     <ConversationSeat {...seat}>
-      <AskRegistryProvider value={asks}>
-        <RowDrawnContext.Provider value={drawn}>
-          <RowStopContext.Provider value={stop}>{children}</RowStopContext.Provider>
-        </RowDrawnContext.Provider>
-      </AskRegistryProvider>
+      <CodeConversation.Provider value={code}>
+        <AskRegistryProvider value={asks}>
+          <RowDrawnContext.Provider value={drawn}>
+            <RowStopContext.Provider value={stop}>{children}</RowStopContext.Provider>
+          </RowDrawnContext.Provider>
+        </AskRegistryProvider>
+      </CodeConversation.Provider>
     </ConversationSeat>
   );
 }
@@ -3993,48 +4015,6 @@ function useAfter(ms: number, on: boolean) {
     return () => clearTimeout(timer);
   }, [ms, on]);
   return on && late;
-}
-
-/**
- * Above the composer when the connection drops: "Sem conexão. O que você mandar sai sozinho quando
- * voltar." (what is sent meanwhile waits and goes out on its own), then "Conectado de novo" for 1.6 s.
- * A socket that only reconnects for a moment says nothing.
- */
-function ConnectionBanner({ status }: { status: ConnectionStatus }) {
-  const { t } = useTranslation();
-  const offline = useBrowserOffline();
-  const reconnecting = status === "reconnecting";
-  const [longReconnect, setLongReconnect] = useState(false);
-  useEffect(() => {
-    if (!reconnecting) {
-      setLongReconnect(false);
-      return;
-    }
-    const timer = setTimeout(() => setLongReconnect(true), 1500);
-    return () => clearTimeout(timer);
-  }, [reconnecting]);
-  const down = offline || (reconnecting && longReconnect);
-  const [back, setBack] = useState(false);
-  const wasDown = useRef(false);
-  useEffect(() => {
-    if (down) {
-      wasDown.current = true;
-      setBack(false);
-      return;
-    }
-    if (!wasDown.current) return;
-    wasDown.current = false;
-    setBack(true);
-    const timer = setTimeout(() => setBack(false), 1600);
-    return () => clearTimeout(timer);
-  }, [down]);
-  if (!down && !back) return null;
-  return (
-    <p className="channel__conn ac-iconline" data-back={!down || undefined} role="status">
-      <Icon name={down ? "cloud" : "check"} size={16} />
-      {down ? t("channel.offline") : t("channel.backOnline")}
-    </p>
-  );
 }
 
 const sameSet = (a: Set<string>, b: Set<string>) => a.size === b.size && [...a].every((x) => b.has(x));
@@ -4442,6 +4422,7 @@ export const TimelineMessage = memo(function TimelineMessage({
   helping,
   readOnly = false,
   run = "solo",
+  answer = false,
 }: {
   message: MessageType;
   grouped: boolean;
@@ -4467,6 +4448,8 @@ export const TimelineMessage = memo(function TimelineMessage({
   readOnly?: boolean;
   /** Its place in its author's run (`runPosition`): on my own rows, which bubble corners square off. */
   run?: RunPosition;
+  /** The newest message, or one after my latest (`answerIds`): it shows whole however long. */
+  answer?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const { org, me } = useOrg();
@@ -4588,7 +4571,10 @@ export const TimelineMessage = memo(function TimelineMessage({
   // Where it browsed (`meta.browser`) and what it did on its desktop (`meta.desktop`): each card stays
   // after the run, and its steps leave the work list.
   // Step summaries, no picture: activity, so the person's setting hides them like the tool block.
-  const trailsShown = m.author.type === "agent" && showsActivity(org);
+  // A code session's screen line (ADR 0215) is its way to the panel's screen: shown whatever that setting says.
+  const screenPanel = useContext(ScreenPanelContext);
+  const shows = useShowsWork(org);
+  const trailsShown = m.author.type === "agent" && (shows || screenPanel !== null);
   const browserTrail = useMemo(() => (trailsShown ? browserTrailOf(m.meta) : []), [trailsShown, m.meta]);
   const desktopTrail = useMemo(() => (trailsShown ? desktopTrailOf(m.meta) : []), [trailsShown, m.meta]);
   const onCards = useMemo(
@@ -4624,6 +4610,8 @@ export const TimelineMessage = memo(function TimelineMessage({
   const missionSuggestion = m.author.type === "person" ? missionSuggestionOf(meta) : null;
   // A mission proposed from here whose thread lives elsewhere: its link card under the reply.
   const missionLink = m.author.type === "agent" ? missionLinkOf(meta) : null;
+  // A code session it suggested for a change asked here (ADR 0215 §11): the person's card under the reply.
+  const codeSuggestion = m.author.type === "agent" && !m.local ? codeSuggestionOf(meta) : null;
   // Preparing the mission's copy of the project failed (ADR 0044): the card with "Tentar de novo".
   const missionSetup = missionSetupOf(meta);
   const missionCard = Boolean(
@@ -4888,6 +4876,8 @@ export const TimelineMessage = memo(function TimelineMessage({
           <Parts resetKey={m}>
             <LiveRunStatus run={live} />
             {makingImage(live) && <ImageMaking color={colorOf(agent)} />}
+            {/* Its subagents and workflows at work, in a code session (ADR 0215). */}
+            <LiveSubagents work={live.work ?? []} agentName={name} color={colorOf(agent)} />
             <RunBrowserCard run={live} name={name} />
             <span className="ac-visually-hidden">{t("channel.writing")}</span>
           </Parts>
@@ -4927,7 +4917,7 @@ export const TimelineMessage = memo(function TimelineMessage({
             {routine && report && reportOpen && <RoutineReport text={report} />}
             {bodyShown && (
               <MessageText key="body" style={workOver ? { opacity: 0.6 } : undefined}>
-                <ClippedBody lead={talk?.lead}>
+                <ClippedBody id={m.id} addressed={answer || mentionsMe} lead={talk?.lead}>
                   {(clip, lead) => (
                     <MessageBody
                       className={clip}
@@ -5033,6 +5023,7 @@ export const TimelineMessage = memo(function TimelineMessage({
             {missionReport && <MissionReportExtras report={missionReport} message={m} />}
             {missionStart && <MissionStartLink message={m} />}
             {missionLink && <MissionLinkCard link={missionLink} />}
+            {codeSuggestion && <CodeSuggestionCard message={m} suggestion={codeSuggestion} />}
             {issueWork && (
               <IssueWorkCard work={issueWork} authorId={m.author.type === "person" ? (m.author.id ?? null) : null} />
             )}
@@ -5064,6 +5055,7 @@ export const TimelineMessage = memo(function TimelineMessage({
               !m.meta?.workUpdate && (
                 <SavedTools
                   runId={replyRun}
+                  messageId={m.id}
                   meta={m.meta}
                   agentName={agent?.name ?? name}
                   color={colorOf(agent)}
