@@ -174,10 +174,28 @@ export const envVars = {
       "On SIGTERM, how long the server keeps serving while `/api/health` answers 503, before it stops taking requests. Behind a reverse proxy with an active health check (and a retry window), set it above the check's interval so the proxy stops sending requests here first and holds them for the next instance instead of failing them (2000 for a check every second). 0 (default): stop taking requests at once.",
     section: "Server",
   },
+  LOAD_SHED_EVENT_LOOP_MS: {
+    schema: z.coerce.number().int().min(0).default(500),
+    description:
+      "Load shedding: while the event loop's p99 delay over the last 5 seconds is above this, the process is overloaded. It then answers new WebSocket connections and the apps' reads (`GET /api/app/*`, not links a person opens) with 503 and a `Retry-After` of 5 to 15 seconds instead of queueing everyone. `/api/health` says `overloaded`, still with 200; `/api/health?load=1` answers 503 then, for a proxy's active health check across several app processes (never a single process's: it would take out the only one). Writes, sign-in and open sockets carry on. 0: off.",
+    section: "Server",
+  },
+  LOAD_SHED_DB_WAIT_MS: {
+    schema: z.coerce.number().int().min(0).default(2_000),
+    description:
+      "Load shedding: while a `select 1` (waiting for one of the `DATABASE_POOL_MAX` connections included) takes longer than this, the process is overloaded (see `LOAD_SHED_EVENT_LOOP_MS`). 0: off.",
+    section: "Server",
+  },
+  LOAD_SHED_MAX_SOCKETS: {
+    schema: z.coerce.number().int().min(0).default(4_000),
+    description:
+      "Load shedding: at this many of the apps' open sockets in one process, it is overloaded (see `LOAD_SHED_EVENT_LOOP_MS`): a new one is turned away until some close, and behind a proxy goes to another process. Each person has at most 50 per process. 0: no cap.",
+    section: "Server",
+  },
   OUTBOX_MAX_IN_FLIGHT: {
     schema: z.coerce.number().int().min(1).default(48),
     description:
-      "How many jobs one server process runs at once besides its requests: agents' runs, routines, a message's routing, notifications, emails. Agents' runs spend most of their time waiting for their model or their computer, so this can be far above the number of CPUs. A job holds a database connection only while it reads or writes (`DATABASE_POOL_MAX`).",
+      "How many jobs one server process runs at once besides its requests: agents' runs, routines, a message's routing, notifications, emails. Agents' runs spend most of their time waiting for their model or their computer, so this can be far above the number of CPUs. A job holds a database connection only while it reads or writes (`DATABASE_POOL_MAX`). Native mode (`agentes-server`, with the database built in: one process, one connection) defaults to 16, 4 of them quick (`OUTBOX_QUICK_SLOTS`).",
     section: "Server",
   },
   OUTBOX_QUICK_SLOTS: {
@@ -189,7 +207,7 @@ export const envVars = {
   OUTBOX_MAX_IN_FLIGHT_CEILING: {
     schema: z.coerce.number().int().min(1).optional(),
     description:
-      "At most this many jobs at once in one process, however far the slots could grow. While jobs wait for a slot (a burst of routines, a busy hour), the slots double every 30 seconds from `OUTBOX_MAX_IN_FLIGHT`: agents' runs as far as half the process's memory holds them (about 4 MB each while they wait), quick jobs to 4 per database connection (`DATABASE_POOL_MAX`); they shrink back once nothing waits. Unset (default): only those limits. Set it to `OUTBOX_MAX_IN_FLIGHT` to keep the slots fixed. With the built-in database they never grow.",
+      "At most this many jobs at once in one process, however far the slots could grow. While jobs wait for a slot (a burst of routines, a busy hour), the slots double every 30 seconds from `OUTBOX_MAX_IN_FLIGHT`: agents' runs as far as half the process's memory holds them (about 4 MB each while they wait), quick jobs to 4 per database connection (`DATABASE_POOL_MAX`); they shrink back once nothing waits. After a restart, agents' runs already waiting start as a ramp over the first minute, not all at once. Unset (default): 8 jobs per database connection (160 with 20). Set it to `OUTBOX_MAX_IN_FLIGHT` to keep the slots fixed. With the built-in database they never grow.",
     section: "Server",
   },
   SERVER_ROLE: {
@@ -214,7 +232,7 @@ export const envVars = {
   DATABASE_POOL_MAX: {
     schema: z.coerce.number().int().min(1).default(20),
     description:
-      "Maximum number of open connections per agentes.chat process, shared by its HTTP requests and its jobs (`OUTBOX_MAX_IN_FLIGHT`). Keep it, times the number of processes, under the database's `max_connections`.",
+      "Maximum number of open connections per agentes.chat process, shared by its HTTP requests and its jobs (`OUTBOX_MAX_IN_FLIGHT`). Give it at least one per 4 job slots (12 for the default 48): below that the server warns as it starts. Keep it, times the number of processes, under the database's `max_connections`.",
     section: "Database",
   },
   RUN_MIGRATIONS_ON_BOOT: {
@@ -1194,6 +1212,12 @@ export const envVars = {
       "Path-style bucket URLs (`https://endpoint/bucket/key`), for MinIO, Garage and similar stores. Off: virtual-hosted URLs (`https://bucket.endpoint/key`), as R2 and AWS expect.",
     section: "Storage",
   },
+  S3_PRESIGNED_URLS: {
+    schema: z.stringbool().default(true),
+    description:
+      "Browsers and the apps download files of the platform bucket straight from it, by short-lived presigned links the server hands out after its own checks (videos and downloads; previews still come through the server). Only for an `https` `S3_ENDPOINT`: an `http` one is never linked to. Set to `false` when browsers can't reach `S3_ENDPOINT` (a bucket on a private network): the server then sends every file itself.",
+    section: "Storage",
+  },
   HOST_COMPUTER_TOKEN: {
     schema: z
       .string()
@@ -1468,6 +1492,23 @@ export const envVars = {
     schema: z.string().min(1).max(64).default("production"),
     description: "The environment error reports are filed under (`production`, `staging`).",
     section: "Observability",
+  },
+  HEAP_SNAPSHOT_MB: {
+    schema: z.coerce.number().int().min(64).optional(),
+    description:
+      "Once a process's JavaScript heap passes this many MiB, it writes one heap snapshot to `HEAP_SNAPSHOT_DIR` (once per process start), to find what holds the memory. Writing it pauses the process for seconds to minutes and takes about as much memory again as the heap, so set it well under the process's memory limit. The file holds everything in the process's memory in clear (decrypted keys, sessions, messages), readable by the server's user alone: delete it once read. No process writes one while the folder holds 3. Unset (default): never.",
+    section: "Observability",
+    example: "3072",
+  },
+  HEAP_SNAPSHOT_DIR: {
+    schema: z
+      .string()
+      .regex(/^(\/|[A-Za-z]:[\\/]|\\\\)/, "must be an absolute path")
+      .optional(),
+    description:
+      "Absolute path of the folder `HEAP_SNAPSHOT_MB` writes its snapshot to; in a container, a mounted volume, or it is gone with the container. Unset: the system's temporary folder.",
+    section: "Observability",
+    example: "/data/heap",
   },
 } satisfies Record<string, EnvVarDefinition>;
 

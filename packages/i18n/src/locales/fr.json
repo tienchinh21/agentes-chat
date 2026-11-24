@@ -2365,7 +2365,7 @@
     "summary_one": "{{people}} membre · {{agents}} agents",
     "summary_many": "{{people}} membres · {{agents}} agents",
     "summary_other": "{{people}} membres · {{agents}} agents",
-    "waiting": "Vous attend",
+    "waiting": "Boîte de réception",
     "approvals": "Approbations",
     "proposals": "Propositions d'amélioration",
     "issues": "Tâches",
@@ -3182,7 +3182,7 @@
       "team": "Met en place et modifie toute l'équipe avec des cartes qu'une personne applique : agents, personnes et réglages du workspace",
       "routines": "Lance et supprime les routines de n'importe quel agent que vous pouvez gérer",
       "asYou": "Dans votre propre conversation, lit le Drive, le wiki et les tâches que vous pouvez voir",
-      "mentions": "Répond à une @mention dans n'importe quel canal sans en être membre"
+      "mentions": "Répond à une @mention dans n'importe quel canal sans en être membre, et aux messages pour lesquels il est le plus indiqué"
     },
     "card": {
       "settings": "{{name}} · Réglages",
@@ -5445,7 +5445,7 @@
     "firstRun": "Reprenez là où vous en étiez · {{done}} sur {{total}}"
   },
   "notifications": {
-    "title": "Notifications",
+    "title": "Boîte de réception",
     "planLent": {
       "takeBack": "Reprendre",
       "takeBackAll": "Reprendre de tous les agents",
@@ -5487,7 +5487,7 @@
         "computer": "Changer d'ordinateur"
       }
     },
-    "docTitleUnread": "({{count}}) Notifications",
+    "docTitleUnread": "({{count}}) Boîte de réception",
     "summaryWaiting_one": "{{count}} chose vous attend",
     "summaryWaiting_many": "{{count}} choses vous attendent",
     "summaryWaiting_other": "{{count}} choses vous attendent",
@@ -5505,6 +5505,7 @@
       "waiting": "Vous attend",
       "unread": "Non lues",
       "reactions": "Réactions",
+      "requests": "Demandes traitées",
       "done": "Terminées"
     },
     "keys": {
@@ -5755,6 +5756,8 @@
     "noneUnread": "Tout est lu.",
     "noneHere": "Rien ici pour l'instant.",
     "noneDone": "Rien marqué comme terminé ces 30 derniers jours.",
+    "noneRequests": "Aucune demande traitée pour l’instant.",
+    "proposes": "propose une amélioration",
     "more": "Afficher plus"
   },
   "approvals": {
@@ -6354,6 +6357,7 @@
       "overview": "Vue d'ensemble",
       "instructions": "Instructions",
       "access": "Outils et accès",
+      "skills": "Compétences",
       "memory": "Mémoire",
       "files": "Fichiers",
       "usage": "Utilisation",
@@ -11149,7 +11153,80 @@
       "text": "Les agents continuent de travailler sans elle."
     }
   },
+  "aiHub": {
+    "tab": "Comptes IA",
+    "usageTab": "Utilisation",
+    "accounts": "Comptes",
+    "accountsHint": "Chaque forfait et clé d'API avec lesquels les agents peuvent penser, quel que soit qui l'a connecté.",
+    "apiKey": "Clé d'API",
+    "of": "de {{name}}",
+    "moreSpeed": "Vitesse et fenêtre de contexte",
+    "whoThinks": "Qui pense",
+    "bulk": {
+      "sub": "Choisissez l'IA, puis les agents qui la prennent."
+    },
+    "choice": {
+      "workspace": "Celle de l'espace de travail",
+      "none": "Choisir un compte",
+      "search": "Rechercher par nom, IA, forfait ou propriétaire",
+      "noMatch": "Aucun compte ne correspond.",
+      "noModel": "Aucun modèle ne correspond.",
+      "groups": {
+        "yours": "Les vôtres",
+        "others": "De l'équipe",
+        "keys": "De l'espace de travail"
+      }
+    },
+    "order": {
+      "title": "Ordre d'utilisation",
+      "tip": "Le compte que les agents utilisent en premier",
+      "sub": "À la limite, les agents passent au compte suivant.",
+      "group": "{{maker}} · {{computer}}",
+      "signedOut": "Déconnecté · ignoré",
+      "skipped": "Ignoré",
+      "fallback": "Continuer avec la clé d'API quand tous les forfaits sont à leur limite",
+      "fallbackHint": "Désactivé : les agents attendent que le premier forfait se renouvelle. Activé : ils continuent avec la clé d'API de l'espace de travail, payée à l'usage. Jamais pour une mission."
+    },
+    "detail": {
+      "limits": "Limites",
+      "noLimits": "Limites pas encore lues.",
+      "permissions": "Autorisations",
+      "saved": "Autorisations enregistrées.",
+      "more": "Plus pour {{name}}",
+      "manage": "Gérer",
+      "manageLine": "Renommer, se reconnecter, supprimer",
+      "manageHint": "Qui peut renommer ce compte, s'y reconnecter, le supprimer et changer ces autorisations.",
+      "use": "Utiliser dans les agents",
+      "useLine": "Le choisir dans Qui pense",
+      "useHint": "Les agents de qui peuvent penser avec ce compte.",
+      "reply": "Répondre à tous",
+      "replyLine": "À qui parlent les agents",
+      "replyHint": "À qui un agent sur ce compte répond en plus de son propriétaire.",
+      "claudeTerms": "Selon les conditions de Claude, un forfait personnel appartient à une personne. Le partager est une zone grise.",
+      "pickRoles": "Les personnes qui ont ces rôles.",
+      "pickPeople": "En plus du propriétaire du compte.",
+      "searchRoles": "Rechercher des rôles",
+      "searchPeople": "Rechercher des personnes",
+      "nobody": "Personne à choisir."
+    },
+    "modes": {
+      "owner": "Vous seul",
+      "ownerOf": "Seulement {{name}}",
+      "admins": "Vous et les admins",
+      "adminsOf": "{{name}} et les admins",
+      "roles": "Rôles…",
+      "people": "Personnes…",
+      "everyone": "Tout le monde",
+      "replyOwner": "Seulement le propriétaire de l'agent"
+    }
+  },
   "aiAccounts": {
+    "useReason": {
+      "signed_out": "Déconnecté",
+      "owner_left": "{{owner}} a quitté le workspace",
+      "owner_only": "Seul {{owner}} l'utilise",
+      "not_allowed": "Pas ouvert à vos agents"
+    },
     "unnamed": "Compte sans nom",
     "rename": {
       "action": "Renommer {{label}}",
@@ -11703,6 +11780,20 @@
     "empty": "Rien pour « {{q}} »."
   },
   "codeSessions": {
+    "beta": {
+      "title": "Coding mode est en bêta",
+      "text": "Il fonctionne vraiment et change chaque semaine. Parfois il se bloque. Dans ce cas, le problème vient de nous.",
+      "go": "Commencer",
+      "added": {
+        "worktree": "Chaque demande dans son propre worktree, avec Git, Fichiers, Écran et Terminal",
+        "anyAi": "N'importe quelle IA : Claude Code, Codex, OpenCode ou un modèle par sa clé",
+        "beside": "Modifiez les fichiers et ouvrez un terminal à côté de la conversation"
+      },
+      "removed": {
+        "paste": "Copier-coller du code entre le chat et l'éditeur",
+        "watch": "Surveiller le terminal jusqu'à ce que l'agent ait fini"
+      }
+    },
     "title": "Code",
     "state": {
       "waiting": "vous attend",
@@ -11762,6 +11853,7 @@
       "agent_idle": "est libre"
     },
     "gitTab": {
+      "openFile": "Ouvrir le fichier",
       "label": "Git",
       "from": "depuis {{base}}",
       "ahead_one": "{{count}}{{more}} commit d'avance",
@@ -11786,8 +11878,7 @@
         "deleted": "Supprimé",
         "renamed": "Renommé",
         "untracked": "Nouveau, pas encore dans git"
-      },
-      "openFile": "Ouvrir le fichier"
+      }
     },
     "files": {
       "label": "Fichiers",
@@ -11806,13 +11897,7 @@
       "truncated_other": "Affichage des {{formatted}} premiers fichiers.",
       "hasChanges": "Contient des modifications",
       "opening": "Ouverture du fichier…",
-      "state": {
-        "binary": "Un fichier binaire : rien à afficher ici.",
-        "missing": "Ce fichier n'est plus là.",
-        "ignored": "Git ignore ce fichier, il ne s'affiche donc pas ici.",
-        "secret": "Les fichiers .env ne s'affichent pas ici : ils contiennent souvent des secrets.",
-        "outside": "Ce fichier est un lien vers l'extérieur du worktree."
-      },
+      "cut": "Seuls les premiers {{size}} s'affichent ici.",
       "save": "Enregistrer",
       "unsaved": "Non enregistré",
       "tooLong": "Trop long pour être modifié ici",
@@ -11822,7 +11907,20 @@
       "unsavedAsk": "Ce fichier contient des modifications non enregistrées.",
       "keepEditing": "Continuer à modifier",
       "discard": "Abandonner",
-      "cut": "Seuls les premiers {{size}} s'affichent ici."
+      "state": {
+        "binary": "Un fichier binaire : rien à afficher ici.",
+        "missing": "Ce fichier n'est plus là.",
+        "ignored": "Git ignore ce fichier, il ne s'affiche donc pas ici.",
+        "secret": "Les fichiers .env ne s'affichent pas ici : ils contiennent souvent des secrets.",
+        "outside": "Ce fichier est un lien vers l'extérieur du worktree."
+      }
+    },
+    "tabs": {
+      "label": "Onglets de la session",
+      "talk": "Conversation",
+      "terminalN": "Terminal {{n}}",
+      "close": "Fermer {{name}}",
+      "add": "Nouvel onglet"
     },
     "screen": {
       "computer": "Ordinateur de {{name}}",
@@ -11865,27 +11963,6 @@
       "dm": "Ouverte depuis votre conversation avec {{name}}",
       "channel": "Ouverte depuis #{{name}}",
       "see": "Voir la conversation"
-    },
-    "tabs": {
-      "label": "Onglets de la session",
-      "talk": "Conversation",
-      "terminalN": "Terminal {{n}}",
-      "close": "Fermer {{name}}",
-      "add": "Nouvel onglet"
-    },
-    "beta": {
-      "added": {
-        "worktree": "Chaque demande dans son propre worktree, avec Git, Fichiers, Écran et Terminal",
-        "anyAi": "N'importe quelle IA : Claude Code, Codex, OpenCode ou un modèle par sa clé",
-        "beside": "Modifiez les fichiers et ouvrez un terminal à côté de la conversation"
-      },
-      "removed": {
-        "paste": "Copier-coller du code entre le chat et l'éditeur",
-        "watch": "Surveiller le terminal jusqu'à ce que l'agent ait fini"
-      },
-      "title": "Coding mode est en bêta",
-      "text": "Il fonctionne vraiment et change chaque semaine. Parfois il se bloque. Dans ce cas, le problème vient de nous.",
-      "go": "Commencer"
     }
   },
   "code": {
@@ -13752,13 +13829,53 @@
   },
   "connectors": {
     "title": "Connecteurs",
-    "add": "Ajouter un connecteur",
-    "mcp": {
-      "title": "MCP",
-      "add": "Ajouter un MCP",
-      "list": "Serveurs MCP connectés",
-      "none": "Les serveurs MCP que vous connectez par leur adresse s'affichent ici."
+    "store": {
+      "featured": "À la une",
+      "suggested": "Suggéré",
+      "seeAll": "Tout voir",
+      "more": "Voir plus",
+      "moreName": "En savoir plus sur {{name}}",
+      "connected": "Connecté",
+      "browse": "Parcourir les connecteurs",
+      "notListed": "Un service manque dans la boutique ?",
+      "howLabel": "Comment il se connecte",
+      "whoAll": "Tous les agents",
+      "whoChoose": "Vous choisirez ensuite",
+      "asksLabel": "Approbation",
+      "asksSensitive": "Le sensible vous demande",
+      "afterTitle": "Après la connexion",
+      "agents_one": "{{count}} agent",
+      "agents_many": "{{count}} agents",
+      "agents_other": "{{count}} agents",
+      "whoEvery_one": "Votre agent l'utilise.",
+      "whoEvery_many": "Les {{count}} agents l'utilisent.",
+      "whoEvery_other": "Les {{count}} agents l'utilisent.",
+      "whoSome_one": "{{names}}. L'autre agent ne l'utilise pas.",
+      "whoSome_many": "{{names}}. Les {{count}} autres agents ne l'utilisent pas.",
+      "whoSome_other": "{{names}}. Les {{count}} autres agents ne l'utilisent pas.",
+      "change": "Modifier",
+      "see": "Voir",
+      "account": "Compte",
+      "toolsText": "Ce que les agents peuvent faire avec, et ce qui vous demande.",
+      "addressesText": "Avec qui les agents peuvent échanger depuis cette boîte.",
+      "bandTitle_one": "{{count}} service à connecter",
+      "bandTitle_many": "{{count}} services à connecter",
+      "bandTitle_other": "{{count}} services à connecter",
+      "bandText": "{{names}} et d'autres.",
+      "appMissing": "L'application de ce serveur n'est pas encore créée",
+      "appEvents": "Il manque des événements à l'application",
+      "appLine": "Application de ce serveur",
+      "eventsLine": "Événements"
     },
+    "howShort": {
+      "oneClick": "Un clic",
+      "oauthOrKey": "Un clic ou une clé API",
+      "key": "Clé API",
+      "appPassword": "Mot de passe d'application",
+      "addressPassword": "Adresse et mot de passe",
+      "composio": "Via Composio"
+    },
+    "add": "Ajouter un connecteur",
     "personal": {
       "note": "Vous seul ouvrez ces connexions. Vos agents les utilisent seulement quand vous le demandez.",
       "noteOne": "Vous seul ouvrez cette connexion. Vos agents l'utilisent seulement quand vous le demandez.",
@@ -13790,9 +13907,6 @@
       "moveText": "Tout le workspace la voit. Les personnes qui gèrent les agents choisissent quels agents l'utilisent, et le propriétaire d'un agent peut la désactiver sur le sien. Un agent qui utilise toutes les apps connectées la reçoit tout de suite.",
       "moved": "{{name}} appartient maintenant à l’équipe."
     },
-    "addTitle": "Ajouter un connecteur",
-    "catalogText": "Connectez une seule fois pour {{org}}. Choisissez ensuite ce que chaque agent peut utiliser.",
-    "catalog": "Connecteurs disponibles",
     "categories": "Catégories",
     "category": {
       "all": "Tous",
@@ -13813,8 +13927,6 @@
     "connectName": "Connecter {{name}}",
     "reconnectName": "Reconnecter {{name}}",
     "addAccountName": "Ajouter un autre compte {{name}}",
-    "other": "Vous ne trouvez pas ?",
-    "otherText": "Connectez n'importe quel service via son adresse.",
     "search": "Rechercher des connecteurs",
     "searchPlaceholder": "Rechercher par nom ou par fonction",
     "empty": "Aucun connecteur ne correspond à « {{q}} »",
@@ -13828,8 +13940,6 @@
     "more": "Plus de services",
     "tileConnected": "{{name}}, connecté",
     "tileSoon": "{{name}}, bientôt",
-    "otherTitle": "Un autre service",
-    "otherDetail": "Tout service qui propose une connexion pour les agents, via son adresse (elle commence par https://).",
     "otherSteps": {
       "1": "Vous collez l'adresse et autorisez l'accès sur la page du service",
       "2": "Nous déterminons ce que fait chacun de ses outils",
@@ -13837,16 +13947,13 @@
     },
     "otherConnect": "Connecter par adresse",
     "detail": {
-      "close": "Fermer les détails",
       "can": "Ce que les agents pourront faire",
       "afterText": "Aucun agent ne l'utilise tant que vous n'avez pas choisi.",
       "allText": "Une fois connecté, tous les agents peuvent l'utiliser. Vous pourrez ajuster cela plus tard.",
       "addAccount": "Ajouter un autre compte",
       "accountsText": "Chaque compte a ses propres agents et niveaux.",
       "reconnect": "Reconnecter",
-      "replaceText": "Remplace la connexion actuelle. Ceux qui l'utilisent restent les mêmes.",
-      "connected": "Déjà connecté",
-      "how": "Fonctionnement"
+      "replaceText": "Remplace la connexion actuelle. Ceux qui l'utilisent restent les mêmes."
     },
     "how": {
       "oneClick": "Un clic : vous autorisez l'accès sur la page du service",
@@ -14067,6 +14174,10 @@
         "2": "Créer et ajuster des campagnes",
         "ask": "Activer des publicités et changer des budgets demande toujours votre approbation"
       },
+      "tiktok_ads": {
+        "1": "Voir les campagnes, les groupes d’annonces et les résultats",
+        "2": "Créer et ajuster des campagnes et des annonces"
+      },
       "google_docs": {
         "1": "Rechercher et lire des documents",
         "2": "Créer et modifier des documents"
@@ -14219,7 +14330,6 @@
         "ask": "Chaque envoi demande toujours votre approbation"
       }
     },
-    "connectedList": "Connectés",
     "connected": "Connecté",
     "connectedAs": "Connecté en tant que {{account}}",
     "reconnectAdds": "Reconnectez {{name}} pour que les agents puissent aussi {{what}}.",
@@ -14349,6 +14459,7 @@
       "amplitude": "Graphiques, tableaux de bord et expériences.",
       "himetrica": "Visiteurs, entonnoirs, revenus et trafic de recherche.",
       "meta_ads": "Campagnes publicitaires Facebook et Instagram et leurs résultats.",
+      "tiktok_ads": "Campagnes, groupes d’annonces et annonces TikTok, avec leurs résultats.",
       "klaviyo": "Campagnes, flows, listes et profils.",
       "millionsend": "Campagnes e-mail, listes et contacts.",
       "semrush": "Données sur les mots-clés, domaines et backlinks.",
@@ -16207,10 +16318,10 @@
       "repoNotAllowed": "Cet agent ne peut pas travailler dans ce dépôt. Choisissez-en un autre, ou ajoutez celui-ci dans les paramètres de l'agent.",
       "notYours": "Seule la personne qui a ouvert la session ou un administrateur peut la fermer.",
       "notReady": "Le worktree de la session n'est pas encore prêt. Réessayez dans un instant.",
-      "suggestionGone": "Cette suggestion a déjà reçu une réponse.",
-      "suggestionNotYours": "Seule la personne qui a demandé décide d'ouvrir la session.",
       "fileChanged": "Ce fichier a changé sur l'ordinateur après que vous l'avez ouvert.",
-      "fileLocked": "Ce fichier ne peut pas être modifié ici."
+      "fileLocked": "Ce fichier ne peut pas être modifié ici.",
+      "suggestionGone": "Cette suggestion a déjà reçu une réponse.",
+      "suggestionNotYours": "Seule la personne qui a demandé décide d'ouvrir la session."
     },
     "webhook": {
       "githubNoAccess": "Le GitHub de ce workspace ne peut pas créer de webhooks dans {{repo}}. Suis les étapes ci-dessous pour le créer à la main.",
@@ -16541,6 +16652,7 @@
     "account": {
       "notRestorable": "Ce compte ne peut plus être restauré.",
       "notOwner": "Seule la personne qui a connecté ce compte ou cet abonnement peut faire cela.",
+      "permissionForbidden": "Seul le propriétaire du compte, un admin ou qui peut le gérer peut changer cela.",
       "orderForbidden": "Seuls la personne qui a connecté ce compte ou un admin peuvent changer sa place dans l'ordre."
     },
     "channel": {
@@ -20965,6 +21077,7 @@
     "openAgain": "Rouvrir",
     "ended": "Le shell s'est arrêté",
     "dropped": "La connexion au terminal a été perdue",
+    "moved": "Ce terminal est ouvert dans une autre fenêtre",
     "screening": "Le terminal est désactivé ici",
     "forbidden": "Seules les personnes qui peuvent utiliser cet ordinateur ouvrent un terminal",
     "offline": "L'ordinateur est hors ligne",
@@ -20974,8 +21087,7 @@
     "busy": "Cet ordinateur a déjà autant de terminaux ouverts qu'il peut en accepter. Fermez-en un et réessayez.",
     "paused": "L'ordinateur est en pause",
     "failed": "Impossible d'ouvrir le terminal",
-    "agentFolder": "Le terminal s'est ouvert dans le dossier de l'agent. Mettez à jour l'ordinateur pour l'ouvrir dans le dossier de la session.",
-    "moved": "Ce terminal est ouvert dans une autre fenêtre"
+    "agentFolder": "Le terminal s'est ouvert dans le dossier de l'agent. Mettez à jour l'ordinateur pour l'ouvrir dans le dossier de la session."
   },
   "agora": {
     "label": "Maintenant",

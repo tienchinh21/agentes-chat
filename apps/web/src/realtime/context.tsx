@@ -450,11 +450,25 @@ export function RealtimeProvider({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: one socket per org; toast and language are read live
   useEffect(() => {
-    const conn = new RealtimeConnection({ url: realtimeUrl(window.location, orgId), createSocket });
-    // Catch up over HTTP after a reconnect: events sent while offline are gone.
-    const offReconnect = conn.onReconnect(() => {
-      // A reconnect is often a deploy: is this tab still on the app the server serves?
-      void checkAppVersion();
+    const conn = new RealtimeConnection({
+      url: realtimeUrl(window.location, orgId),
+      createSocket,
+      // A background tab's lost socket comes back slowly (`checkAlive` on showing times it again): the old tabs a
+      // restart dropped don't all dial at once, and they still get their notifications within a minute.
+      hidden: () => document.visibilityState === "hidden",
+      // Spread out in a browser; in React's act() environment (tests), like the frames, at once: catch-ups, and
+      // reconnects within half a second.
+      ...(batchFrames() ? {} : { catchUpSpreadMs: 0, backoffMs: [500] }),
+    });
+    // A reconnect is often a deploy: is this tab still on the app the server serves?
+    const offReconnect = conn.onReconnect(() => void checkAppVersion());
+    // Catch up over HTTP after a reconnect or a server's resync: events sent meanwhile are gone.
+    const offCatchUp = conn.onCatchUp((full) => {
+      if (!full) {
+        void qc.refetchQueries({ queryKey: keys.org(orgId), type: "active" });
+        void qc.refetchQueries({ queryKey: keys.me, type: "active" });
+        return;
+      }
       // Reactions heard live may be stale now: the refetched message lists carry them again.
       qc.removeQueries({ queryKey: ["org", orgId, "reactions"] });
       // Nothing sent while the socket was down reached this tab, so everything the workspace holds may be old: what
@@ -577,7 +591,8 @@ export function RealtimeProvider({
     });
     conn.start();
     setConnection(conn);
-    // Back from a sleep or a network change, the socket may be dead while it still says open: check it now.
+    // Back from a sleep or a network change, the socket may be dead while it still says open: check it now (and a
+    // reconnect still waiting dials within the first step).
     const wake = () => {
       if (document.visibilityState === "visible") conn.checkAlive();
     };
@@ -589,6 +604,7 @@ export function RealtimeProvider({
       document.removeEventListener("visibilitychange", wake);
       window.removeEventListener("online", wake);
       offReconnect();
+      offCatchUp();
       offOpen();
       offUser();
       offError();

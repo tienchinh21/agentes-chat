@@ -1339,7 +1339,7 @@ describe("proposals for teammates (one card, a row per agent and kind of change)
       roles: [{ agent: "@ada", role: "Revisora" }],
     });
     expect(out.content).toContain(
-      "they wait for someone who edits the agent or reviews memory (instructions), and someone who edits the agent (a role).",
+      "they wait for the agent's owner or its editors, or someone who reviews memory when it has neither (instructions), and someone who edits the agent (a role).",
     );
   });
 

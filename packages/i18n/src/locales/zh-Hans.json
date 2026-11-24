@@ -2217,7 +2217,7 @@
     "expandNav": "展开侧边栏",
     "searchWorkspace": "搜索工作区",
     "summary_other": "{{people}} 位成员 · {{agents}} 个智能体",
-    "waiting": "等你处理",
+    "waiting": "收件箱",
     "approvals": "审批",
     "proposals": "改进建议",
     "issues": "任务",
@@ -2944,7 +2944,7 @@
       "team": "通过由人来应用的卡片搭建和调整整个团队，包括智能体、成员和工作区设置",
       "routines": "运行和删除你有权管理的任何智能体的例行任务",
       "asYou": "在你自己的对话里，读取你能看到的 Drive、Wiki 和任务",
-      "mentions": "不是成员也能回应任何频道里的 @提及"
+      "mentions": "不是成员也能回应任何频道里的 @提及，以及最适合由它回答的消息"
     },
     "card": {
       "settings": "{{name}} · 设置",
@@ -5083,7 +5083,7 @@
     "firstRun": "从上次的地方继续 · {{done}}/{{total}}"
   },
   "notifications": {
-    "title": "通知",
+    "title": "收件箱",
     "planLent": {
       "takeBack": "收回",
       "takeBackAll": "从所有智能体收回",
@@ -5111,7 +5111,7 @@
         "computer": "更换电脑"
       }
     },
-    "docTitleUnread": "({{count}}) 通知",
+    "docTitleUnread": "({{count}}) 收件箱",
     "summaryWaiting_other": "{{count}} 件事等你处理",
     "summaryUnread_other": "{{count}} 条未读",
     "summaryAllRead": "全部已读",
@@ -5125,6 +5125,7 @@
       "waiting": "等你处理",
       "unread": "未读",
       "reactions": "表情回应",
+      "requests": "已决定的请求",
       "done": "已完成"
     },
     "keys": {
@@ -5343,6 +5344,8 @@
     "noneUnread": "全部已读。",
     "noneHere": "这里暂时没有内容。",
     "noneDone": "过去 30 天内没有标记为完成的内容。",
+    "noneRequests": "还没有已决定的请求。",
+    "proposes": "提出了一项改进",
     "more": "显示更多"
   },
   "approvals": {
@@ -5920,6 +5923,7 @@
       "overview": "概览",
       "instructions": "指令",
       "access": "工具和权限",
+      "skills": "技能",
       "memory": "记忆",
       "files": "文件",
       "usage": "用量",
@@ -10349,7 +10353,80 @@
       "text": "没有它，智能体也会继续工作。"
     }
   },
+  "aiHub": {
+    "tab": "AI 账号",
+    "usageTab": "用量",
+    "accounts": "账号",
+    "accountsHint": "智能体可以用来思考的所有套餐和 API 密钥，无论是谁连接的。",
+    "apiKey": "API 密钥",
+    "of": "{{name}} 的",
+    "moreSpeed": "速度和上下文窗口",
+    "whoThinks": "由谁思考",
+    "bulk": {
+      "sub": "先选 AI，再选使用它的智能体。"
+    },
+    "choice": {
+      "workspace": "工作区的",
+      "none": "选择账号",
+      "search": "按名称、AI、套餐或所有者搜索",
+      "noMatch": "没有匹配的账号。",
+      "noModel": "没有匹配的模型。",
+      "groups": {
+        "yours": "你的",
+        "others": "团队的",
+        "keys": "工作区的"
+      }
+    },
+    "order": {
+      "title": "使用顺序",
+      "tip": "智能体先用哪个账号",
+      "sub": "达到上限时，智能体会换到下一个账号。",
+      "group": "{{maker}} · {{computer}}",
+      "signedOut": "已退出 · 跳过",
+      "skipped": "跳过",
+      "fallback": "所有套餐都达到上限时继续使用 API 密钥",
+      "fallbackHint": "关闭：智能体等待第一个套餐恢复。开启：它们继续使用工作区按用量付费的 API 密钥。任务从不继续。"
+    },
+    "detail": {
+      "limits": "上限",
+      "noLimits": "尚未读取上限。",
+      "permissions": "权限",
+      "saved": "权限已保存。",
+      "more": "{{name}} 的更多操作",
+      "manage": "管理",
+      "manageLine": "重命名、重新登录、移除",
+      "manageHint": "谁可以重命名此账号、重新登录、移除它并更改这些权限。",
+      "use": "用于智能体",
+      "useLine": "在“由谁思考”中选择",
+      "useHint": "谁的智能体可以用此账号思考。",
+      "reply": "回复所有人",
+      "replyLine": "智能体与谁交谈",
+      "replyHint": "此账号上的智能体除了自己的所有者之外还回复谁。",
+      "claudeTerms": "根据 Claude 的条款，个人套餐归一个人所有。共享属于灰色地带。",
+      "pickRoles": "拥有这些角色的人。",
+      "pickPeople": "除账号所有者之外。",
+      "searchRoles": "搜索角色",
+      "searchPeople": "搜索成员",
+      "nobody": "没有可选择的人。"
+    },
+    "modes": {
+      "owner": "仅你",
+      "ownerOf": "仅 {{name}}",
+      "admins": "你和管理员",
+      "adminsOf": "{{name}} 和管理员",
+      "roles": "角色…",
+      "people": "成员…",
+      "everyone": "所有人",
+      "replyOwner": "仅智能体的所有者"
+    }
+  },
   "aiAccounts": {
+    "useReason": {
+      "signed_out": "已退出登录",
+      "owner_left": "{{owner}} 已离开工作区",
+      "owner_only": "只有 {{owner}} 使用",
+      "not_allowed": "未向你的智能体开放"
+    },
     "unnamed": "未命名账号",
     "rename": {
       "action": "重命名 {{label}}",
@@ -10878,6 +10955,20 @@
     "empty": "没有找到“{{q}}”相关内容。"
   },
   "codeSessions": {
+    "beta": {
+      "title": "Coding mode 处于测试阶段",
+      "text": "它真的能用，而且每周都在变。有时会卡住。卡住时，问题在我们这边。",
+      "go": "开始",
+      "added": {
+        "worktree": "每个请求都有自己的 worktree，带 Git、文件、屏幕和终端",
+        "anyAi": "任何 AI：Claude Code、Codex、OpenCode，或用密钥的模型",
+        "beside": "在对话旁边编辑文件、打开终端"
+      },
+      "removed": {
+        "paste": "在聊天和编辑器之间复制粘贴代码",
+        "watch": "盯着终端等智能体做完"
+      }
+    },
     "title": "代码",
     "state": {
       "waiting": "等你处理",
@@ -10937,6 +11028,7 @@
       "agent_idle": "现在有空"
     },
     "gitTab": {
+      "openFile": "打开文件",
       "label": "Git",
       "from": "基于 {{base}}",
       "ahead_other": "领先 {{count}}{{more}} 个提交",
@@ -10959,8 +11051,7 @@
         "deleted": "已删除",
         "renamed": "已重命名",
         "untracked": "新文件，尚未加入 git"
-      },
-      "openFile": "打开文件"
+      }
     },
     "files": {
       "label": "文件",
@@ -10975,13 +11066,7 @@
       "truncated_other": "显示前 {{formatted}} 个文件。",
       "hasChanges": "有改动",
       "opening": "正在打开文件…",
-      "state": {
-        "binary": "二进制文件：这里无法显示。",
-        "missing": "这个文件已经不在了。",
-        "ignored": "git 忽略了这个文件，所以这里不显示。",
-        "secret": ".env 文件不会在这里显示：它们通常包含机密信息。",
-        "outside": "这个文件是指向工作树之外的链接。"
-      },
+      "cut": "这里只显示前 {{size}}。",
       "save": "保存",
       "unsaved": "未保存",
       "tooLong": "太长，无法在这里编辑",
@@ -10991,7 +11076,20 @@
       "unsavedAsk": "这个文件有你没保存的改动。",
       "keepEditing": "继续编辑",
       "discard": "放弃",
-      "cut": "这里只显示前 {{size}}。"
+      "state": {
+        "binary": "二进制文件：这里无法显示。",
+        "missing": "这个文件已经不在了。",
+        "ignored": "git 忽略了这个文件，所以这里不显示。",
+        "secret": ".env 文件不会在这里显示：它们通常包含机密信息。",
+        "outside": "这个文件是指向工作树之外的链接。"
+      }
+    },
+    "tabs": {
+      "label": "会话的标签页",
+      "talk": "对话",
+      "terminalN": "终端 {{n}}",
+      "close": "关闭 {{name}}",
+      "add": "新建标签页"
     },
     "screen": {
       "computer": "{{name}} 的电脑",
@@ -11032,27 +11130,6 @@
       "dm": "从你和 {{name}} 的对话中打开",
       "channel": "从 #{{name}} 打开",
       "see": "查看对话"
-    },
-    "tabs": {
-      "label": "会话的标签页",
-      "talk": "对话",
-      "terminalN": "终端 {{n}}",
-      "close": "关闭 {{name}}",
-      "add": "新建标签页"
-    },
-    "beta": {
-      "added": {
-        "worktree": "每个请求都有自己的 worktree，带 Git、文件、屏幕和终端",
-        "anyAi": "任何 AI：Claude Code、Codex、OpenCode，或用密钥的模型",
-        "beside": "在对话旁边编辑文件、打开终端"
-      },
-      "removed": {
-        "paste": "在聊天和编辑器之间复制粘贴代码",
-        "watch": "盯着终端等智能体做完"
-      },
-      "title": "Coding mode 处于测试阶段",
-      "text": "它真的能用，而且每周都在变。有时会卡住。卡住时，问题在我们这边。",
-      "go": "开始"
     }
   },
   "code": {
@@ -12773,13 +12850,45 @@
   },
   "connectors": {
     "title": "连接器",
-    "add": "添加连接器",
-    "mcp": {
-      "title": "MCP",
-      "add": "添加 MCP",
-      "list": "已连接的 MCP 服务器",
-      "none": "通过地址连接的 MCP 服务器会显示在这里。"
+    "store": {
+      "featured": "精选",
+      "suggested": "推荐",
+      "seeAll": "查看全部",
+      "more": "查看更多",
+      "moreName": "查看 {{name}} 的更多信息",
+      "connected": "已连接",
+      "browse": "浏览连接器",
+      "notListed": "商店里没有你要的服务？",
+      "howLabel": "连接方式",
+      "whoAll": "所有智能体",
+      "whoChoose": "之后再选",
+      "asksLabel": "审批",
+      "asksSensitive": "敏感操作会先问你",
+      "afterTitle": "连接之后",
+      "agents_other": "{{count}} 个智能体",
+      "whoEvery_other": "全部 {{count}} 个智能体都在使用。",
+      "whoSome_other": "{{names}}。其他 {{count}} 个智能体没有使用。",
+      "change": "更改",
+      "see": "查看",
+      "account": "账号",
+      "toolsText": "智能体可以用它做什么，以及哪些操作会先问你。",
+      "addressesText": "智能体可以通过这个邮箱联系的人。",
+      "bandTitle_other": "{{count}} 个可连接的服务",
+      "bandText": "{{names}} 等。",
+      "appMissing": "这个服务器的应用还没有创建",
+      "appEvents": "应用缺少事件",
+      "appLine": "这个服务器的应用",
+      "eventsLine": "事件"
     },
+    "howShort": {
+      "oneClick": "一键",
+      "oauthOrKey": "一键或 API 密钥",
+      "key": "API 密钥",
+      "appPassword": "应用专用密码",
+      "addressPassword": "地址和密码",
+      "composio": "通过 Composio"
+    },
+    "add": "添加连接器",
     "personal": {
       "note": "只有你能打开这些连接。你的智能体只在你要求时使用它们。",
       "noteOne": "只有你能打开这个连接，你的智能体只在你要求时使用它。",
@@ -12811,9 +12920,6 @@
       "moveText": "工作区里的所有人都能看到。由管理智能体的人选择哪些智能体使用它，智能体的所有者可以在自己的智能体上关闭它。使用所有已连接应用的智能体会立即用上它。",
       "moved": "{{name}} 现在属于团队。"
     },
-    "addTitle": "添加连接器",
-    "catalogText": "为 {{org}} 连接一次，然后选择每个智能体可以使用什么。",
-    "catalog": "可用的连接器",
     "categories": "分类",
     "category": {
       "all": "全部",
@@ -12834,8 +12940,6 @@
     "connectName": "连接 {{name}}",
     "reconnectName": "重新连接 {{name}}",
     "addAccountName": "添加另一个 {{name}} 账号",
-    "other": "找不到？",
-    "otherText": "通过地址连接任意服务。",
     "search": "搜索连接器",
     "searchPlaceholder": "按名称或功能搜索",
     "empty": "没有与“{{q}}”匹配的连接器",
@@ -12849,8 +12953,6 @@
     "more": "更多服务",
     "tileConnected": "{{name}}，已连接",
     "tileSoon": "{{name}}，即将推出",
-    "otherTitle": "其他服务",
-    "otherDetail": "任何为智能体提供连接的服务，通过它的地址连接（以 https:// 开头）。",
     "otherSteps": {
       "1": "粘贴地址，然后在服务的页面上授权",
       "2": "我们会整理好它每个工具的作用",
@@ -12858,16 +12960,13 @@
     },
     "otherConnect": "通过地址连接",
     "detail": {
-      "close": "关闭详情",
       "can": "智能体将能做什么",
       "afterText": "在你选择之前，没有智能体会使用它。",
       "allText": "连接后，所有智能体都可以使用。之后可以调整。",
       "addAccount": "添加另一个账号",
       "accountsText": "每个账号都有自己的智能体和权限级别。",
       "reconnect": "重新连接",
-      "replaceText": "替换当前的登录，使用者保持不变。",
-      "connected": "已连接",
-      "how": "运作方式"
+      "replaceText": "替换当前的登录，使用者保持不变。"
     },
     "how": {
       "oneClick": "一键完成：在服务的页面上授权",
@@ -13088,6 +13187,10 @@
         "2": "创建和调整广告系列",
         "ask": "开启广告和修改预算始终需要你的审批"
       },
+      "tiktok_ads": {
+        "1": "查看广告系列、广告组和效果",
+        "2": "创建和调整广告系列与广告"
+      },
       "google_docs": {
         "1": "搜索和读取文档",
         "2": "创建和编辑文档"
@@ -13240,7 +13343,6 @@
         "ask": "每次上传始终需要你的审批"
       }
     },
-    "connectedList": "已连接",
     "connected": "已连接",
     "connectedAs": "已连接为 {{account}}",
     "reconnectAdds": "重新连接 {{name}}，让智能体也能{{what}}。",
@@ -13360,6 +13462,7 @@
       "amplitude": "图表、仪表盘和实验。",
       "himetrica": "访客、漏斗、收入和搜索流量。",
       "meta_ads": "Facebook 和 Instagram 广告系列及效果。",
+      "tiktok_ads": "TikTok 广告系列、广告组、广告及效果。",
       "klaviyo": "营销活动、流程、列表和用户档案。",
       "millionsend": "邮件营销活动、列表和联系人。",
       "semrush": "关键词、域名和外链数据。",
@@ -15144,10 +15247,10 @@
       "repoNotAllowed": "这个智能体不能在那个仓库里工作。换一个仓库，或者在智能体的设置里添加它。",
       "notYours": "只有打开这个会话的人或管理员可以关闭它。",
       "notReady": "会话的工作树还没准备好。请稍后再试。",
-      "suggestionGone": "这条建议已经有人回应了。",
-      "suggestionNotYours": "只有提出请求的人能决定是否打开会话。",
       "fileChanged": "这个文件在你打开之后在电脑上被改动了。",
-      "fileLocked": "这个文件不能在这里编辑。"
+      "fileLocked": "这个文件不能在这里编辑。",
+      "suggestionGone": "这条建议已经有人回应了。",
+      "suggestionNotYours": "只有提出请求的人能决定是否打开会话。"
     },
     "webhook": {
       "githubNoAccess": "这个工作区的 GitHub 无法在 {{repo}} 中创建 Webhook。请按下面的步骤手动创建。",
@@ -15476,6 +15579,7 @@
     "account": {
       "notRestorable": "这个账号已无法恢复。",
       "notOwner": "只有连接此账号或套餐的人可以执行此操作。",
+      "permissionForbidden": "只有账号的所有者、管理员或可以管理它的人才能更改。",
       "orderForbidden": "只有连接此账号的人或管理员可以调整它在顺序中的位置。"
     },
     "channel": {
@@ -19776,6 +19880,7 @@
     "openAgain": "重新打开",
     "ended": "shell 已结束",
     "dropped": "与终端的连接已断开",
+    "moved": "这个终端已在另一个窗口打开",
     "screening": "此处已关闭终端",
     "forbidden": "只有能使用这台电脑的人才能打开终端",
     "offline": "电脑处于离线状态",
@@ -19785,8 +19890,7 @@
     "busy": "这台电脑打开的终端已达上限。请关闭一个，再重新打开。",
     "paused": "电脑已暂停",
     "failed": "无法打开终端",
-    "agentFolder": "终端已在智能体的文件夹中打开。更新电脑后，才能在会话的文件夹中打开。",
-    "moved": "这个终端已在另一个窗口打开"
+    "agentFolder": "终端已在智能体的文件夹中打开。更新电脑后，才能在会话的文件夹中打开。"
   },
   "agora": {
     "label": "现在",

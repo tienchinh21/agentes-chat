@@ -2341,7 +2341,8 @@ export const ptBR = {
     searchWorkspace: "Buscar no workspace",
     summary_one: "{{people}} membro · {{agents}} agentes",
     summary_other: "{{people}} membros · {{agents}} agentes",
-    waiting: "Esperando você",
+    /** The sidebar's one entry for everything that involves me: what waits on me, what is new, what I decided. */
+    waiting: "Caixa de entrada",
     approvals: "Aprovações",
     proposals: "Propostas de melhoria",
     issues: "Tarefas",
@@ -3182,7 +3183,7 @@ export const ptBR = {
       team: "Monta e muda o time inteiro por cards que uma pessoa aplica: agentes, pessoas e ajustes do workspace",
       routines: "Roda e apaga rotinas de qualquer agente que você pode gerenciar",
       asYou: "Na sua conversa, lê o Drive, a wiki e as tarefas que você pode ver",
-      mentions: "Responde a um @ em qualquer canal sem ser membro",
+      mentions: "Responde a um @ em qualquer canal sem ser membro, e a mensagens em que é a melhor escolha",
     },
     card: {
       settings: "{{name}} · Configurações",
@@ -5571,7 +5572,7 @@ export const ptBR = {
     firstRun: "Continue de onde parou · {{done}} de {{total}}",
   },
   notifications: {
-    title: "Notificações",
+    title: "Caixa de entrada",
     /** "Tirar de volta" on `plan_lent`: the person's plan leaves the agent someone else gave it to, or all of them. */
     planLent: {
       takeBack: "Tirar de volta",
@@ -5609,7 +5610,7 @@ export const ptBR = {
         computer: "Trocar computador",
       },
     },
-    docTitleUnread: "({{count}}) Notificações",
+    docTitleUnread: "({{count}}) Caixa de entrada",
     summaryWaiting_one: "{{count}} coisa esperando você",
     summaryWaiting_other: "{{count}} coisas esperando você",
     summaryUnread_one: "{{count}} não lida",
@@ -5626,6 +5627,8 @@ export const ptBR = {
       waiting: "Esperando você",
       unread: "Não lidas",
       reactions: "Reações",
+      /** The requests already decided: approved, refused, expired. */
+      requests: "Pedidos decididos",
       done: "Concluídas",
     },
     keys: {
@@ -5868,6 +5871,9 @@ export const ptBR = {
     noneUnread: "Tudo lido.",
     noneHere: "Nada aqui por enquanto.",
     noneDone: "Nada concluído nos últimos 30 dias.",
+    noneRequests: "Nenhum pedido decidido ainda.",
+    /** A proposal's row in the inbox, after the agent's name. */
+    proposes: "propõe uma melhoria",
     more: "Mostrar mais",
   },
   approvals: {
@@ -6513,6 +6519,7 @@ export const ptBR = {
       overview: "Visão geral",
       instructions: "Instruções",
       access: "Ferramentas e acesso",
+      skills: "Skills",
       memory: "Memória",
       files: "Arquivos",
       usage: "Uso",
@@ -11136,7 +11143,83 @@ export const ptBR = {
       text: "Os agentes continuam trabalhando sem ele.",
     },
   },
+  /** "Contas de IA" (IA e uso's first tab), an account's permissions, the order of use, and the one "Quem pensa" picker. */
+  aiHub: {
+    tab: "Contas de IA",
+    usageTab: "Uso",
+    accounts: "Contas",
+    accountsHint: "Todos os planos e chaves de API com que os agentes podem pensar, de quem quer que tenha conectado.",
+    apiKey: "Chave de API",
+    of: "de {{name}}",
+    moreSpeed: "Velocidade e janela de contexto",
+    whoThinks: "Quem pensa",
+    bulk: {
+      sub: "Escolha a IA e depois os agentes que passam a usar.",
+    },
+    choice: {
+      workspace: "A do workspace",
+      none: "Escolha uma conta",
+      search: "Buscar por nome, IA, plano ou dono",
+      noMatch: "Nenhuma conta encontrada.",
+      noModel: "Nenhum modelo encontrado.",
+      groups: {
+        yours: "Suas",
+        others: "Do time",
+        keys: "Do workspace",
+      },
+    },
+    order: {
+      title: "Ordem de uso",
+      tip: "Qual conta os agentes usam primeiro",
+      sub: "No limite, os agentes passam para a próxima conta.",
+      group: "{{maker}} · {{computer}}",
+      signedOut: "Saiu da conta · pulada",
+      skipped: "Pulada",
+      fallback: "Continuar com a chave de API quando todos os planos estiverem no limite",
+      fallbackHint:
+        "Desligado: os agentes esperam o primeiro plano renovar. Ligado: eles seguem com a chave de API do workspace, paga por uso. Uma missão nunca segue.",
+    },
+    detail: {
+      limits: "Limites",
+      noLimits: "Os limites ainda não foram lidos.",
+      permissions: "Permissões",
+      saved: "Permissões salvas.",
+      more: "Mais sobre {{name}}",
+      manage: "Gerenciar",
+      manageLine: "Renomear, entrar de novo, excluir",
+      manageHint: "Quem pode renomear esta conta, entrar de novo, excluir e mudar estas permissões.",
+      use: "Usar em agentes",
+      useLine: "Escolher em Quem pensa",
+      useHint: "De quem os agentes podem pensar com esta conta.",
+      reply: "Atender todos",
+      replyLine: "Com quem os agentes falam",
+      replyHint: "Quem um agente nesta conta atende além do próprio dono.",
+      claudeTerms: "Nos termos do Claude, um plano pessoal é de uma pessoa. Dividir é uma área cinzenta.",
+      pickRoles: "Quem tem estes cargos.",
+      pickPeople: "Além do dono da conta.",
+      searchRoles: "Buscar cargos",
+      searchPeople: "Buscar pessoas",
+      nobody: "Ninguém para escolher.",
+    },
+    modes: {
+      owner: "Só você",
+      ownerOf: "Só {{name}}",
+      admins: "Você e administradores",
+      adminsOf: "{{name}} e administradores",
+      roles: "Cargos…",
+      people: "Pessoas…",
+      everyone: "Todos",
+      replyOwner: "Só o dono do agente",
+    },
+  },
   aiAccounts: {
+    /** Why an account can't think for these agents (`AccountUseReason`): the picker shows it dimmed, with this. */
+    useReason: {
+      signed_out: "Saiu da conta",
+      owner_left: "{{owner}} saiu do workspace",
+      owner_only: "Só {{owner}} usa",
+      not_allowed: "Não liberada para os seus agentes",
+    },
     /** An account of the viewer's that says no email and has no name of theirs yet (Claude's token for all agents). */
     unnamed: "Conta sem nome",
     /** The pencil after an account's title, and the field it opens in the row. */
@@ -13765,14 +13848,51 @@ export const ptBR = {
     added: "{{repo}} entra na lista ao salvar.",
   },
   connectors: {
+    /** The connectors as a store: featured services, a line per service with one button, and each one's page. */
+    store: {
+      featured: "Destaques",
+      suggested: "Sugerido",
+      seeAll: "Ver todos",
+      more: "Ver mais",
+      moreName: "Ver mais sobre {{name}}",
+      connected: "Conectado",
+      browse: "Ver conectores",
+      notListed: "Tem um serviço que não está na loja?",
+      howLabel: "Como conecta",
+      whoAll: "Todos os agentes",
+      whoChoose: "Você escolhe depois",
+      asksLabel: "Aprovação",
+      asksSensitive: "O que é sensível pede você",
+      afterTitle: "Depois de conectar",
+      agents_one: "{{count}} agente",
+      agents_other: "{{count}} agentes",
+      whoEvery_one: "O seu agente usa.",
+      whoEvery_other: "Todos os {{count}} agentes usam.",
+      whoSome_one: "{{names}}. O outro agente não usa.",
+      whoSome_other: "{{names}}. Os outros {{count}} agentes não usam.",
+      change: "Alterar",
+      see: "Ver",
+      account: "Conta",
+      toolsText: "O que os agentes podem fazer com ela, e o que pede você.",
+      addressesText: "Com quem os agentes podem falar por esta caixa.",
+      bandTitle_one: "{{count}} serviço para conectar",
+      bandTitle_other: "{{count}} serviços para conectar",
+      bandText: "{{names}} e outros.",
+      appMissing: "Falta criar o app do servidor",
+      appEvents: "Faltam eventos no app",
+      appLine: "App deste servidor",
+      eventsLine: "Eventos",
+    },
+    howShort: {
+      oneClick: "Um clique",
+      oauthOrKey: "Um clique ou chave de API",
+      key: "Chave de API",
+      appPassword: "Senha de app",
+      addressPassword: "Endereço e senha",
+      composio: "Pela Composio",
+    },
     title: "Conectores",
     add: "Adicionar conector",
-    mcp: {
-      title: "MCPs",
-      add: "Adicionar MCP",
-      list: "Servidores MCP conectados",
-      none: "Os servidores MCP que você conectar pelo endereço aparecem aqui.",
-    },
     /** Connections split as the Vault splits its items: the team's and each person's (ADR 0099 addendum). */
     personal: {
       note: "Só você abre estas conexões. Seus agentes só usam quando você pede.",
@@ -13810,9 +13930,6 @@ export const ptBR = {
         "Todos do workspace passam a ver. Quem gerencia agentes escolhe quais agentes usam, e o dono de um agente pode desligar no seu. Um agente que usa todos os apps conectados passa a usar na hora.",
       moved: "{{name}} agora é da equipe.",
     },
-    addTitle: "Adicionar conector",
-    catalogText: "Conecte uma vez para a {{org}}. Depois escolha o que cada agente pode usar.",
-    catalog: "Conectores disponíveis",
     categories: "Categorias",
     category: {
       all: "Todos",
@@ -13833,8 +13950,6 @@ export const ptBR = {
     connectName: "Conectar {{name}}",
     reconnectName: "Reconectar {{name}}",
     addAccountName: "Adicionar outra conta do {{name}}",
-    other: "Não achou?",
-    otherText: "Conecte qualquer serviço pelo endereço dele.",
     search: "Buscar conector",
     searchPlaceholder: "Buscar por nome ou o que faz",
     empty: "Nenhum conector com “{{q}}”",
@@ -13848,8 +13963,6 @@ export const ptBR = {
     more: "Mais serviços",
     tileConnected: "{{name}}, conectado",
     tileSoon: "{{name}}, em breve",
-    otherTitle: "Outro serviço",
-    otherDetail: "Qualquer serviço que ofereça conexão para agentes, pelo endereço dele (começa com https://).",
     otherSteps: {
       "1": "Você cola o endereço e autoriza na página do serviço",
       "2": "A gente classifica o que cada ferramenta faz",
@@ -13857,7 +13970,6 @@ export const ptBR = {
     },
     otherConnect: "Conectar pelo endereço",
     detail: {
-      close: "Fechar detalhe",
       can: "O que os agentes poderão fazer",
       afterText: "Nenhum agente usa até você escolher.",
       allText: "Ao conectar, todos os agentes podem usar. Dá para ajustar depois.",
@@ -13865,8 +13977,6 @@ export const ptBR = {
       accountsText: "Cada conta tem quem usa e níveis próprios.",
       reconnect: "Reconectar",
       replaceText: "Substitui o login atual. Quem usa continua igual.",
-      connected: "Já conectado",
-      how: "Como funciona",
     },
     how: {
       oneClick: "Um clique: você autoriza na página do serviço",
@@ -13969,6 +14079,10 @@ export const ptBR = {
         "2": "Criar e ajustar campanhas",
         ask: "Ativar anúncios e mudar orçamentos sempre pedem sua aprovação",
       },
+      tiktok_ads: {
+        "1": "Ver campanhas, grupos de anúncios e resultados",
+        "2": "Criar e ajustar campanhas e anúncios",
+      },
       google_docs: { "1": "Buscar e ler documentos", "2": "Criar e editar documentos" },
       google_sheets: { "1": "Ler planilhas", "2": "Adicionar linhas e atualizar células" },
       google_calendar: {
@@ -14056,7 +14170,6 @@ export const ptBR = {
         ask: "Cada envio sempre pede sua aprovação",
       },
     },
-    connectedList: "Conectados",
     connected: "Conectado",
     connectedAs: "Conectado como {{account}}",
     reconnectAdds: "Reconecte o {{name}} para os agentes também poderem {{what}}.",
@@ -14184,6 +14297,7 @@ export const ptBR = {
       amplitude: "Gráficos, dashboards e experimentos.",
       himetrica: "Visitantes, funis, receita e busca orgânica.",
       meta_ads: "Campanhas e resultados de anúncios no Facebook e Instagram.",
+      tiktok_ads: "Campanhas, grupos de anúncios e anúncios do TikTok, com os resultados.",
       klaviyo: "Campanhas, fluxos, listas e perfis.",
       millionsend: "Campanhas de email, listas e contatos.",
       semrush: "Dados de palavras-chave, domínios e backlinks.",
@@ -16324,6 +16438,8 @@ export const ptBR = {
     account: {
       notRestorable: "Esta conta não pode mais ser restaurada.",
       notOwner: "Só quem conectou esta conta ou plano pode fazer isso.",
+      /** `account.permission_forbidden`: an AI account's Gerenciar, Usar em agentes or Atender todos. */
+      permissionForbidden: "Só o dono da conta, um administrador ou quem pode gerenciá-la muda isto.",
       /** `account.order_forbidden`: the order of use of a provider's accounts (ADR 0041 §6). */
       orderForbidden: "Só quem conectou esta conta ou um admin pode mudar o lugar dela na ordem.",
     },

@@ -875,6 +875,14 @@ export const NETWORK_ENV = [
 const CLOUD_ENV = ["CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX", "CLAUDE_CODE_USE_FOUNDRY"] as const;
 
 /**
+ * Claude Code's `cleanupPeriodDays` in the `--settings` of a sign-in the runner keeps (an account folder, or the one
+ * sign-in a system-mode computer lends to all its agents): transcripts of sessions idle this long go at the CLI's next
+ * start (its default is 30). Every agent on that sign-in writes there, so 30 days of 15-minute routines piled up. A
+ * session idle longer than this starts afresh. The computer owner's own sign-in keeps its own setting.
+ */
+export const ACCOUNT_TRANSCRIPT_DAYS = 14;
+
+/**
  * The `env` of a Claude Code turn's or task's own `--settings`, which outranks the project's settings (the agent
  * can write those, and a cloned repo can bring them): the endpoint (the plan's, else Anthropic's), no other
  * cloud, and the runner's own proxies and certificates (or none), so the sign-in or key goes nowhere else;

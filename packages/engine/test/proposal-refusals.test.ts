@@ -16,6 +16,7 @@ import {
   proposeChange,
   proposeFromItem,
   receiptLine,
+  setAgentEditors,
   updateAgent,
 } from "../src";
 import { addMember, type Fixture, setup } from "./fixtures";
@@ -266,6 +267,8 @@ describe("what waits on a person", () => {
     f = await setup();
     const sam = await addMember(f.db, f.org.id, "admin", "sam");
     const ada = await teammate("ada");
+    // Its instructions wait on who looks after it (ADR 0085, addendum of 2026-11-24): the owner and a named editor.
+    await setAgentEditors(f.db, f.owner.id, f.org.id, ada.id, { userIds: [sam.id], roleIds: [] });
     const [row] = (await propose([ada.id], "Uma regra.")).proposals;
     const heard: { type: string }[] = [];
     f.pubsub.subscribe(userTopic(f.org.id, sam.id), (e) => heard.push(e as { type: string }));

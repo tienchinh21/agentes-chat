@@ -567,6 +567,13 @@ export function barEntries(
     if (seen.has(c.agentId)) continue;
     // Its run failed: its row in the conversation says so.
     if (runs.some((r) => r.runId === c.runId && r.status === "failed")) continue;
+    // At work on something else while its question is out (a message that came meanwhile started another turn, or
+    // woke the asking one): the bar says that work, and the question takes the line back once it is done.
+    if (
+      c.status === "asking" &&
+      runs.some((r) => r.agentId === c.agentId && (r.runId !== c.runId || c.woke) && BAR_STATUSES.has(r.status))
+    )
+      continue;
     seen.add(c.agentId);
     out.push({
       id: c.agentId,

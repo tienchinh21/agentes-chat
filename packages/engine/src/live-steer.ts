@@ -6,6 +6,7 @@ import { confidentialThread, isConfidential, stubOf, thinksAsThread, unsealed } 
 import { attachedLine, taskNotice } from "./context";
 import { publishChannelEvent } from "./events";
 import { ACTIVE_RUN_STATUSES, releaseInbox, stoppedToSend } from "./run-inbox";
+import type { RunRow } from "./run-state";
 import type { AgentRun } from "./runs";
 
 const { agentRuns, messages, users, agents } = schema;
@@ -55,7 +56,7 @@ const LIVE_STEER_RETRIES = 30;
  */
 export async function deliverLive(
   deps: { db: Database; pubsub: PubSub; waitMs?: number },
-  run: AgentRun,
+  run: Pick<RunRow, "id" | "status">,
   input: { messageId: string; urgent: boolean },
 ): Promise<boolean> {
   if (run.status !== "running") return false;

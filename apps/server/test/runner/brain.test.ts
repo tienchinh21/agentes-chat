@@ -30,7 +30,7 @@ import {
   STEER_PROTOCOL,
   type WireBrainEvent,
 } from "@agenteschat/adapters/machine-protocol";
-import { accountSettingsEnv } from "../../runner/accounts";
+import { ACCOUNT_TRANSCRIPT_DAYS, accountSettingsEnv } from "../../runner/accounts";
 import {
   BRAIN_BUILTIN_TOOLS,
   BrainManager,
@@ -1329,6 +1329,8 @@ test.if(posix)(
       permissions: { allow: string[]; ask: string[]; deny: string[] };
     };
     // Inline code reaches the prompt tool, where the server decides it (a mission's card, elsewhere ordinary work).
+    // The computer's own sign-in keeps its owner's transcript retention.
+    expect((wsettings as { cleanupPeriodDays?: number }).cleanupPeriodDays).toBeUndefined();
     expect(wsettings.permissions.deny).not.toContain("Bash(python3 -c*)");
     expect(wsettings.permissions.ask).toContain("Bash(python3 -c*)");
     expect(wsettings.permissions.deny).toContain("Bash(gh auth token*)");
@@ -1996,6 +1998,7 @@ test.if(posix)(
         oauthFd: string | null;
         authToken: string | null;
         settingsEnv: Record<string, string> | null;
+        cleanupDays: number | null;
       };
       const runs = () => spawns() as unknown as Run[];
       const grant = { grant: { kind: "token" as const, token: TOKEN } };
@@ -2012,6 +2015,7 @@ test.if(posix)(
       expect(JSON.stringify(first?.settingsEnv)).not.toContain("oat01");
       expect(first?.settingsEnv?.ANTHROPIC_BASE_URL).toBe("https://api.anthropic.com");
       expect(first?.settingsEnv?.CLAUDE_CODE_USE_BEDROCK).toBe("");
+      expect(first?.cleanupDays).toBe(ACCOUNT_TRANSCRIPT_DAYS);
       // What the CLI printed with it comes back redacted.
       const sent = JSON.stringify([r.final, ...r.events]);
       expect(sent).not.toContain(TOKEN);
@@ -2725,6 +2729,8 @@ test.if(posix)("delegated: argv, files and environment are root's, with no agent
   expect(statSync(dir).mode & 0o777).toBe(0o750);
   const settings = JSON.parse(readFileSync(typed(spawn, "--settings") as string, "utf8"));
   expect(settings.disableAllHooks).toBe(true);
+  // The sign-in every agent on the computer shares keeps two weeks of their transcripts.
+  expect(settings.cleanupPeriodDays).toBe(ACCOUNT_TRANSCRIPT_DAYS);
   expect(settings.permissions).toBeUndefined();
   expect(settings.env).toEqual(accountSettingsEnv(undefined, "opus"));
   for (const flag of ["--settings", "--mcp-config", "--append-system-prompt-file"]) {

@@ -12,6 +12,7 @@ import type {
 import { and, count, eq, inArray, isNull, ne, queryTrace, schema, sql } from "@agenteschat/db";
 import { ACCOUNT_CONTACT_JOB, saveAccountContact } from "./account-contacts";
 import { AGENT_MEDIA_JOB, enqueueAgentMedia, maybeSendAgentMedia } from "./agent-media";
+import { ACCOUNT_OPENED_JOB } from "./ai-accounts/serves";
 import { aiConnectIntent, type ConnectIntent } from "./ai-intent";
 import { orgHasAi } from "./ai-status";
 import { type ArtifactDeps, announceFileConversation } from "./artifacts";
@@ -52,6 +53,7 @@ import { isAgentOnlyDm } from "./dms";
 import {
   type EmailArt,
   PLAN_WAITING_JOB,
+  queueAccountOpenedEmail,
   queuePlanLent,
   queuePlanOpenedEmail,
   queuePlanWaiting,
@@ -1097,6 +1099,11 @@ export function createJobHandlers(deps: JobDeps): JobHandlers {
     },
     [PLAN_WAITING_JOB]: async (job) => {
       if (deps.emailArt) await sendPlanWaitingEmail(deps.db, deps.emailArt.home, orgOf(job), job.payload.step);
+    },
+    // Someone else let more people use a person's AI account or be answered on it (`setAccountPermissions`).
+    [ACCOUNT_OPENED_JOB]: async (job) => {
+      if (!deps.emailArt) return;
+      await queueAccountOpenedEmail(deps.db, deps.emailArt.home, orgOf(job), job.id, job.payload);
     },
     // Someone else let more people talk to an agent on a person's plan: that person's email (`planOpened`).
     [PLAN_OPENED_JOB]: async (job) => {

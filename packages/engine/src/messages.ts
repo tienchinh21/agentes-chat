@@ -22,7 +22,7 @@ import { CHANNEL_REF } from "@agenteschat/ui/channel-refs";
 import { plainLine } from "@agenteschat/ui/markdown";
 import { type AgentActionView, actionsFor } from "./agent-actions";
 import { currentHandles } from "./agents";
-import { withDeletedArtifacts } from "./artifacts";
+import { fileFacts, withDeletedArtifacts } from "./artifacts";
 import { audienceSql, notifyBlocked } from "./audience";
 import { postRefusal, requireChannelAccess } from "./channels";
 import { admitCodeMembers, codeAgentSql } from "./code-sessions";
@@ -1519,6 +1519,19 @@ export async function postPersonMessage(
       ...(referenced.length > 0 ? { referenced } : {}),
       strategy: channel.kind === "dm" && message.mentionedAgentIds.length === 0 ? "dm" : "mention",
     });
+  } else if (channel.kind === "code") {
+    // A code session's conversation is never the router's (ADR 0215), so no decision follows this one: with nobody to
+    // answer (its agent doesn't answer this person, its worktree isn't ready yet, the message is for a person), the
+    // receipt is settled here and no app keeps "Picking who answers".
+    await publishChannelEvent(deps.pubsub, {
+      type: "message.routed",
+      channelId,
+      messageId: message.id,
+      seenBy: [],
+      pickedBy: [],
+      runs: [],
+      strategy: "none",
+    });
   }
   // The runs answer where the message is, or under it when its channel replies in threads (ADR 0214).
   for (const run of runs) {
@@ -1863,7 +1876,17 @@ export async function attachmentRefsFor(db: Database, userId: string, orgId: str
   const a = schema.artifacts;
   const v = schema.artifactVersions;
   const rows = await db
-    .select({ id: a.id, title: a.title, version: a.currentVersion, width: v.width, height: v.height })
+    .select({
+      id: a.id,
+      kind: a.kind,
+      title: a.title,
+      version: a.currentVersion,
+      fileName: v.fileName,
+      contentType: v.contentType,
+      size: v.size,
+      width: v.width,
+      height: v.height,
+    })
     .from(a)
     .leftJoin(v, and(eq(v.artifactId, a.id), eq(v.version, a.currentVersion)))
     .where(
@@ -1880,8 +1903,13 @@ export async function attachmentRefsFor(db: Database, userId: string, orgId: str
   const byId = new Map(rows.map((r) => [r.id, r]));
   return wanted.map((id) => {
     const r = byId.get(id) as (typeof rows)[number];
-    // A picture's size: its card has its box before it loads.
-    return { id: r.id, version: r.version, title: r.title, ...pictureSize(r) };
+    const { contentType, size } = r;
+    // An uploaded file's card draws from its facts; anything else's, a picture's size at most.
+    const facts =
+      r.kind === "file" && contentType !== null && size !== null
+        ? fileFacts({ fileName: r.fileName, contentType, size, width: r.width, height: r.height })
+        : pictureSize(r);
+    return { id: r.id, version: r.version, title: r.title, ...facts };
   });
 }
 

@@ -55,6 +55,7 @@ import {
 import {
   ACCOUNT_MISSING_MESSAGE,
   ACCOUNT_SIGNED_OUT,
+  ACCOUNT_TRANSCRIPT_DAYS,
   type AccountGrant,
   accountEnv,
   accountSettingsEnv,
@@ -3304,7 +3305,7 @@ export class BrainManager {
     const settingsFile = path.join(dir, "settings.json");
     const settings = delegated
       ? // The turn's rules are the worker's to apply: none of the CLI's own tools is left for them.
-        { disableAllHooks: true, env: accountSettingsEnv(undefined, model) }
+        { disableAllHooks: true, cleanupPeriodDays: ACCOUNT_TRANSCRIPT_DAYS, env: accountSettingsEnv(undefined, model) }
       : {
           ...claudePermissionSettings(
             mode,
@@ -3321,7 +3322,7 @@ export class BrainManager {
           ...(codeTurn ? { enableWorkflows: true } : {}),
           // With the owner's own settings loaded (`personalMcp`), theirs decide the computer's own sign-in.
           ...(ctx.accountHome
-            ? { env: accountSettingsEnv(plan, model) }
+            ? { cleanupPeriodDays: ACCOUNT_TRANSCRIPT_DAYS, env: accountSettingsEnv(plan, model) }
             : req.personalMcp === true && mode !== "chat"
               ? {}
               : { env: accountSettingsEnv(undefined, model, process.env, true) }),

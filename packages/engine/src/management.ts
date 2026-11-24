@@ -362,8 +362,6 @@ export async function agentDetail(db: Database, actorId: string, orgId: string, 
   const since = monthStartUtc(now);
   const [usage] = await db
     .select({
-      // What its budget paid: its own calls and pictures, as `agentBudgetsThisMonth` counts them.
-      cost: sql<string>`coalesce(sum(${usageRecords.costNanoUsd}) filter (where ${usageRecords.kind} in ('agent', 'image')), 0)`,
       tokens: sql<string>`coalesce(sum(${usageRecords.inputTokens} + ${usageRecords.outputTokens} + ${usageRecords.cacheReadTokens} + ${usageRecords.cacheWriteTokens}), 0)`,
     })
     .from(usageRecords)
@@ -384,9 +382,10 @@ export async function agentDetail(db: Database, actorId: string, orgId: string, 
     .from(approvals)
     .where(and(eq(approvals.agentId, agentId), eq(approvals.status, "pending")));
   const channelsOf = await listAgentChannels(db, actorId, orgId, agentId);
+  // What its budget paid (its own calls and pictures): the gateway's counter, as `agentBudgetsThisMonth` reads it.
   const budget = await agentBudgetState(db, orgId, agentId, now);
   const budgetNanoUsd = await effectiveAgentBudget(db, agent);
-  const spentNanoUsd = Number(usage?.cost ?? 0);
+  const spentNanoUsd = budget.spentNanoUsd;
   return {
     agent,
     month: {

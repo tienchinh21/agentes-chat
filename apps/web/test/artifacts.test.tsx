@@ -184,6 +184,47 @@ describe("a tile's actions", () => {
 });
 
 describe("a picture's tile", () => {
+  test("a card with its file's facts shows the picture's small copy, kept by the browser and loaded as it nears the screen", async () => {
+    const state = seedState();
+    const api = createFakeApi(state);
+    const shot = await api.artifacts.upload(ORG_ID, new File(["png"], "tela.png", { type: "image/png" }), {
+      channelId: ENG_ID,
+    });
+    state.messages.push({
+      id: "m-pic",
+      channelId: ENG_ID,
+      threadId: null,
+      author: { type: "agent", id: ATLAS_ID },
+      body: "A tela.",
+      mentionedAgentIds: [],
+      agentRunId: "r-pic",
+      meta: {
+        artifacts: [
+          {
+            id: shot.id,
+            version: 1,
+            title: "tela.png",
+            name: "tela.png",
+            contentType: "image/png",
+            size: 3,
+            width: 800,
+            height: 600,
+          },
+        ],
+      },
+      createdAt: new Date().toISOString(),
+    });
+    await renderApp(`/org/${ORG_ID}/c/${ENG_ID}`, { api });
+    await settle(8);
+    const tile = card("tela.png");
+    const img = tile.querySelector("img") as HTMLImageElement;
+    expect(img.getAttribute("src")).toBe(`/api/app/organizations/${ORG_ID}/artifacts/${shot.id}/thumb?version=1&w=480`);
+    expect(img.getAttribute("srcset")).toContain("w=960 960w");
+    expect(img.getAttribute("sizes")).toBe("400px");
+    expect(img.getAttribute("loading")).toBe("lazy");
+    expect(tile.getAttribute("data-ratio")).toBe("true");
+  });
+
   test("More has Copiar imagem: the picture goes on the clipboard as a PNG, and a toast says so", async () => {
     const written: Record<string, Blob | Promise<Blob>>[] = [];
     const g = globalThis as { ClipboardItem?: unknown };

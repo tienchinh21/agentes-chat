@@ -134,6 +134,8 @@ export async function createTestServer(
      * addendum 2026-11-22), and most tests are about what comes after.
      */
     unconfirmedSignUps?: boolean;
+    /** Whether the process counts as overloaded (`watchLoad`); absent = never. */
+    overloaded?: () => string | null;
   } = {},
 ) {
   const { db, close } = await createTestDatabase();
@@ -251,6 +253,7 @@ export async function createTestServer(
     version: "test",
     modules: [],
     pingDatabase: async () => {},
+    overloaded: options.overloaded,
     appsFetchDocument:
       options.appsFetchDocument ??
       (async () => {
@@ -279,6 +282,7 @@ export async function createTestServer(
     browserLive: engine.browserLive,
     streams: createStreamSockets({ db, auth, config, broker: engine.streams }),
     live,
+    overloaded: options.overloaded,
   });
   return {
     db,

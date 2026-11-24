@@ -91,7 +91,7 @@
     "chats": "チャット",
     "threads": "スレッド",
     "agents": "エージェント",
-    "activity": "アクティビティ",
+    "activity": "受信トレイ",
     "search": "検索",
     "withCount": "{{label}}、{{count}}"
   },
@@ -845,7 +845,7 @@
     }
   },
   "activity": {
-    "title": "アクティビティ",
+    "title": "受信トレイ",
     "chooseModel": "別のモデルを選ぶ",
     "filter": {
       "all": "すべて",
@@ -1261,6 +1261,7 @@
     "criteriaOf": "{{done}}/{{total}}",
     "linkMessage": "#{{channel}}のメッセージ",
     "linkMessagePlain": "元のメッセージ",
+    "removeFileText": "ファイルはDriveに残ります。",
     "subIssues": "サブタスク",
     "talk": "チャット",
     "finish": "完了にする",
@@ -3046,6 +3047,59 @@
       "editHint": "この部分を編集します",
       "notHere": "この部分はコンピューターで編集します"
     }
+  },
+  "aiHub": {
+    "accounts": "アカウント",
+    "accountsHint": "このワークスペースのすべてのプランとAPIキー(接続した人を問わず)。アカウントをタップすると、上限と使える人を確認できます。",
+    "order": "使用順",
+    "orderSub": "上限に達すると、エージェントは次のアカウントで続けます。",
+    "skipped": "スキップ",
+    "orderGroup": "{{plan}} · {{computer}}",
+    "noOrder": "1台のコンピューターに同じAIのアカウントが2つあると、その順番がここに表示されます。",
+    "keyFallback": "すべてのプランが上限に達したらAPIキーで続ける",
+    "keyFallbackHint": "最後のアカウントの後は、ワークスペースのAPIキー(従量課金)で続けます。ミッションはキーに切り替わりません。",
+    "keyFallbackLocked": "変更できるのは管理者だけです。",
+    "limits": "上限",
+    "permissions": "権限",
+    "manage": "管理",
+    "manageSub": "名前の変更、再ログイン、削除",
+    "manageHint": "このアカウントの名前を変更し、再ログインし、削除できる人。変更できるのは接続した人だけです。",
+    "use": "エージェントで使う",
+    "useSub": "考えるAIで選ぶ",
+    "useHint": "このアカウントで考えられるのは誰のエージェントか、誰のLodiか。管理する人が変更できます。",
+    "reply": "全員に対応",
+    "replySub": "エージェントが話す相手",
+    "replyHint": "このアカウントのエージェントが、自分のオーナー以外に誰に応答するか。Claudeの規約では、プランは料金を払う本人が使うことになっています。全員に開く前に確認してください。",
+    "audience": {
+      "owner": "あなただけ",
+      "ownerOf": "{{name}}だけ",
+      "admins": "あなたと管理者",
+      "adminsOf": "{{name}}と管理者",
+      "roles": "役割…",
+      "people": "メンバー…",
+      "everyone": "全員",
+      "agentOwner": "エージェントのオーナーだけ",
+      "rolesCount_other": "{{count}}個の役割",
+      "peopleCount_other": "{{count}}人"
+    },
+    "pickRoles": "役割",
+    "pickPeople": "メンバー",
+    "pickNone": "少なくとも1つ選んでください。",
+    "choice": {
+      "account": "アカウント",
+      "model": "モデル",
+      "effort": "思考量",
+      "yours": "あなたの",
+      "others": "チームの",
+      "keys": "APIキー",
+      "workspace": "ワークスペースのもの",
+      "workspaceSub": "ワークスペースのAPIキー",
+      "key": "APIキー",
+      "keyDefault": "ワークスペースの既定",
+      "api": "API"
+    },
+    "missionAi": "AI",
+    "missionLocked": "作業する人は開始前に選びます。モデルはいつでも変更できます。"
   },
   "surface": {
     "on": "オン",

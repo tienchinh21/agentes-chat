@@ -91,7 +91,7 @@
     "chats": "聊天",
     "threads": "话题",
     "agents": "智能体",
-    "activity": "动态",
+    "activity": "收件箱",
     "search": "搜索",
     "withCount": "{{label}}，{{count}}"
   },
@@ -845,7 +845,7 @@
     }
   },
   "activity": {
-    "title": "动态",
+    "title": "收件箱",
     "chooseModel": "选择其他模型",
     "filter": {
       "all": "全部",
@@ -1261,6 +1261,7 @@
     "criteriaOf": "{{done}}/{{total}}",
     "linkMessage": "#{{channel}} 中的消息",
     "linkMessagePlain": "原始消息",
+    "removeFileText": "文件仍保留在 Drive 中。",
     "subIssues": "子任务",
     "talk": "聊天",
     "finish": "标为完成",
@@ -3046,6 +3047,59 @@
       "editHint": "编辑这一部分",
       "notHere": "这一部分需要在电脑上编辑"
     }
+  },
+  "aiHub": {
+    "accounts": "账号",
+    "accountsHint": "这个工作区的所有套餐和 API 密钥,不论是谁连接的。点按一个账号,查看它的限额和谁能使用。",
+    "order": "使用顺序",
+    "orderSub": "达到限额时,智能体会换用下一个账号继续。",
+    "skipped": "已跳过",
+    "orderGroup": "{{plan}} · {{computer}}",
+    "noOrder": "一台电脑上有同一 AI 的两个账号时,它们的顺序会显示在这里。",
+    "keyFallback": "所有套餐都达到限额时,改用 API 密钥继续",
+    "keyFallbackHint": "最后一个账号之后,智能体改用工作区的 API 密钥继续,按用量计费。任务永远不会换到密钥。",
+    "keyFallbackLocked": "只有管理员可以更改。",
+    "limits": "限额",
+    "permissions": "权限",
+    "manage": "管理",
+    "manageSub": "重命名、重新登录、移除",
+    "manageHint": "谁可以重命名这个账号、重新登录和移除它。只有连接它的人可以更改。",
+    "use": "在智能体中使用",
+    "useSub": "在思考方式中选择",
+    "useHint": "谁的智能体可以用这个账号思考,以及谁的 Lodi。管理它的人可以更改。",
+    "reply": "回应所有人",
+    "replySub": "智能体和谁交谈",
+    "replyHint": "这个账号上的智能体除了自己的所有者,还回应谁。Claude 的条款要求套餐由付费的人使用:向所有人开放前请先查看。",
+    "audience": {
+      "owner": "仅你",
+      "ownerOf": "仅 {{name}}",
+      "admins": "你和管理员",
+      "adminsOf": "{{name}} 和管理员",
+      "roles": "角色…",
+      "people": "成员…",
+      "everyone": "所有人",
+      "agentOwner": "仅智能体的所有者",
+      "rolesCount_other": "{{count}} 个角色",
+      "peopleCount_other": "{{count}} 人"
+    },
+    "pickRoles": "角色",
+    "pickPeople": "成员",
+    "pickNone": "请至少选择一个。",
+    "choice": {
+      "account": "账号",
+      "model": "模型",
+      "effort": "思考强度",
+      "yours": "你的",
+      "others": "团队的",
+      "keys": "API 密钥",
+      "workspace": "工作区的",
+      "workspaceSub": "工作区的 API 密钥",
+      "key": "API 密钥",
+      "keyDefault": "工作区默认",
+      "api": "API"
+    },
+    "missionAi": "AI",
+    "missionLocked": "开始前选择由谁来做。模型随时可以更改。"
   },
   "surface": {
     "on": "已开启",

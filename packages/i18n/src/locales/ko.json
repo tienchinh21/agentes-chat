@@ -2217,7 +2217,7 @@
     "expandNav": "사이드바 펼치기",
     "searchWorkspace": "워크스페이스 검색",
     "summary_other": "멤버 {{people}}명 · 에이전트 {{agents}}명",
-    "waiting": "내 확인 대기",
+    "waiting": "받은편지함",
     "approvals": "승인",
     "proposals": "개선 제안",
     "issues": "작업",
@@ -2945,7 +2945,7 @@
       "team": "사람이 적용하는 카드로 팀 전체를 꾸리고 바꿔요. 에이전트, 사람, 워크스페이스 설정이 대상이에요",
       "routines": "내가 관리할 수 있는 루틴이면 어느 에이전트의 것이든 실행하고 삭제해요",
       "asYou": "나와의 대화에서는 내가 볼 수 있는 Drive, 위키, 작업을 읽어요",
-      "mentions": "멤버가 아니어도 모든 채널의 @멘션에 답해요"
+      "mentions": "멤버가 아니어도 모든 채널의 @멘션과 자기가 가장 잘 맞는 메시지에 답해요"
     },
     "card": {
       "settings": "{{name}} · 설정",
@@ -5079,7 +5079,7 @@
     "firstRun": "하던 곳에서 이어서 · {{total}}개 중 {{done}}개"
   },
   "notifications": {
-    "title": "알림",
+    "title": "받은편지함",
     "planLent": {
       "takeBack": "되돌려 받기",
       "takeBackAll": "모든 에이전트에서 되돌려 받기",
@@ -5107,7 +5107,7 @@
         "computer": "컴퓨터 바꾸기"
       }
     },
-    "docTitleUnread": "({{count}}) 알림",
+    "docTitleUnread": "({{count}}) 받은편지함",
     "summaryWaiting_other": "내 확인을 기다리는 항목 {{count}}개",
     "summaryUnread_other": "{{count}}개 읽지 않음",
     "summaryAllRead": "모두 읽음",
@@ -5121,6 +5121,7 @@
       "waiting": "내 확인 대기",
       "unread": "읽지 않음",
       "reactions": "반응",
+      "requests": "결정된 요청",
       "done": "완료"
     },
     "keys": {
@@ -5339,6 +5340,8 @@
     "noneUnread": "모두 읽었어요.",
     "noneHere": "지금은 아무것도 없어요.",
     "noneDone": "최근 30일 동안 완료로 표시한 항목이 없어요.",
+    "noneRequests": "아직 결정된 요청이 없습니다.",
+    "proposes": "님이 개선을 제안합니다",
     "more": "더 보기"
   },
   "approvals": {
@@ -5891,6 +5894,7 @@
       "overview": "개요",
       "instructions": "지침",
       "access": "도구 및 접근 권한",
+      "skills": "스킬",
       "memory": "메모리",
       "files": "파일",
       "usage": "사용량",
@@ -10300,7 +10304,80 @@
       "text": "키가 없어도 에이전트는 계속 일해요."
     }
   },
+  "aiHub": {
+    "tab": "AI 계정",
+    "usageTab": "사용량",
+    "accounts": "계정",
+    "accountsHint": "누가 연결했든 에이전트가 생각하는 데 쓸 수 있는 모든 플랜과 API 키.",
+    "apiKey": "API 키",
+    "of": "{{name}} 님의",
+    "moreSpeed": "속도와 컨텍스트 창",
+    "whoThinks": "생각하는 주체",
+    "bulk": {
+      "sub": "AI를 고른 다음 그것을 쓸 에이전트를 고르세요."
+    },
+    "choice": {
+      "workspace": "워크스페이스의 것",
+      "none": "계정 선택",
+      "search": "이름, AI, 플랜, 소유자로 검색",
+      "noMatch": "일치하는 계정이 없습니다.",
+      "noModel": "일치하는 모델이 없습니다.",
+      "groups": {
+        "yours": "내 계정",
+        "others": "팀의 계정",
+        "keys": "워크스페이스의 계정"
+      }
+    },
+    "order": {
+      "title": "사용 순서",
+      "tip": "에이전트가 먼저 쓰는 계정",
+      "sub": "한도에 이르면 에이전트는 다음 계정으로 넘어갑니다.",
+      "group": "{{maker}} · {{computer}}",
+      "signedOut": "로그아웃됨 · 건너뜀",
+      "skipped": "건너뜀",
+      "fallback": "모든 플랜이 한도에 이르면 API 키로 계속하기",
+      "fallbackHint": "끄기: 에이전트는 첫 플랜이 갱신될 때까지 기다립니다. 켜기: 사용한 만큼 비용을 내는 워크스페이스의 API 키로 계속합니다. 미션은 계속하지 않습니다."
+    },
+    "detail": {
+      "limits": "한도",
+      "noLimits": "아직 한도를 읽지 못했습니다.",
+      "permissions": "권한",
+      "saved": "권한을 저장했습니다.",
+      "more": "{{name}} 더 보기",
+      "manage": "관리",
+      "manageLine": "이름 바꾸기, 다시 로그인, 삭제",
+      "manageHint": "이 계정의 이름을 바꾸고, 다시 로그인하고, 삭제하고, 이 권한을 바꿀 수 있는 사람.",
+      "use": "에이전트에서 사용",
+      "useLine": "생각하는 주체에서 선택",
+      "useHint": "이 계정으로 생각할 수 있는 에이전트의 소유자.",
+      "reply": "모두에게 응답",
+      "replyLine": "에이전트가 대화하는 상대",
+      "replyHint": "이 계정의 에이전트가 자기 소유자 외에 응답하는 상대.",
+      "claudeTerms": "Claude 약관상 개인 플랜은 한 사람의 것입니다. 공유는 회색 지대입니다.",
+      "pickRoles": "이 역할을 가진 사람.",
+      "pickPeople": "계정 소유자 외에.",
+      "searchRoles": "역할 검색",
+      "searchPeople": "사람 검색",
+      "nobody": "고를 사람이 없습니다."
+    },
+    "modes": {
+      "owner": "나만",
+      "ownerOf": "{{name}} 님만",
+      "admins": "나와 관리자",
+      "adminsOf": "{{name}} 님과 관리자",
+      "roles": "역할…",
+      "people": "사람…",
+      "everyone": "모두",
+      "replyOwner": "에이전트 소유자만"
+    }
+  },
   "aiAccounts": {
+    "useReason": {
+      "signed_out": "로그아웃됨",
+      "owner_left": "{{owner}} 님이 워크스페이스를 떠났어요",
+      "owner_only": "{{owner}} 님만 사용해요",
+      "not_allowed": "내 에이전트에는 열려 있지 않아요"
+    },
     "unnamed": "이름 없는 계정",
     "rename": {
       "action": "{{label}} 이름 바꾸기",
@@ -10801,6 +10878,20 @@
     "empty": "“{{q}}”에 대한 결과가 없어요."
   },
   "codeSessions": {
+    "beta": {
+      "title": "Coding mode는 베타입니다",
+      "text": "실제로 쓸 수 있고 매주 달라집니다. 가끔 멈출 수 있는데, 그럴 때 문제는 저희 쪽에 있습니다.",
+      "go": "시작하기",
+      "added": {
+        "worktree": "요청마다 자체 worktree, Git·파일·화면·터미널 포함",
+        "anyAi": "어떤 AI든: Claude Code, Codex, OpenCode 또는 키로 쓰는 모델",
+        "beside": "대화 옆에서 파일을 편집하고 터미널을 엽니다"
+      },
+      "removed": {
+        "paste": "채팅과 에디터 사이에서 코드 복사·붙여넣기",
+        "watch": "에이전트가 끝날 때까지 터미널 지켜보기"
+      }
+    },
     "title": "코드",
     "state": {
       "waiting": "내 확인 대기",
@@ -10860,6 +10951,7 @@
       "agent_idle": "사용 가능"
     },
     "gitTab": {
+      "openFile": "파일 열기",
       "label": "Git",
       "from": "{{base}}에서 분기",
       "ahead_other": "커밋 {{count}}{{more}}개 앞섬",
@@ -10882,8 +10974,7 @@
         "deleted": "삭제됨",
         "renamed": "이름 변경됨",
         "untracked": "새 파일, 아직 git에 없음"
-      },
-      "openFile": "파일 열기"
+      }
     },
     "files": {
       "label": "파일",
@@ -10898,13 +10989,7 @@
       "truncated_other": "처음 {{formatted}}개 파일을 표시하고 있어요.",
       "hasChanges": "변경 사항 있음",
       "opening": "파일을 여는 중…",
-      "state": {
-        "binary": "바이너리 파일이라 여기에 표시할 내용이 없어요.",
-        "missing": "이 파일은 더 이상 없어요.",
-        "ignored": "git이 이 파일을 무시해서 여기에 표시되지 않아요.",
-        "secret": ".env 파일은 여기에 표시되지 않아요. 보통 비밀 정보가 들어 있어요.",
-        "outside": "이 파일은 워크트리 밖을 가리키는 링크예요."
-      },
+      "cut": "여기에는 처음 {{size}}만 표시돼요.",
       "save": "저장",
       "unsaved": "저장 안 됨",
       "tooLong": "너무 길어서 여기서 편집할 수 없습니다",
@@ -10914,7 +10999,20 @@
       "unsavedAsk": "이 파일에 저장하지 않은 변경 사항이 있습니다.",
       "keepEditing": "계속 편집",
       "discard": "버리기",
-      "cut": "여기에는 처음 {{size}}만 표시돼요."
+      "state": {
+        "binary": "바이너리 파일이라 여기에 표시할 내용이 없어요.",
+        "missing": "이 파일은 더 이상 없어요.",
+        "ignored": "git이 이 파일을 무시해서 여기에 표시되지 않아요.",
+        "secret": ".env 파일은 여기에 표시되지 않아요. 보통 비밀 정보가 들어 있어요.",
+        "outside": "이 파일은 워크트리 밖을 가리키는 링크예요."
+      }
+    },
+    "tabs": {
+      "label": "세션 탭",
+      "talk": "대화",
+      "terminalN": "터미널 {{n}}",
+      "close": "{{name}} 닫기",
+      "add": "새 탭"
     },
     "screen": {
       "computer": "{{name}}의 컴퓨터",
@@ -10955,27 +11053,6 @@
       "dm": "{{name}}와의 대화에서 열었어요",
       "channel": "#{{name}}에서 열었어요",
       "see": "대화 보기"
-    },
-    "tabs": {
-      "label": "세션 탭",
-      "talk": "대화",
-      "terminalN": "터미널 {{n}}",
-      "close": "{{name}} 닫기",
-      "add": "새 탭"
-    },
-    "beta": {
-      "added": {
-        "worktree": "요청마다 자체 worktree, Git·파일·화면·터미널 포함",
-        "anyAi": "어떤 AI든: Claude Code, Codex, OpenCode 또는 키로 쓰는 모델",
-        "beside": "대화 옆에서 파일을 편집하고 터미널을 엽니다"
-      },
-      "removed": {
-        "paste": "채팅과 에디터 사이에서 코드 복사·붙여넣기",
-        "watch": "에이전트가 끝날 때까지 터미널 지켜보기"
-      },
-      "title": "Coding mode는 베타입니다",
-      "text": "실제로 쓸 수 있고 매주 달라집니다. 가끔 멈출 수 있는데, 그럴 때 문제는 저희 쪽에 있습니다.",
-      "go": "시작하기"
     }
   },
   "code": {
@@ -12698,13 +12775,45 @@
   },
   "connectors": {
     "title": "커넥터",
-    "add": "커넥터 추가",
-    "mcp": {
-      "title": "MCP",
-      "add": "MCP 추가",
-      "list": "연결된 MCP 서버",
-      "none": "주소로 연결한 MCP 서버가 여기에 표시돼요."
+    "store": {
+      "featured": "추천",
+      "suggested": "제안",
+      "seeAll": "모두 보기",
+      "more": "더 보기",
+      "moreName": "{{name}} 자세히 보기",
+      "connected": "연결됨",
+      "browse": "커넥터 둘러보기",
+      "notListed": "스토어에 없는 서비스가 있나요?",
+      "howLabel": "연결 방법",
+      "whoAll": "모든 에이전트",
+      "whoChoose": "나중에 고를 수 있어요",
+      "asksLabel": "승인",
+      "asksSensitive": "민감한 작업은 확인을 요청해요",
+      "afterTitle": "연결한 다음",
+      "agents_other": "에이전트 {{count}}명",
+      "whoEvery_other": "에이전트 {{count}}명 모두 사용해요.",
+      "whoSome_other": "{{names}}. 나머지 에이전트 {{count}}명은 사용하지 않아요.",
+      "change": "변경",
+      "see": "보기",
+      "account": "계정",
+      "toolsText": "에이전트가 이걸로 할 수 있는 일과 확인을 요청하는 일이에요.",
+      "addressesText": "에이전트가 이 메일함으로 연락할 수 있는 상대예요.",
+      "bandTitle_other": "연결할 수 있는 서비스 {{count}}개",
+      "bandText": "{{names}} 등.",
+      "appMissing": "이 서버의 앱이 아직 만들어지지 않았어요",
+      "appEvents": "앱에 이벤트가 빠져 있어요",
+      "appLine": "이 서버의 앱",
+      "eventsLine": "이벤트"
     },
+    "howShort": {
+      "oneClick": "클릭 한 번",
+      "oauthOrKey": "클릭 한 번 또는 API 키",
+      "key": "API 키",
+      "appPassword": "앱 비밀번호",
+      "addressPassword": "주소와 비밀번호",
+      "composio": "Composio를 통해"
+    },
+    "add": "커넥터 추가",
     "personal": {
       "note": "이 연결은 나만 열 수 있어요. 내가 부탁할 때만 에이전트가 사용해요.",
       "noteOne": "이 연결은 나만 열 수 있고, 내가 부탁할 때만 에이전트가 사용해요.",
@@ -12736,9 +12845,6 @@
       "moveText": "워크스페이스의 모든 사람이 보게 됩니다. 어떤 에이전트가 쓸지는 에이전트를 관리하는 사람이 정하고, 에이전트 주인은 자기 에이전트에서 끌 수 있습니다. 연결된 모든 앱을 쓰는 에이전트는 바로 쓰게 됩니다.",
       "moved": "{{name}}은(는) 이제 팀의 것이에요."
     },
-    "addTitle": "커넥터 추가",
-    "catalogText": "{{org}}에 한 번만 연결하세요. 그다음 에이전트마다 사용할 수 있는 것을 정해요.",
-    "catalog": "사용 가능한 커넥터",
     "categories": "카테고리",
     "category": {
       "all": "전체",
@@ -12759,8 +12865,6 @@
     "connectName": "{{name}} 연결",
     "reconnectName": "{{name}} 다시 연결",
     "addAccountName": "다른 {{name}} 계정 추가",
-    "other": "찾는 게 없나요?",
-    "otherText": "주소만 있으면 어떤 서비스든 연결할 수 있어요.",
     "search": "커넥터 검색",
     "searchPlaceholder": "이름이나 기능으로 검색",
     "empty": "“{{q}}”와(과) 일치하는 커넥터가 없어요",
@@ -12774,8 +12878,6 @@
     "more": "더 많은 서비스",
     "tileConnected": "{{name}}, 연결됨",
     "tileSoon": "{{name}}, 곧 출시",
-    "otherTitle": "다른 서비스",
-    "otherDetail": "에이전트용 연결을 제공하는 서비스라면 주소(https://로 시작)로 연결할 수 있어요.",
     "otherSteps": {
       "1": "주소를 붙여넣고 서비스 페이지에서 승인해요",
       "2": "각 도구가 하는 일은 저희가 정리해요",
@@ -12783,16 +12885,13 @@
     },
     "otherConnect": "주소로 연결",
     "detail": {
-      "close": "세부 정보 닫기",
       "can": "에이전트가 할 수 있는 일",
       "afterText": "직접 선택하기 전까지는 어떤 에이전트도 사용하지 않아요.",
       "allText": "연결하면 모든 에이전트가 사용할 수 있어요. 나중에 조정할 수 있어요.",
       "addAccount": "다른 계정 추가",
       "accountsText": "계정마다 에이전트와 수준이 따로 있어요.",
       "reconnect": "다시 연결",
-      "replaceText": "현재 로그인을 대체해요. 사용하는 대상은 그대로예요.",
-      "connected": "이미 연결됨",
-      "how": "작동 방식"
+      "replaceText": "현재 로그인을 대체해요. 사용하는 대상은 그대로예요."
     },
     "how": {
       "oneClick": "클릭 한 번: 서비스 페이지에서 승인해요",
@@ -13013,6 +13112,10 @@
         "2": "캠페인 만들기와 조정",
         "ask": "광고 활성화와 예산 변경은 항상 승인을 요청합니다"
       },
+      "tiktok_ads": {
+        "1": "캠페인, 광고 그룹, 성과 보기",
+        "2": "캠페인과 광고 만들기와 조정"
+      },
       "google_docs": {
         "1": "문서 검색과 읽기",
         "2": "문서 만들기와 편집"
@@ -13165,7 +13268,6 @@
         "ask": "업로드할 때마다 항상 승인을 요청합니다"
       }
     },
-    "connectedList": "연결됨",
     "connected": "연결됨",
     "connectedAs": "{{account}}(으)로 연결됨",
     "reconnectAdds": "{{name}}을(를) 다시 연결하면 에이전트가 {{what}} 수도 있어요.",
@@ -13285,6 +13387,7 @@
       "amplitude": "차트, 대시보드, 실험.",
       "himetrica": "방문자, 퍼널, 매출, 검색 유입.",
       "meta_ads": "Facebook과 Instagram 광고 캠페인과 성과.",
+      "tiktok_ads": "TikTok 광고 캠페인, 광고 그룹, 광고와 성과.",
       "klaviyo": "캠페인, 플로, 목록, 프로필.",
       "millionsend": "이메일 캠페인, 목록, 연락처.",
       "semrush": "키워드, 도메인, 백링크 데이터.",
@@ -15069,10 +15172,10 @@
       "repoNotAllowed": "이 에이전트는 그 저장소에서 작업할 수 없어요. 다른 저장소를 고르거나, 에이전트 설정에서 추가하세요.",
       "notYours": "세션은 연 사람이나 관리자만 닫을 수 있어요.",
       "notReady": "세션의 워크트리가 아직 준비되지 않았어요. 잠시 후 다시 시도하세요.",
-      "suggestionGone": "이 제안에는 이미 답했어요.",
-      "suggestionNotYours": "세션을 열지는 요청한 사람만 정할 수 있어요.",
       "fileChanged": "이 파일은 연 뒤에 컴퓨터에서 변경되었습니다.",
-      "fileLocked": "이 파일은 여기서 편집할 수 없습니다."
+      "fileLocked": "이 파일은 여기서 편집할 수 없습니다.",
+      "suggestionGone": "이 제안에는 이미 답했어요.",
+      "suggestionNotYours": "세션을 열지는 요청한 사람만 정할 수 있어요."
     },
     "webhook": {
       "githubNoAccess": "이 워크스페이스의 GitHub은 {{repo}}에 웹훅을 만들 수 없어요. 아래 단계를 따라 직접 만들어 주세요.",
@@ -15401,6 +15504,7 @@
     "account": {
       "notRestorable": "이 계정은 더 이상 복원할 수 없어요.",
       "notOwner": "이 계정이나 요금제를 연결한 사람만 할 수 있어요.",
+      "permissionForbidden": "계정 소유자, 관리자 또는 계정을 관리할 수 있는 사람만 바꿀 수 있어요.",
       "orderForbidden": "이 계정을 연결한 사람이나 관리자만 순서에서 위치를 바꿀 수 있어요."
     },
     "channel": {
@@ -19584,6 +19688,7 @@
     "openAgain": "다시 열기",
     "ended": "셸이 종료됐어요",
     "dropped": "터미널 연결이 끊겼어요",
+    "moved": "이 터미널은 다른 창에서 열려 있습니다",
     "screening": "여기서는 터미널이 꺼져 있습니다",
     "forbidden": "이 컴퓨터를 쓸 수 있는 사람만 터미널을 열 수 있어요",
     "offline": "컴퓨터가 오프라인이에요",
@@ -19593,8 +19698,7 @@
     "busy": "이 컴퓨터에서 열 수 있는 터미널이 가득 찼어요. 하나를 닫고 다시 여세요.",
     "paused": "컴퓨터가 일시 중지됐어요",
     "failed": "터미널을 열지 못했어요",
-    "agentFolder": "터미널이 에이전트 폴더에서 열렸어요. 세션 폴더에서 열려면 컴퓨터를 업데이트하세요.",
-    "moved": "이 터미널은 다른 창에서 열려 있습니다"
+    "agentFolder": "터미널이 에이전트 폴더에서 열렸어요. 세션 폴더에서 열려면 컴퓨터를 업데이트하세요."
   },
   "agora": {
     "label": "지금",

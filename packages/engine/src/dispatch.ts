@@ -33,6 +33,7 @@ import {
   workKeepsThread,
   workTakesPersonMessage,
 } from "./run-scope";
+import { runState } from "./run-state";
 import type { AgentRun } from "./runs";
 import { holdOf, hopLimitReached, pauseStretch, personAskedLately, stretchOf, stretchStop } from "./stretch";
 
@@ -176,7 +177,7 @@ export async function startOrJoinRun(
         status: agentRuns.status,
         triggerMessageId: agentRuns.triggerMessageId,
         waitingForComputer,
-        inLine: sql<boolean>`coalesce(${agentRuns.transcript}->'waitingForBrain'->>'code' = 'busy', false)`,
+        inLine: sql<boolean>`coalesce(${runState}->'waitingForBrain'->>'code' = 'busy', false)`,
       })
       .from(agentRuns)
       .where(
@@ -470,7 +471,7 @@ export async function reportMentionReplies(
           where ${siblingRuns(orgId, input.triggerId, input.agentId, true)} and ${agentRuns.workId} is null
             and (${agentRuns.status} in ('queued', 'running') or (${agentRuns.status} = 'waiting_input'
               and ${agentRuns.waitingMachineId} is not null
-              and ${agentRuns.transcript}->'waitingForBrain'->>'code' = 'busy')))
+              and ${runState}->'waitingForBrain'->>'code' = 'busy')))
         or exists (${parkedWakes(orgId, input.triggerId, input.agentId)})) as yes`),
     );
     if (working?.yes === true || working?.yes === "t") {

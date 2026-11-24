@@ -9,6 +9,7 @@ import {
   notifyOwnerOnBudget,
   proposeChange,
   queueBudgetEmail,
+  setAgentEditors,
   updateAgent,
 } from "../src";
 import { addMember, type Fixture, setup } from "./fixtures";
@@ -118,5 +119,50 @@ describe("agents without an owner", () => {
     expect(lessons).toHaveLength(1);
     expect(lessons[0]).toMatchObject({ agentId: f.agent.id, scopeType: "agent" });
     expect(lessons[0]?.content).toContain("Always answer in English.");
+  });
+});
+
+describe("an agent's instructions wait on who looks after it (ADR 0085, addendum of 2026-11-24)", () => {
+  const propose = (requesterId: string) =>
+    proposeChange(
+      { db: f.db },
+      {
+        orgId: f.org.id,
+        agentId: f.agent.id,
+        target: "agent_instructions",
+        change: "Always answer in English.",
+        rationale: "asked in chat",
+        requesterId,
+      },
+    );
+
+  test("with an owner, an admin who isn't one neither decides nor is asked; the owner decides", async () => {
+    f = await setup();
+    const admin = await addMember(f.db, f.org.id, "admin", "bia");
+    const member = await addMember(f.db, f.org.id, "member", "caio");
+    const {
+      proposals: [proposal],
+    } = await propose(member.id);
+    const id = proposal?.id ?? "";
+    await expect(decideProposal(f.db, admin.id, f.org.id, id, "reject")).rejects.toThrow();
+    const waiting = await f.db
+      .select({ userId: schema.notifications.userId })
+      .from(schema.notifications)
+      .where(and(eq(schema.notifications.orgId, f.org.id), eq(schema.notifications.kind, "proposal_waiting")));
+    expect(waiting.map((n) => n.userId)).toEqual([f.owner.id]);
+    expect((await decideProposal(f.db, f.owner.id, f.org.id, id, "reject")).status).toBe("rejected");
+  });
+
+  test("someone its editors name decides too, and an admin who asked for the change decides their own", async () => {
+    f = await setup();
+    const admin = await addMember(f.db, f.org.id, "admin", "bia");
+    const editor = await addMember(f.db, f.org.id, "member", "caio");
+    await setAgentEditors(f.db, f.owner.id, f.org.id, f.agent.id, { userIds: [editor.id], roleIds: [] });
+    const {
+      proposals: [theirs],
+    } = await propose(f.owner.id);
+    expect((await decideProposal(f.db, editor.id, f.org.id, theirs?.id ?? "", "reject")).status).toBe("rejected");
+    const asked = await propose(admin.id);
+    expect(asked.proposals[0]?.canDecide).toBe(true);
   });
 });

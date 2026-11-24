@@ -189,8 +189,8 @@ test("Configurações › Lodi: Resumo do dia and its hour for anyone, the week'
   expect(screen).toContain('t("teamWeek.settings.dayLabel")');
   // The hour and the day are one row each that opens the app's picker, as "Your AI" does: no wall of 24 small pills.
   expect(screen).not.toContain("<Pills");
-  // Three of them, and "Your AI" itself, which opens its choice the same way.
-  expect(screen.match(/\bmenu\n/g)).toHaveLength(4);
+  // Three of them ("Your AI" opens its lists the same way, from the one choice's own fields).
+  expect(screen.match(/\bmenu\n/g)).toHaveLength(3);
   expect(screen).toContain("value={hourText(locale, prefs.dayHour)}");
   expect(screen).toContain("value={dayText(locale, prefs.day)}");
   expect(screen).toContain("(weekHour) => save({ weekHour })");

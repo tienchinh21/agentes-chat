@@ -96,7 +96,7 @@
     "chats": "Sohbetler",
     "threads": "İleti dizileri",
     "agents": "Ajanlar",
-    "activity": "Etkinlik",
+    "activity": "Gelen kutusu",
     "search": "Ara",
     "withCount": "{{label}}, {{count}}"
   },
@@ -870,7 +870,7 @@
     }
   },
   "activity": {
-    "title": "Etkinlik",
+    "title": "Gelen kutusu",
     "chooseModel": "Başka bir model seç",
     "filter": {
       "all": "Tümü",
@@ -1341,6 +1341,7 @@
     "criteriaOf": "{{done}} / {{total}}",
     "linkMessage": "#{{channel}} kanalındaki mesaj",
     "linkMessagePlain": "Kaynak mesaj",
+    "removeFileText": "Dosya Drive'da kalır.",
     "subIssues": "Alt görevler",
     "talk": "Sohbet et",
     "finish": "Tamamlandı olarak işaretle",
@@ -3179,6 +3180,61 @@
       "editHint": "Bu kısmı düzenler",
       "notHere": "Bu kısım bilgisayarda düzenlenir"
     }
+  },
+  "aiHub": {
+    "accounts": "Hesaplar",
+    "accountsHint": "Bu çalışma alanındaki tüm planlar ve API anahtarları, kim bağlamış olursa olsun. Sınırlarını ve kimin kullanabileceğini görmek için bir hesaba dokunun.",
+    "order": "Kullanım sırası",
+    "orderSub": "Sınıra gelince ajanlar sıradaki hesapla devam eder.",
+    "skipped": "atlandı",
+    "orderGroup": "{{plan}} · {{computer}}",
+    "noOrder": "Bir bilgisayarda aynı yapay zekanın iki hesabı olduğunda sıraları burada görünür.",
+    "keyFallback": "Tüm planlar sınırdayken API anahtarıyla devam et",
+    "keyFallbackHint": "Son hesaptan sonra ajanlar, kullanım başına ücretlendirilen çalışma alanı API anahtarıyla devam eder. Görevler hiçbir zaman anahtara geçmez.",
+    "keyFallbackLocked": "Bunu yalnızca bir yönetici değiştirir.",
+    "limits": "Sınırlar",
+    "permissions": "İzinler",
+    "manage": "Yönet",
+    "manageSub": "Yeniden adlandır, tekrar giriş yap, kaldır",
+    "manageHint": "Bu hesabı kimin yeniden adlandırabileceği, tekrar giriş yapabileceği ve kaldırabileceği. Bunu yalnızca hesabı bağlayan kişi değiştirir.",
+    "use": "Ajanlarda kullan",
+    "useSub": "Düşünen yapay zekada seç",
+    "useHint": "Kimin ajanlarının bu hesapla düşünebileceği ve kimin Lodi'sinin. Hesabı yöneten kişi değiştirir.",
+    "reply": "Herkese yanıt ver",
+    "replySub": "Ajanların kiminle konuştuğu",
+    "replyHint": "Bu hesaptaki bir ajanın kendi sahibi dışında kime yanıt verdiği. Claude'un koşulları, bir planın parasını ödeyen kişi tarafından kullanılmasını ister: herkese açmadan önce kontrol edin.",
+    "audience": {
+      "owner": "Yalnızca siz",
+      "ownerOf": "Yalnızca {{name}}",
+      "admins": "Siz ve yöneticiler",
+      "adminsOf": "{{name}} ve yöneticiler",
+      "roles": "Roller…",
+      "people": "Kişiler…",
+      "everyone": "Herkes",
+      "agentOwner": "Yalnızca ajanın sahibi",
+      "rolesCount_one": "{{count}} rol",
+      "rolesCount_other": "{{count}} rol",
+      "peopleCount_one": "{{count}} kişi",
+      "peopleCount_other": "{{count}} kişi"
+    },
+    "pickRoles": "Roller",
+    "pickPeople": "Kişiler",
+    "pickNone": "En az birini seçin.",
+    "choice": {
+      "account": "Hesap",
+      "model": "Model",
+      "effort": "Çaba",
+      "yours": "Sizin",
+      "others": "Ekibin",
+      "keys": "API anahtarları",
+      "workspace": "Çalışma alanınınki",
+      "workspaceSub": "Çalışma alanının API anahtarı",
+      "key": "API anahtarı",
+      "keyDefault": "çalışma alanı varsayılanı",
+      "api": "API"
+    },
+    "missionAi": "Yapay zeka",
+    "missionLocked": "İşi kimin yapacağı Başlat'tan önce seçilir. Model her zaman değiştirilebilir."
   },
   "surface": {
     "on": "Açık",

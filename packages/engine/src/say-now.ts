@@ -10,6 +10,7 @@ import { insertMessage, messageView } from "./messages";
 import { runReadOutside } from "./outside";
 import { endsWithSentinel, isSentinelOnly } from "./reply-policy";
 import { personAmong } from "./run-inbox";
+import { type RunRow, runColumns } from "./run-state";
 import { type AgentRun, isTerminal, replyThreadOf } from "./runs";
 import { runStretchOf } from "./stretch";
 import { maskCredentials, scrubSignIns } from "./tool-detail";
@@ -45,7 +46,7 @@ export interface SaidNow {
  * not an agents' DM, a mission's thread, background work, a routine's run or a confidential thread). Elsewhere the
  * tool refuses with the reason, and the prompt doesn't speak of it.
  */
-export async function sayNowApplies(db: Executor, run: AgentRun, confidential?: boolean) {
+export async function sayNowApplies(db: Executor, run: RunRow, confidential?: boolean) {
   if (run.background || run.workId) return false;
   // Known to the run already (`sealedAtClaim`): no read of the thread's row on its way to the model.
   if (confidential ?? (await threadIsConfidential(db, run.orgId, run.threadRootId))) return false;
@@ -87,7 +88,7 @@ const refused = (content: string, isError = true): ToolOutput => ({ content, isE
 async function runOf(ctx: ToolContext) {
   if (!ctx.runId || ctx.background || ctx.bridge?.taskId) return null;
   const [run] = await ctx.db
-    .select()
+    .select(runColumns)
     .from(agentRuns)
     .where(and(eq(agentRuns.id, ctx.runId), eq(agentRuns.orgId, ctx.orgId), eq(agentRuns.agentId, ctx.agentId)));
   return run ?? null;

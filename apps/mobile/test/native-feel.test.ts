@@ -50,7 +50,8 @@ describe("the system's symbols", () => {
     expect(bar.match(/icon: barIcon\(a\),/g)).toHaveLength(3);
     expect(bar).toContain('icon: { type: "sfSymbol" as const, name: m.sf },');
     const tabs = src("app/(app)/(main)/(tabs)/_layout.tsx");
-    expect(tabs).toContain('sf: { default: "bell", selected: "bell.fill" },');
+    // The inbox's tab (ADR 0218): the system's tray, filled when chosen.
+    expect(tabs).toContain('sf: { default: "tray", selected: "tray.fill" },');
     expect(tabs).toContain('{ name: "agents", glyph: "agents", label: "mobile.tabs.agents" },');
     expect(tabs).toContain("{...(tab.sf ? { sf: tab.sf } : {})}");
   });

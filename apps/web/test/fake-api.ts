@@ -1,5 +1,6 @@
 import type {
   AccountDeletionPlan,
+  AccountPermissions,
   ActiveRun,
   Agent,
   AgentAudience,
@@ -4713,6 +4714,71 @@ export function createFakeApi(state: FakeState = seedState(), options: { seed?: 
           },
         }
       : {}),
+  };
+  // "Contas de IA" (`hub`) as the server builds it from the same accounts, the workspace's keys and the order of use,
+  // unless a test's `setAiAccounts` gave one. Permissions start at their defaults (Gerenciar: its owner and admins,
+  // Usar em agentes: as "Quem usa" was, Atender todos: the agent's owner) and keep what a test saved.
+  const permissionsSaved = new Map<string, AccountPermissions>();
+  const seededPermissions = client.machines.setAccountPermissions;
+  client.machines.setAccountPermissions = async (orgId, accountId, input) => {
+    const saved = await seededPermissions(orgId, accountId, input);
+    const was = permissionsSaved.get(accountId);
+    permissionsSaved.set(accountId, { ...(was ?? saved.permissions), ...input } as AccountPermissions);
+    return saved;
+  };
+  const seededAi = client.machines.aiAccounts;
+  client.machines.aiAccounts = async (...args) => {
+    const view = await seededAi(...args);
+    if (view.hub) return view;
+    const nobody = { userIds: [], roleIds: [] };
+    const { groups, keyFallback, canConfigure } = await client.machines.accountOrder(args[0]);
+    return {
+      ...view,
+      hub: {
+        accounts: view.accounts.map((a) => {
+          const ownerOnly = a.serves === "owner";
+          // As the server's `sameAs`: the logins of one account on a computer share its oldest login's id.
+          const same = view.accounts.find(
+            (b) =>
+              b.machineId === a.machineId &&
+              b.kind === a.kind &&
+              b.provider === a.provider &&
+              (a.provider ? b.keyHint === a.keyHint : !!a.email && b.email?.toLowerCase() === a.email.toLowerCase()),
+          );
+          return {
+            ...a,
+            ...(a.sameAs ? {} : { sameAs: same?.id ?? a.id }),
+            permissions: permissionsSaved.get(a.sameAs ?? a.id) ??
+              permissionsSaved.get(a.id) ?? {
+                manage: { mode: "admins", ...nobody },
+                use: { mode: ownerOnly ? "owner" : "everyone", ...nobody },
+                reply: { mode: "owner", ...nobody },
+              },
+            rights: {
+              canManage: a.mine,
+              canSetManage: a.mine,
+              canUse: a.mine || !ownerOnly,
+              ...(!a.mine && ownerOnly ? { useReason: "owner_only" as const } : {}),
+              canReplyAll: a.mine,
+            },
+          };
+        }),
+        keys: state.credentials
+          .filter((c) => !c.revokedAt)
+          .map((c) => ({
+            id: c.id,
+            provider: c.provider,
+            label: c.label,
+            keyHint: c.keyHint,
+            isDefault: c.id === (state.defaultCredentialId ?? null),
+            ...(c.endpoint ? { endpoint: c.endpoint } : {}),
+          })),
+        order: groups,
+        keyFallback: keyFallback ?? false,
+        canManageKeys: true,
+        canConfigure: canConfigure ?? false,
+      },
+    };
   };
   // As the server's: the usage views list every account on a computer, so what `setAiAccounts` set is there too, each
   // the viewer's own with its address, after the computer's own sign-in.

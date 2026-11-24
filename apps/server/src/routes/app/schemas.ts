@@ -1216,7 +1216,11 @@ export const MachineAccount = z
     }),
     serves: z.enum(["everyone", "owner"]).openapi({
       description:
-        "Who it thinks for (ADR 0059 §3): everyone in the workspace (the default), or only its owner. Only its owner changes it.",
+        'Who it thinks for (ADR 0059 §3), as older apps read it: `everyone` while its "Usar em agentes" is everyone, else `owner`. `permissions.use` in `GET …/ai-accounts`\'s `hub` says it all.',
+    }),
+    usable: z.boolean().optional().openapi({
+      description:
+        'In an agent\'s "Quem pensa" (`GET …/agents/{id}/brain`): it may think for that agent, the agent\'s owner being in its "Usar em agentes".',
     }),
     useOrder: z.number().int().nullable().openapi({
       description:
@@ -1235,6 +1239,40 @@ export const MachineAccount = z
     description:
       "An account of a computer brain on a connected computer (ADR 0041, ADR 0059). Metadata only, never a sign-in.",
   });
+
+export const AccountAudience = z
+  .object({
+    mode: z.enum(["owner", "admins", "roles", "people", "everyone"]),
+    userIds: z.array(z.string()).openapi({ description: "With `people`." }),
+    roleIds: z.array(z.uuid()).openapi({ description: "With `roles`." }),
+  })
+  .openapi("AccountAudience", {
+    description:
+      "Who besides its owner holds one of an AI account's permissions: nobody (`owner`), administrators, the holders of some roles, some people, or everyone.",
+  });
+
+export const AccountPermissions = z
+  .object({
+    manage: AccountAudience.openapi({ description: '"Gerenciar": rename it, remove it, choose `use`.' }),
+    use: AccountAudience.openapi({
+      description: '"Usar em agentes": whose agents (by the agent\'s owner) and whose right hand may think with it.',
+    }),
+    reply: AccountAudience.openapi({
+      description:
+        '"Atender todos": whom an agent on it answers besides the agent\'s own owner (`owner`: nobody else).',
+    }),
+  })
+  .openapi("AccountPermissions");
+
+export const AccountRights = z
+  .object({
+    canManage: z.boolean().openapi({ description: "Rename it, remove it and set `use`." }),
+    canSetManage: z.boolean().openapi({ description: "Set `manage`: its owner." }),
+    canUse: z.boolean().openapi({ description: "The viewer's agents and right hand may think with it." }),
+    useReason: z.enum(["signed_out", "owner_left", "owner_only", "not_allowed"]).optional(),
+    canReplyAll: z.boolean().openapi({ description: "Set `reply`: its owner or an administrator." }),
+  })
+  .openapi("AccountRights", { description: "What the viewer may do with an AI account." });
 
 /** A computer the caller may give an agent, with what it offers. */
 export const BrainMachine = z

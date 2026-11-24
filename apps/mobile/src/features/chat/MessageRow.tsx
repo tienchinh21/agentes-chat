@@ -1453,11 +1453,9 @@ function HelpingTag({ consultation: c, channelId }: { consultation: RunConsultat
   return (
     <>
       <Text variant="footnote" tone="faint" numberOfLines={1} style={styles.shrink}>
-        {withAgentFaces(
-          t("chat.consultPanel.helping", { name: from.name, context: from.context }),
-          [{ name: from.name, agentId: c.agentId }],
-          12,
-        )}
+        {withAgentFaces(t("chat.consultPanel.helping", { name: from.name, context: from.context }), [
+          { name: from.name, agentId: c.agentId },
+        ])}
       </Text>
       <Pressable
         onPress={() => router.push(consultationHref(c.id, channelId))}

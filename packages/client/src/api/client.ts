@@ -35,6 +35,7 @@ import type {
   AccountLoginStart,
   AccountLoginStatus,
   AccountOrderGroup,
+  AccountPermissions,
   ActiveRun,
   AdminAsk,
   Agent,
@@ -110,6 +111,7 @@ import type {
   ChannelMember,
   ChannelOverride,
   Choices,
+  ClientVitalsReport,
   CliInstall,
   CodeSent,
   CommandApproval,
@@ -403,6 +405,8 @@ export interface ApiClient {
     /** `null` unless I am the installation's owner (and not on agentes.chat itself). */
     telemetry(): Promise<ServerTelemetry | null>;
     setTelemetry(enabled: boolean): Promise<ServerTelemetry>;
+    /** How fast this app ran (`ClientVitalsReport`); absent from fakes that don't take it. */
+    reportVitals?(report: ClientVitalsReport): Promise<void>;
     /** A problem report to show in full before it's sent (self-hosted servers; 404 on agentes.chat itself). */
     previewProblemReport(input: ProblemReportPreviewInput): Promise<ProblemReportPreview>;
     /** Sends the previewed report, with the person's note and reply address: answers its code (`R-7K3QXM`). */
@@ -1343,8 +1347,24 @@ export interface ApiClient {
       accountId: string,
       serves: PlanServes,
     ): Promise<{ serves: PlanServes; agentIds: string[] }>;
-    /** "Ordem de uso" (ADR 0041 §6): every computer's Claude and ChatGPT accounts in their order, by computer and kind. */
-    accountOrder(orgId: string): Promise<{ groups: AccountOrderGroup[] }>;
+    /**
+     * "Ordem de uso" (ADR 0041 §6): every computer's Claude and ChatGPT accounts in their order, by computer and kind,
+     * and the API-key switch under it (absent: an older server).
+     */
+    accountOrder(
+      orgId: string,
+    ): Promise<{ groups: AccountOrderGroup[]; keyFallback?: boolean; canConfigure?: boolean }>;
+    /**
+     * An account's Gerenciar, Usar em agentes and Atender todos (only those given change): `manage` its owner, `use`
+     * whoever manages it, `reply` its owner or an admin (`account.permission_forbidden`). `agentIds`: agents moved off it.
+     */
+    setAccountPermissions(
+      orgId: string,
+      accountId: string,
+      input: Partial<AccountPermissions>,
+    ): Promise<{ permissions: AccountPermissions; agentIds: string[] }>;
+    /** "Continuar com a chave de API quando todos os planos estiverem no limite" (admins). */
+    setKeyFallback(orgId: string, on: boolean): Promise<{ on: boolean }>;
     /** Moves the account to `index` (0 first) in its order: its owner or an admin (`account.order_forbidden`). */
     moveAccountInOrder(orgId: string, accountId: string, index: number): Promise<AccountOrderGroup>;
     /** Its owner names it (1 to 40 characters). */
@@ -1943,6 +1963,8 @@ export interface ApiClient {
       id: string,
       options?: { version?: number; format?: "csv" | "patch" | "pdf" | "docx" | "xlsx" | "pptx" | "md" },
     ): string;
+    /** A picture made small (`THUMB_WIDTHS` on the server), as WebP, at a version: the browser keeps it for good. */
+    thumbUrl(orgId: string, id: string, options: { version: number; width: 96 | 480 | 960 }): string;
     create(
       orgId: string,
       input: { title: string; channelId?: string | null; folderId?: string | null; content: ArtifactContent },

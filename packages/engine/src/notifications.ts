@@ -16,13 +16,11 @@ import {
   schema,
   sql,
 } from "@agenteschat/db";
-import { plainLine } from "@agenteschat/ui/markdown";
 import { decidableBySql } from "./approvals";
 import { NotFoundError, ValidationError } from "./errors";
 import { publishUserEvent } from "./events";
-import { cutText } from "./format";
 import { queueLiveActivity } from "./live-activity-queue";
-import type { PreviewMeta } from "./message-preview";
+import { type PreviewMeta, snippetOf } from "./message-preview";
 import { noticeOn, noticePrefsOf, readNoticePrefs } from "./notice-prefs";
 import { listMemberships, requirePermission } from "./organizations";
 import { enqueuePush } from "./push";
@@ -529,11 +527,9 @@ const nowOf = (deps: { now?: () => Date }) => deps.now?.() ?? new Date();
 /** How many people a merged row names (`latest.names`); the rest are counted. */
 const MAX_NAMES = 2;
 
-/** Plain text for a card (`plainLine`), at most `max` chars. `@mentions` stay. */
+/** Plain text for a card (`snippetOf`), at most `max` chars. `@mentions` stay. */
 export function notificationSnippet(text: string | null | undefined, max = SNIPPET_LENGTH): string {
-  if (!text) return "";
-  const plain = plainLine(text, max);
-  return plain.length > max ? `${cutText(plain, max - 1).trimEnd()}…` : plain;
+  return snippetOf(text, max);
 }
 
 export function notificationView(r: Row): NotificationView {

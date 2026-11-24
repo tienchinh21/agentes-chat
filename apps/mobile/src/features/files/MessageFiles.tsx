@@ -32,7 +32,7 @@ import {
 } from "./logic";
 import { openFile } from "./open";
 import { LocalPdfPage } from "./pdf-preview";
-import { pictureDrawn, pictureFade, rememberLocalCopy, useArtifacts, useRemoteFile } from "./source";
+import { pictureDrawn, pictureFade, rememberLocalCopy, useArtifacts, usePicture, useRemoteFile } from "./source";
 import { VideoFirstFrame, VideoPlayer } from "./VideoPlayer";
 
 /**
@@ -216,10 +216,8 @@ function InlineImage({
   const c = useColors();
   // The message's own version, from the first frame: switched to the details' once they came, the link and the cache
   // key changed, and the picture went blank and faded in again.
-  const version = file.version;
-  const key = `${file.id}@${version ?? "latest"}`;
-  const link = useRemoteFile(orgId, file.id, version);
-  const [failed, setFailed] = useState(false);
+  const picture = usePicture(orgId, file.id, file.version);
+  const { key, source, failed } = picture;
   return (
     <PressScale
       haptic={false}
@@ -229,20 +227,20 @@ function InlineImage({
       accessibilityHint={t("mobile.files.openImage")}
       style={[styles.shot, { width, height, backgroundColor: c.sunken, borderColor: c.line2 }, cardCorners]}
     >
-      {link.data && !failed ? (
+      {source && !failed ? (
         <Image
-          source={{ uri: link.data.uri, headers: link.data.headers, cacheKey: key }}
+          source={source}
           recyclingKey={key}
           cachePolicy="memory-disk"
           contentFit="contain"
           transition={pictureFade(key)}
           onLoad={() => pictureDrawn(key)}
           style={StyleSheet.absoluteFill}
-          onError={() => setFailed(true)}
+          onError={picture.onError}
           accessible={false}
         />
       ) : null}
-      {failed || link.isError ? (
+      {failed ? (
         <View style={styles.center}>
           <Icon name="image" size={22} color={c.faint} />
         </View>

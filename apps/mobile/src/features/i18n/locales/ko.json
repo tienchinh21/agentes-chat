@@ -91,7 +91,7 @@
     "chats": "채팅",
     "threads": "스레드",
     "agents": "에이전트",
-    "activity": "활동",
+    "activity": "받은편지함",
     "search": "검색",
     "withCount": "{{label}}, {{count}}"
   },
@@ -845,7 +845,7 @@
     }
   },
   "activity": {
-    "title": "활동",
+    "title": "받은편지함",
     "chooseModel": "다른 모델 고르기",
     "filter": {
       "all": "전체",
@@ -1261,6 +1261,7 @@
     "criteriaOf": "{{total}}개 중 {{done}}개",
     "linkMessage": "#{{channel}}의 메시지",
     "linkMessagePlain": "원래 메시지",
+    "removeFileText": "파일은 Drive에 그대로 남아요.",
     "subIssues": "하위 작업",
     "talk": "채팅",
     "finish": "완료로 표시",
@@ -3046,6 +3047,59 @@
       "editHint": "이 부분을 편집해요",
       "notHere": "이 부분은 컴퓨터에서 편집해요"
     }
+  },
+  "aiHub": {
+    "accounts": "계정",
+    "accountsHint": "누가 연결했든 이 워크스페이스의 모든 요금제와 API 키입니다. 계정을 탭하면 한도와 사용할 수 있는 사람을 볼 수 있어요.",
+    "order": "사용 순서",
+    "orderSub": "한도에 도달하면 에이전트가 다음 계정으로 이어갑니다.",
+    "skipped": "건너뜀",
+    "orderGroup": "{{plan}} · {{computer}}",
+    "noOrder": "한 컴퓨터에 같은 AI 계정이 두 개 있으면 순서가 여기에 표시됩니다.",
+    "keyFallback": "모든 요금제가 한도에 도달하면 API 키로 계속",
+    "keyFallbackHint": "마지막 계정 다음에는 사용량만큼 청구되는 워크스페이스 API 키로 이어갑니다. 미션은 키로 넘어가지 않아요.",
+    "keyFallbackLocked": "관리자만 변경할 수 있어요.",
+    "limits": "한도",
+    "permissions": "권한",
+    "manage": "관리",
+    "manageSub": "이름 변경, 다시 로그인, 삭제",
+    "manageHint": "이 계정의 이름을 바꾸고, 다시 로그인하고, 삭제할 수 있는 사람입니다. 연결한 사람만 변경할 수 있어요.",
+    "use": "에이전트에서 사용",
+    "useSub": "생각하는 AI에서 선택",
+    "useHint": "누구의 에이전트가 이 계정으로 생각할 수 있는지, 누구의 Lodi인지 정합니다. 관리하는 사람이 변경할 수 있어요.",
+    "reply": "모두에게 응답",
+    "replySub": "에이전트가 대화하는 상대",
+    "replyHint": "이 계정의 에이전트가 자신의 소유자 외에 누구에게 응답할지 정합니다. Claude 약관은 요금제를 결제한 사람이 쓰도록 하고 있으니, 모두에게 열기 전에 확인하세요.",
+    "audience": {
+      "owner": "나만",
+      "ownerOf": "{{name}}만",
+      "admins": "나와 관리자",
+      "adminsOf": "{{name}}와 관리자",
+      "roles": "역할…",
+      "people": "사람…",
+      "everyone": "모두",
+      "agentOwner": "에이전트 소유자만",
+      "rolesCount_other": "역할 {{count}}개",
+      "peopleCount_other": "{{count}}명"
+    },
+    "pickRoles": "역할",
+    "pickPeople": "사람",
+    "pickNone": "하나 이상 선택하세요.",
+    "choice": {
+      "account": "계정",
+      "model": "모델",
+      "effort": "노력",
+      "yours": "내 계정",
+      "others": "팀 계정",
+      "keys": "API 키",
+      "workspace": "워크스페이스 것",
+      "workspaceSub": "워크스페이스 API 키",
+      "key": "API 키",
+      "keyDefault": "워크스페이스 기본값",
+      "api": "API"
+    },
+    "missionAi": "AI",
+    "missionLocked": "작업할 주체는 시작 전에 고릅니다. 모델은 언제든 바꿀 수 있어요."
   },
   "surface": {
     "on": "켜짐",

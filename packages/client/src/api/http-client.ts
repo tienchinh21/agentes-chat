@@ -23,6 +23,7 @@ import type {
   AccountLoginStart,
   AccountLoginStatus,
   AccountOrderGroup,
+  AccountPermissions,
   ActiveRun,
   Agent,
   AgentAccess,
@@ -595,6 +596,7 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
       instance: () => request<Instance>("/api/instance"),
       telemetry: () => nullOn(404, () => request<ServerTelemetry>("/api/app/telemetry")),
       setTelemetry: (enabled) => request<ServerTelemetry>("/api/app/telemetry", { method: "PUT", json: { enabled } }),
+      reportVitals: (report) => request<void>("/api/app/client-vitals", { json: report }),
       previewProblemReport: (input) =>
         request<ProblemReportPreview>("/api/app/problem-reports/preview", { json: input }),
       sendProblemReport: (input) => request<{ id: string }>("/api/app/problem-reports/send", { json: input }),
@@ -1460,7 +1462,17 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
           method: "PUT",
           json: { serves },
         }),
-      accountOrder: (orgId) => request<{ groups: AccountOrderGroup[] }>(`${org(orgId)}/ai-accounts/order`),
+      accountOrder: (orgId) =>
+        request<{ groups: AccountOrderGroup[]; keyFallback?: boolean; canConfigure?: boolean }>(
+          `${org(orgId)}/ai-accounts/order`,
+        ),
+      setAccountPermissions: (orgId, accountId, input) =>
+        request<{ permissions: AccountPermissions; agentIds: string[] }>(
+          `${org(orgId)}/ai-accounts/${enc(accountId)}/permissions`,
+          { method: "PUT", json: input },
+        ),
+      setKeyFallback: (orgId, on) =>
+        request<{ on: boolean }>(`${org(orgId)}/ai-accounts/key-fallback`, { method: "PUT", json: { on } }),
       moveAccountInOrder: (orgId, accountId, index) =>
         request<AccountOrderGroup>(`${org(orgId)}/ai-accounts/${enc(accountId)}/order`, {
           method: "PUT",
@@ -1618,6 +1630,8 @@ export function createHttpApi(options: TransportOptions = {}): HttpApi {
         const qs = params.toString();
         return `${base}${org(orgId)}/artifacts/${enc(id)}/file${qs ? `?${qs}` : ""}`;
       },
+      thumbUrl: (orgId, id, { version, width }) =>
+        `${base}${org(orgId)}/artifacts/${enc(id)}/thumb?version=${version}&w=${width}`,
       upload: (orgId, file, options = {}, upload) => {
         const form = new FormData();
         form.append("file", file, file.name);

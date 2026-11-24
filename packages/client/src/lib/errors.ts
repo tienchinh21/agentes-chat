@@ -65,6 +65,7 @@ const KNOWN = {
   "action.skills_admins": "errors.agent.undoSkillsAdmins",
   "account.not_owner": "errors.account.notOwner",
   "account.order_forbidden": "errors.account.orderForbidden",
+  "account.permission_forbidden": "errors.account.permissionForbidden",
   "channel.members_forbidden": "errors.channel.membersForbidden",
   "agent_proposal.not_requester": "errors.agentProposal.notRequester",
   "proposal.not_requester": "errors.agentProposal.notRequester",

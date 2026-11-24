@@ -83,6 +83,7 @@ import { WorkspaceApprovalsRow } from "@/components/ApprovalsLevelDialog";
 import { AppsDownloadSection } from "@/components/AppsDownload";
 import { AuditSection } from "@/components/Audit";
 import { AutoModelsRow } from "@/components/AutoModels";
+import { AiAccountsTab } from "@/components/ai/AiHub";
 import { EndpointForm } from "@/components/ai/EndpointForm";
 import { WhoPicksSection } from "@/components/ai/Jev";
 import { usePlanHold } from "@/components/ai/plan-hold";
@@ -154,6 +155,7 @@ function Settings({
   role,
   tab,
   create,
+  service,
 }: {
   /** The section a link names; none (`/settings`): Geral for who opens it, else their first one. */
   section?: SettingsSection;
@@ -181,6 +183,8 @@ function Settings({
   tab?: RoleTab;
   /** Cargos, with Criar cargo open (⌘K's "Criar cargo"). */
   create?: boolean;
+  /** Conectores: the service whose page is open. */
+  service?: string;
 }) {
   const { t } = useTranslation();
   const { org } = useOrg();
@@ -282,14 +286,31 @@ function Settings({
       {current === "voice" && <VoiceSettingsSection />}
       {current === "access" && <AccessMatrixSection />}
       {current === "connectors" && (
-        <ConnectorsSection connected={connected} outcome={outcome} review={review} mail={mail} account={account} />
+        <ConnectorsSection
+          connected={connected}
+          outcome={outcome}
+          review={review}
+          mail={mail}
+          account={account}
+          service={service}
+        />
       )}
       {current === "skills" && <SkillsSection install={install} connected={connected} skill={skill} agent={agent} />}
       {current === "storage" && <StorageSection />}
       {current === "devices" && (device ? <DevicePage path={device} /> : <DevicesSection start={connect} />)}
       {current === "usage" && (
         <>
-          <UsageTabs person={person} summary={<UsageSection />} />
+          <UsageTabs
+            person={person}
+            accounts={
+              <>
+                <AiAccountsTab />
+                <KeysSection />
+                <WhoPicksSection />
+              </>
+            }
+            summary={<UsageSection />}
+          />
           {opens("billing") && (
             <SettingsPart id="billing">
               <BillingSection />
@@ -1243,13 +1264,9 @@ export function KeyDialog({
 }
 
 /**
- * Uso (ADR 0063): the plan accounts by computer and the API per agent for everyone (money only for
- * admins), then the API's spend by kind and the default budget (admins).
- */
-/**
- * IA e uso › Resumo: the workspace's AI accounts, then its provider keys (on plans alone, once it has one). What bills per use
- * (the API per agent, its spend by kind, the default budget) shows only once the workspace uses the API
- * (`workspaceUsesApi`): on plans alone there is no budget to show.
+ * IA e uso › Uso: how much each plan account is used, by whom and for what. What bills per use (the API per agent, its
+ * spend by kind, the default budget) shows only once the workspace uses the API (`workspaceUsesApi`): on plans alone
+ * there is no budget to show. The accounts themselves, their permissions and order are "Contas de IA".
  */
 function UsageSection() {
   const { t, i18n } = useTranslation();
@@ -1267,7 +1284,6 @@ function UsageSection() {
           <span className="small">{composioUsageText(t, i18n.language, composio.data)}</span>
         </Card>
       )}
-      <KeysSection />
       {usesApi && <ApiCard />}
       {allowed && (
         <Card aria-labelledby="sec-usage">
@@ -1298,7 +1314,6 @@ function UsageSection() {
         </Card>
       )}
       {allowed && <DefaultBudgetCard />}
-      <WhoPicksSection />
     </>
   );
 }

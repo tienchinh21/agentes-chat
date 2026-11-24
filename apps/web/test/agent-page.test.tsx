@@ -80,7 +80,7 @@ describe("agent page: tabs and the URL", () => {
       within(tabs)
         .getAllByRole("tab")
         .map((t) => t.textContent),
-    ).toEqual(["Visão geral", "Instruções", "Memória1", "Atividade"]);
+    ).toEqual(["Visão geral", "Instruções", "Skills", "Memória1", "Atividade"]);
     // The rest are in More; the one opened from there shows in the bar, and More keeps the others.
     await openTab(/^Uso/);
     expect(router.state.location.search).toMatchObject({ tab: "usage" });
@@ -88,7 +88,7 @@ describe("agent page: tabs and the URL", () => {
       within(screen().getByRole("tablist", { name: "Seções da Ada" }))
         .getAllByRole("tab")
         .map((t) => t.textContent),
-    ).toEqual(["Visão geral", "Instruções", "Memória1", "Atividade", "Uso"]);
+    ).toEqual(["Visão geral", "Instruções", "Skills", "Memória1", "Atividade", "Uso"]);
     await act(async () =>
       fireEvent.pointerDown(
         within(screen().getByRole("tablist", { name: "Seções da Ada" })).getByRole("button", { name: /^Mais/ }),
@@ -581,6 +581,9 @@ describe("agent page: inline editing and the save bar", () => {
     const row = github.closest("li") as HTMLElement;
     expect(row.textContent).toContain("Alterado");
     expect(row.textContent).toContain("Antes: Sem acesso");
+    // The skills' own level is on the Skills tab, with the skills.
+    expect(screen().queryByRole("radiogroup", { name: "Nível em Skills" })).toBeNull();
+    await openTab(/^Skills/);
     const skills = screen().getByRole("radiogroup", { name: "Nível em Skills" });
     const other = within(skills)
       .getAllByRole("radio")
@@ -716,7 +719,7 @@ describe("agent page: inline editing and the save bar", () => {
     const { router } = await go("?tab=instructions");
     await type(screen().getByRole("textbox", { name: "Instruções" }), "Outra coisa.");
     await act(async () => {
-      router.history.push(`/org/${ORG_ID}/approvals`);
+      router.history.push(`/org/${ORG_ID}/notifications`);
     });
     await settle(4);
     const ask = screen().getByRole("dialog", { name: "Sair sem salvar?" });
@@ -725,7 +728,7 @@ describe("agent page: inline editing and the save bar", () => {
     expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/agents/${ADA_ID}`);
     expect(screen().getByRole("textbox", { name: "Instruções" })).toBeTruthy();
     await act(async () => {
-      router.history.push(`/org/${ORG_ID}/approvals`);
+      router.history.push(`/org/${ORG_ID}/notifications`);
     });
     await settle(4);
     await click(
@@ -734,7 +737,7 @@ describe("agent page: inline editing and the save bar", () => {
       }),
     );
     await settle(4);
-    expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/approvals`);
+    expect(router.state.location.pathname).toBe(`/org/${ORG_ID}/notifications`);
   });
 });
 

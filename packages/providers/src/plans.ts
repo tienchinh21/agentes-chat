@@ -563,6 +563,25 @@ export const SHARED_SIGN_INS: Readonly<Record<"claude_code" | "codex" | "antigra
  */
 export const NEXT_ACCOUNT_KINDS: readonly string[] = ["claude_code", "codex"];
 
+/** What an account's place in the order of use is read from (`compareInOrder`). */
+export interface OrderKey {
+  ownerId: string | null;
+  /** Its place among its computer's accounts of its kind, 0 first; null or absent: after the placed ones. */
+  useOrder?: number | null;
+}
+
+const placeOf = (a: OrderKey) => a.useOrder ?? Number.MAX_SAFE_INTEGER;
+
+/**
+ * The one order of use (ADR 0041 §6), the engine's `accountOrderSql` in SQL: `person`'s own accounts first, then by
+ * place, the unplaced after. A stable sort keeps the rest as given, which is oldest first everywhere.
+ */
+export const compareInOrder =
+  (person: string | null) =>
+  (a: OrderKey, b: OrderKey): number =>
+    Number(person !== null && b.ownerId === person) - Number(person !== null && a.ownerId === person) ||
+    placeOf(a) - placeOf(b);
+
 /** Whether a new sign-in of an account (its CLI's kind, and a coding plan's `provider`) is made for all agents. */
 export const sharedSignIn = (kind: string, provider?: string | null) =>
   isPlanId(provider)

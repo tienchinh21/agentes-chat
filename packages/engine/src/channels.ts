@@ -23,7 +23,13 @@ import { ConflictError, ForbiddenError, isUniqueViolation, NotFoundError, Valida
 import { publishChannelEvent, publishChannelsChanged, publishOrgEvent, publishUserEvent } from "./events";
 import { followsThreadSql, threadReadAtSql } from "./follows";
 import { landedAfterSql } from "./message-place";
-import { type PreviewMeta, previewMediaKind, previewMeta, readableBody } from "./message-preview";
+import {
+  CHANNEL_PREVIEW_LENGTH,
+  type PreviewMeta,
+  previewMediaKind,
+  previewMeta,
+  readableBody,
+} from "./message-preview";
 import { quietNoticeSql } from "./notices";
 import { clearChannelNotifications, notificationSnippet } from "./notifications";
 import {
@@ -228,8 +234,6 @@ export async function createChannel(
 
 /** The most unread messages counted per channel (clients show "99+"). */
 export const MAX_CHANNEL_UNREAD = 100;
-/** Length of a channel's last-message preview (plain text). */
-export const CHANNEL_PREVIEW_LENGTH = 140;
 
 export interface ChannelLastMessage {
   id: string;

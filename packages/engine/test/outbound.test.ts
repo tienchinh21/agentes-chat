@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { schema } from "@agenteschat/db";
-import { createWebToolSource, insertMessage, recordRead, type ToolContext } from "../src";
+import { CACHED_CHARS, createWebToolSource, insertMessage, outboundCached, recordRead, type ToolContext } from "../src";
 import { type Fixture, setup } from "./fixtures";
 
 // ADR 0117: what a run read from private data never leaves in a web address; what anyone wrote or a tool gave does.
@@ -279,4 +279,18 @@ describe("web_fetch's outbound check", () => {
       expect((await webFetch(ctx, out)).data).toMatchObject({ code: "outbound.private_text" });
     });
   });
+});
+
+test("the reads cache holds at most CACHED_CHARS of tool output: the least recently used runs go first", () => {
+  const big = "x".repeat(Math.floor(CACHED_CHARS / 3) + 1);
+  const [a, b, c] = [crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()];
+  recordRead(a, "read_file", big);
+  recordRead(b, "read_file", big);
+  // Used again: b is now the least recently used.
+  recordRead(a, "read_file", "again");
+  recordRead(c, "read_file", big);
+  const held = outboundCached();
+  expect(held.chars).toBeLessThanOrEqual(CACHED_CHARS);
+  expect(held.runs).not.toContain(b);
+  expect(held.runs.slice(-2)).toEqual([a, c]);
 });

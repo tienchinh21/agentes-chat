@@ -43,6 +43,8 @@ export interface ListRowProps extends Omit<PressableProps, "style" | "children">
   titleLines?: number;
   /** On the right of line 1 (the time, faint; darker when unread). */
   time?: string | null;
+  /** The time is a deadline close to its end: in the color of what waits on the person. */
+  timeWaiting?: boolean;
   /** A small faint line under the title (what and where: "Missão · #canal"). */
   over?: ReactNode;
   /** Line 2 (a string is drawn in the readable secondary color, up to two lines). */
@@ -83,6 +85,7 @@ export function ListRow({
   titleLines = 1,
   titleAside,
   time,
+  timeWaiting,
   over,
   sub,
   subLines = 2,
@@ -128,7 +131,11 @@ export function ListRow({
               <Text
                 variant={TIME_VARIANT}
                 tone={unread ? "ink2" : "faint"}
-                style={[LIST_TIME, unread && styles.unreadTime]}
+                style={[
+                  LIST_TIME,
+                  unread && styles.unreadTime,
+                  timeWaiting && { color: c.amberInk, fontWeight: weights.semibold },
+                ]}
               >
                 {time}
               </Text>

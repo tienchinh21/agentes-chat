@@ -557,6 +557,15 @@ export const MCP_PRESETS: readonly McpPreset[] = [
     serverUrl: "https://mcp.zapier.com/api/mcp/mcp",
   },
   {
+    // TikTok for Business' own server, every tool at once (the big ones reach agents as a directory).
+    id: "tiktok-ads",
+    category: "marketing",
+    label: "TikTok Ads",
+    description: "TikTok ad campaigns, ad groups, ads and their results.",
+    icon: "tiktok",
+    serverUrl: "https://business-api.tiktok.com/open_mcp/tt-ads-mcp-flat",
+  },
+  {
     id: "canva",
     category: "marketing",
     label: "Canva",

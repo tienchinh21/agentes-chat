@@ -355,6 +355,8 @@ describe("bottom anchoring", () => {
     Object.defineProperty(log, "clientHeight", { configurable: true, value: 500 });
     await sendText("primeira");
     await settle(3);
+    // The list measures how far up it is once a frame.
+    const frame = () => act(() => new Promise<void>((r) => requestAnimationFrame(() => r())));
     const latest = () => screen().queryByRole("button", { name: /Ir para as mensagens mais recentes/ });
     expect(latest()).toBeNull();
     // Less than a screen up: nothing new, no button.
@@ -363,6 +365,7 @@ describe("bottom anchoring", () => {
       fireEvent.wheel(log, { deltaY: -40 });
       fireEvent.scroll(log);
     });
+    await frame();
     expect(latest()).toBeNull();
     // More than a screen up: the button, keyboard reachable, with no count yet.
     log.scrollTop = 600;
@@ -370,6 +373,7 @@ describe("bottom anchoring", () => {
       fireEvent.wheel(log, { deltaY: -40 });
       fireEvent.scroll(log);
     });
+    await frame();
     const button = latest() as HTMLElement;
     expect(button.getAttribute("aria-label")).toBe("Ir para as mensagens mais recentes");
     expect(button.tabIndex).toBe(0);
@@ -406,6 +410,7 @@ describe("bottom anchoring", () => {
     // A frame of the glide down, still far up: the button does not come back.
     log.scrollTop = 1200;
     await act(async () => fireEvent.scroll(log));
+    await frame();
     expect(latest()).toBeNull();
   });
 

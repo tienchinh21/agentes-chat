@@ -100,6 +100,10 @@ export const previewKindOfName = (name: string): PreviewKind | null => PREVIEW_B
 export const isPreviewImage = (content: { contentType: string; size: number }) =>
   previewKind(content.contentType) === "image" && content.size <= MAX_PREVIEW_BYTES;
 
+const THUMBNAIL_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+/** Pictures the server makes small for a tile (`thumbUrl`): a GIF keeps its animation, anything else its own path. */
+export const hasThumbnail = (contentType: string) => THUMBNAIL_TYPES.has(previewType(contentType));
+
 /** The clean MIME type for a preview blob (never what the browser would sniff). */
 export const previewType = (contentType: string) => contentType.split(";")[0]?.trim().toLowerCase() ?? "";
 

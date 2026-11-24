@@ -68,6 +68,20 @@ describe("selectAgents (policy)", () => {
     expect(selectAgents(candidates, { agents, needsAgent: 0.9, forEveryone: 0.8 }, policy)).toEqual(["pm", "research"]);
   });
 
+  test("the right hand answers a message for every agent only when it fits best", () => {
+    const candidates = [cand("dev"), { ...cand("lodi"), rightHand: true }];
+    const result = (dev: number, lodi: number) => ({
+      agents: [
+        { agentId: "dev", score: dev },
+        { agentId: "lodi", score: lodi },
+      ],
+      needsAgent: 0.9,
+      forEveryone: 0.9,
+    });
+    expect(selectAgents(candidates, result(0.9, 0.7), policy)).toEqual(["dev"]);
+    expect(selectAgents(candidates, result(0.7, 0.9), policy)).toEqual(["lodi", "dev"]);
+  });
+
   test("a low need-any-agent score means nobody", () => {
     expect(selectAgents([cand("a")], { agents: [{ agentId: "a", score: 0.9 }], needsAgent: 0.1 }, policy)).toEqual([]);
   });
@@ -631,6 +645,43 @@ describe("routeMessage", () => {
       (await routeMessage({ db: f.db, strategy, policy }, { orgId: f.org.id, messageId: message.id })).skipped,
     ).toBe("no_candidates");
     expect(seen).toHaveLength(0);
+  });
+
+  test("the right hand answers a channel's message when it fits best, never as a rule's pick nor where no agent is", async () => {
+    f = await setup({ rightHand: true });
+    const [lodi] = await f.db.select().from(schema.agents).where(eq(schema.agents.builtin, "right_hand"));
+    if (!lodi) throw new Error("no right hand");
+    const route = async (strategy: RouterStrategy, body: string) =>
+      routeMessage({ db: f.db, strategy, policy }, { orgId: f.org.id, messageId: (await post(body)).id });
+    const decisionOf = async (messageId: string) =>
+      (await f.db.select().from(schema.routingDecisions)).find((d) => d.messageId === messageId);
+
+    // It fits best: it answers, as any agent the router picks.
+    const fits = fixedStrategy({ lodi: 0.9, dev: 0.3 });
+    const setUp = await route(fits.strategy, "how do I add a teammate here?");
+    expect(fits.seen[0]?.find((c) => c.agentId === lodi.id)).toMatchObject({ rightHand: true });
+    expect(setUp.runs.map((r) => [r.agentId, r.trigger])).toEqual([[lodi.id, "router"]]);
+    expect(setUp.seenBy?.sort()).toEqual([lodi.id, f.agent.id].sort());
+
+    // The channel's agent fits best: the right hand stays out of what the message shows as read.
+    const work = await route(fixedStrategy({ lodi: 0.3, dev: 0.9 }).strategy, "the build is red again, can you look?");
+    expect(work.selected).toEqual([f.agent.id]);
+    expect(work.seenBy).toEqual([f.agent.id]);
+    const [run] = work.runs;
+    expect((await decisionOf(run?.triggerMessageId ?? ""))?.candidates.map((c) => c.agentId)).toEqual([f.agent.id]);
+
+    // Nothing could read it: alone with the channel's one agent, that agent answers (R2), never the right hand.
+    const failing: RouterStrategy = { name: "boom", decide: async () => Promise.reject(new Error("down")) };
+    expect((await route(failing, "hi")).selected).toEqual([f.agent.id]);
+
+    // A channel with no agent of its own is people talking: nobody is asked.
+    await f.db
+      .update(schema.channelMembers)
+      .set({ autoReply: false })
+      .where(eq(schema.channelMembers.agentId, f.agent.id));
+    const empty = fixedStrategy({ lodi: 1 });
+    expect((await route(empty.strategy, "how do I add a teammate here?")).skipped).toBe("no_candidates");
+    expect(empty.seen).toHaveLength(0);
   });
 
   test("a failing strategy never goes back to the outbox: it is recorded, and the rules decide", async () => {

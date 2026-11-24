@@ -114,7 +114,9 @@ describe("uploaded files in the Drive", () => {
     const tiles = Array.from(document.querySelectorAll<HTMLElement>(".artifact-cards > .artifact-tile"));
     expect(tiles).toHaveLength(2);
     const [thumb, row] = tiles as [HTMLElement, HTMLElement];
-    expect(thumb.querySelector(".artifact-tile__picture img")?.getAttribute("src")).toMatch(/^blob:preview-/);
+    expect(thumb.querySelector(".artifact-tile__picture img")?.getAttribute("src")).toEndWith(
+      `/artifacts/${image.id}/thumb?version=1&w=480`,
+    );
     // A picture is only the picture (its name and size are in its tip and the viewer's header, below).
     expect(thumb.querySelector(".artifact-tile__foot")).toBeNull();
     expect(row.querySelector(".artifact-tile__title")?.textContent).toBe("carrossel.zip");

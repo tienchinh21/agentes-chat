@@ -902,7 +902,7 @@ export function createContextToolSource(deps: ContextDeps): ToolSource {
     {
       name: "propose_instruction_change",
       description:
-        "When a person asks to change how agents work, propose it: your instructions (my_instructions), other agents' (agents: with their handles, all on one card), or what every agent should know now and later (org_context). Add a rule with change. To change or remove existing text, put the exact text in replaces and the new text in change (empty removes it). To rewrite them whole when the person asks, give the full new text in instructions, for yourself or one agent (read it first: read_agent). With target agents you can also give an agent a new role (roles) and turn an app on or off for it (access: a connected app by its name, or a built-in area such as browser:use; your own apps go through request_permission). When the person who asked may make the change and this turn read nothing from outside, it applies at once with Undo; else a person who may accepts it. Instructions: the agent's owner or someone who reviews memory. A role or an app: an admin who manages agents, or the agent's owner for an app only turned off. The org context: someone who reviews memory. Never tell the person only they can make the change: propose it. Not for routines: a change to what a routine does ('a rotina', 'when a new error comes in…') is `update_routine`.",
+        "When a person asks to change how agents work, propose it: your instructions (my_instructions), other agents' (agents: with their handles, all on one card), or what every agent should know now and later (org_context). Add a rule with change. To change or remove existing text, put the exact text in replaces and the new text in change (empty removes it). To rewrite them whole when the person asks, give the full new text in instructions, for yourself or one agent (read it first: read_agent). With target agents you can also give an agent a new role (roles) and turn an app on or off for it (access: a connected app by its name, or a built-in area such as browser:use; your own apps go through request_permission). When the person who asked may make the change and this turn read nothing from outside, it applies at once with Undo; else a person who may accepts it. Instructions: the agent's owner or who it names as editors (with neither, someone who reviews memory). A role or an app: an admin who manages agents, or the agent's owner for an app only turned off. The org context: someone who reviews memory. Never tell the person only they can make the change: propose it. Not for routines: a change to what a routine does ('a rotina', 'when a new error comes in…') is `update_routine`.",
       scope: "memory:write",
       inputSchema: {
         type: "object",
@@ -1063,7 +1063,7 @@ const decidedBy = (p: Proposal) =>
   p.target === "org_context"
     ? "someone who reviews memory (the org context)"
     : p.target === "agent_instructions"
-      ? "someone who edits the agent or reviews memory (instructions)"
+      ? "the agent's owner or its editors, or someone who reviews memory when it has neither (instructions)"
       : p.target === "agent_role"
         ? "someone who edits the agent (a role)"
         : ownerDecides(p)

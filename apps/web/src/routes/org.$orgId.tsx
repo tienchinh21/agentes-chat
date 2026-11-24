@@ -19,7 +19,6 @@ import { DesktopTitleBar } from "@/components/DesktopTitleBar";
 import { DetailsHost } from "@/components/DetailsHost";
 import { InviteDialogProvider } from "@/components/invite/InviteDialog";
 import { LeaveChannelDialog } from "@/components/LeaveChannelDialog";
-import { RefetchBar } from "@/components/Loading";
 import { OutageNotices } from "@/components/MachineOutages";
 import { NavDrawerProvider, NavScrim, ShellBar } from "@/components/NavDrawer";
 import { NoticeIsland } from "@/components/NoticeIsland";
@@ -37,6 +36,7 @@ import { HeaderSearchProvider } from "@/hooks/useWorkspaceSearch";
 import { useServerLocale } from "@/i18n";
 import { inDesktopApp } from "@/lib/desktop";
 import { preloadDialogs } from "@/lib/lazy-dialog";
+import { prefetchShell } from "@/lib/prefetch";
 import { notePlace } from "@/lib/return-to";
 import { rememberPlace, showWorkspace } from "@/lib/start";
 import { STORAGE_KEYS, storage } from "@/lib/storage";
@@ -58,6 +58,8 @@ export const Route = createFileRoute("/org/$orgId")({
       throw redirect({ to: "/onboarding" });
     return { me, membership };
   },
+  // The shell's lists start with the page's own reads (`prefetchShell`), not after its code loads.
+  loader: ({ context: { queryClient, api }, params: { orgId } }) => prefetchShell(queryClient, api, orgId),
   component: OrgLayout,
   // Opening the workspace takes a moment (the session check): the sky rises meanwhile.
   pendingComponent: BootSplash,
@@ -148,7 +150,6 @@ function OrgLayout() {
                     {/* One new agent's dialog for every way in (ADR 0164): the sidebar, the pages and the menus. */}
                     <NewAgentProvider>
                       <div className="shell">
-                        <RefetchBar />
                         <CommandMenu />
                         <LeaveChannelDialog />
                         {!focused && (

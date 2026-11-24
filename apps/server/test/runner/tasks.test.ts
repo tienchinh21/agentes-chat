@@ -11,7 +11,7 @@ import {
   type RunnerFrame,
   TASKS_PROTOCOL,
 } from "@agenteschat/adapters/machine-protocol";
-import { ACCOUNT_MISSING_MESSAGE, ACCOUNT_SIGNED_OUT } from "../../runner/accounts";
+import { ACCOUNT_MISSING_MESSAGE, ACCOUNT_SIGNED_OUT, ACCOUNT_TRANSCRIPT_DAYS } from "../../runner/accounts";
 import { handleRequest } from "../../runner/handlers";
 import { agentWorkspace } from "../../runner/paths";
 import {
@@ -656,6 +656,7 @@ test.skipIf(!posix)(
       configDir: cli.folder("claude_code", FOLDER_ACCOUNT),
       oauthToken: null,
       settingsEnv: { ANTHROPIC_BASE_URL: "https://api.anthropic.com" },
+      cleanupDays: ACCOUNT_TRANSCRIPT_DAYS,
       autoMemoryOff: "1",
     });
 

@@ -1,5 +1,11 @@
 import { createHash } from "node:crypto";
-import { type BlobStoreResolver, firstWords, type PubSub, type SpeechEngine } from "@agenteschat/adapters";
+import {
+  type BlobStore,
+  type BlobStoreResolver,
+  firstWords,
+  type PubSub,
+  type SpeechEngine,
+} from "@agenteschat/adapters";
 import {
   and,
   type Database,
@@ -38,7 +44,7 @@ import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from ".
 import { publishChannelEvent, publishListChanged } from "./events";
 import { MODEL_FILE_READ_BYTES, type ModelFile, readForModel, tooBigToReadNote, transcriptKey } from "./file-reader";
 import { formatBytes, tableToCsv } from "./format";
-import { imageSize } from "./image-size";
+import { imageSize, pictureSize } from "./image-size";
 import { originOfActor } from "./live/access";
 import { type FileConversationSummary, fileConversationSummaries } from "./live/conversation";
 import { documentExport } from "./live/document-export";
@@ -713,6 +719,53 @@ function fileContent(
     }
   }
   return content;
+}
+
+/**
+ * What a file's card on a message (`meta.artifacts`) draws from: its name, type and size, and a picture's own size. The
+ * apps show the picture or the video at once from these, with no request for the file's details first.
+ */
+export const fileFacts = (
+  v: Pick<VersionRow, "fileName" | "contentType" | "size"> & Partial<Pick<VersionRow, "width" | "height">>,
+) => {
+  const name = v.fileName ?? "file";
+  return { name, contentType: fileContentType(name, v.contentType), size: v.size, ...pictureSize(v) };
+};
+
+/** Message cards with their uploaded files' `fileFacts`, in one read; a card of anything else stays as it is. */
+export async function withFileFacts<T extends { id: string; version: number }>(
+  db: Executor,
+  orgId: string,
+  refs: readonly T[],
+): Promise<T[]> {
+  if (refs.length === 0) return [...refs];
+  const rows = await db
+    .select({
+      artifactId: artifactVersions.artifactId,
+      version: artifactVersions.version,
+      fileName: artifactVersions.fileName,
+      contentType: artifactVersions.contentType,
+      size: artifactVersions.size,
+      width: artifactVersions.width,
+      height: artifactVersions.height,
+    })
+    .from(artifactVersions)
+    .innerJoin(artifacts, eq(artifacts.id, artifactVersions.artifactId))
+    .where(
+      and(
+        eq(artifactVersions.orgId, orgId),
+        eq(artifacts.kind, "file"),
+        inArray(
+          artifactVersions.artifactId,
+          refs.map((r) => r.id),
+        ),
+      ),
+    );
+  const byVersion = new Map(rows.map((r) => [`${r.artifactId}:${r.version}`, r]));
+  return refs.map((r) => {
+    const v = byVersion.get(`${r.id}:${r.version}`);
+    return v ? { ...r, ...fileFacts(v) } : r;
+  });
 }
 
 /** Whether a `file` version's bytes are worth reading for `text`. */
@@ -2027,20 +2080,17 @@ export async function fileBytesOf(deps: ArtifactDeps, actor: ArtifactActor, orgI
 }
 
 /**
- * An uploaded file's bytes by its id alone, with no reader: only for a link this server signed for a file an agent
- * could read when it made it (`openConnectorMedia`). Null when it is gone.
+ * An uploaded file's stored bytes by its id alone, with no reader: only for a link this server signed for a file an
+ * agent could read when it made it (`openConnectorMedia`). Null when it is gone.
  */
-export async function fileBytesById(deps: ArtifactDeps, orgId: string, artifactId: string) {
+export async function storedFileById(deps: ArtifactDeps, orgId: string, artifactId: string) {
   if (!UUID.test(artifactId) || !UUID.test(orgId)) return null;
   const [a] = await deps.db
     .select()
     .from(artifacts)
     .where(and(eq(artifacts.orgId, orgId), eq(artifacts.id, artifactId), isNull(artifacts.deletedAt)));
-  if (!a || a.kind !== "file") return null;
-  const v = await versionRow(deps.db, a);
-  const { body } = await readVersion(deps, a, v);
-  const name = v.fileName ?? "file";
-  return { name, contentType: fileContentType(name, v.contentType), bytes: body };
+  if (a?.kind !== "file") return null;
+  return storedOf(deps, a, await versionRow(deps.db, a));
 }
 
 /**
@@ -3458,12 +3508,27 @@ const fileName = (a: ArtifactRow, version: number, ext: string) => {
 
 export const DOWNLOAD_URL_TTL_SECONDS = 300;
 
-/** A file name safe in any header: non-ASCII, quotes and separators become `_`. */
-const asciiName = (name: string) => name.replace(/[^\x20-\x7e]|["\\;]/g, "_");
+export { attachmentDisposition } from "@agenteschat/adapters";
 
-/** `Content-Disposition: attachment` with the name as is (RFC 6266 `filename*`) and an ASCII fallback. */
-export function attachmentDisposition(filename: string) {
-  return `attachment; filename="${asciiName(filename)}"; filename*=UTF-8''${encodeURIComponent(filename)}`;
+/** A version's bytes where they are kept, with what they download as: served or linked to, never read whole first. */
+export interface StoredDownload {
+  store: BlobStore;
+  key: string;
+  size: number;
+  sha256: string;
+  contentType: string;
+  filename: string;
+}
+
+/** Uploads download as they were sent (name and type); the other stored kinds as their stored form. */
+async function storedOf(deps: ArtifactDeps, a: ArtifactRow, v: VersionRow): Promise<StoredDownload> {
+  const store = await deps.blobs.forConfig(a.orgId, v.storageConfigId);
+  const where = { store, key: v.blobKey, size: v.size, sha256: v.sha256 };
+  if (a.kind !== "file") {
+    return { ...where, contentType: v.contentType, filename: fileName(a, v.version, EXTENSIONS[a.kind]) };
+  }
+  const filename = v.fileName ?? fileName(a, v.version, "bin");
+  return { ...where, contentType: fileContentType(filename, v.contentType), filename };
 }
 
 /**
@@ -3485,15 +3550,31 @@ export async function artifactDownload(
     const url = `/api/app/organizations/${orgId}/artifacts/${artifactId}/file${at}`;
     return { url, expiresAt: new Date(Date.now() + DOWNLOAD_URL_TTL_SECONDS * 1000).toISOString() };
   }
-  const store = await deps.blobs.forConfig(orgId, v.storageConfigId);
-  const filename =
-    a.kind === "file"
-      ? asciiName(v.fileName ?? fileName(a, v.version, "bin"))
-      : fileName(a, v.version, EXTENSIONS[a.kind]);
-  const signed = await store.signedUrl(v.blobKey, { expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS, filename });
+  const file = await storedOf(deps, a, v);
+  const signed = await file.store.signedUrl(file.key, {
+    expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS,
+    filename: file.filename,
+    contentType: file.contentType,
+  });
   const expiresAt = new Date(Date.now() + DOWNLOAD_URL_TTL_SECONDS * 1000).toISOString();
   const url = signed ?? `/api/app/organizations/${orgId}/artifacts/${artifactId}/file?version=${v.version}`;
   return { url, expiresAt };
+}
+
+/**
+ * A version's stored bytes, after the visibility check, for `GET …/file` to stream or link to; null for a live file,
+ * whose download is made from its document (`artifactFile`, ADR 0198).
+ */
+export async function storedArtifactFile(
+  deps: ArtifactDeps,
+  userId: string,
+  orgId: string,
+  artifactId: string,
+  version?: number,
+): Promise<StoredDownload | null> {
+  const a = await readable(deps, { type: "person", userId }, orgId, artifactId);
+  if (isLiveArtifactKind(a.kind)) return null;
+  return storedOf(deps, a, await versionRow(deps.db, a, version));
 }
 
 /**

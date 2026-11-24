@@ -13,6 +13,12 @@ import { IMAGE_SEARCH_TOOL, WEB_FETCH_TOOL, WEB_SEARCH_TOOL } from "./web-tools"
 const THREAD_LIMIT = 500;
 const CHANNEL_LIMIT = 50;
 const CACHED_RUNS = 200;
+/**
+ * Characters of tool output the cache holds at most, across runs: a run's whole outputs are kept, and 200 runs reading
+ * large files or pages each held them for the life of the process. Past it the least recently used runs go; their
+ * next check reads their stored steps again, as an evicted run's always did.
+ */
+export const CACHED_CHARS = 32 * 1024 * 1024;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface RunReads {
@@ -22,10 +28,35 @@ interface RunReads {
   /** What the agent itself wrote to its browser: where it can make a page or a tool's answer show any address. */
   written: string[];
   names: Map<string, string>;
+  /** Null: a call outside a stored run, never cached. */
+  runId: string | null;
+  /** Characters held in `privateText` and `written`. */
+  chars: number;
 }
 
-/** Per run, what its steps added so far: each check reads only the steps since the last one. */
+/** Per run, what its steps added so far: each check reads only the steps since the last one. Least recently used first. */
 const cache = new Map<string, RunReads>();
+let cachedChars = 0;
+
+const evict = (runId: string) => {
+  cachedChars -= cache.get(runId)?.chars ?? 0;
+  cache.delete(runId);
+};
+
+/** Characters `addResult` and `addWritten` just added to a cached run: past `CACHED_CHARS`, the oldest runs go. */
+function grew(reads: RunReads, chars: number) {
+  reads.chars += chars;
+  // Evicted meanwhile (or never cached): it holds nothing the cache counts.
+  if (!reads.runId || cache.get(reads.runId) !== reads) return;
+  cachedChars += chars;
+  for (const oldest of cache.keys()) {
+    if (cachedChars <= CACHED_CHARS) break;
+    evict(oldest);
+  }
+}
+
+/** Tests: the runs the cache holds, least recently used first, and their characters. */
+export const outboundCached = () => ({ runs: [...cache.keys()], chars: cachedChars });
 
 /**
  * `outboundUrlProblem` with what this run knows (ADR 0117): `seen` is every address in the conversation (the
@@ -53,15 +84,27 @@ export async function outboundRefusal(
   return problem ? { content: problem.message, isError: true, data: { code: problem.code, url } } : null;
 }
 
-const emptyReads = (): RunReads => ({ seq: -1, seen: new Set(), privateText: [], written: [], names: new Map() });
+const emptyReads = (runId: string | null = null): RunReads => ({
+  runId,
+  seq: -1,
+  seen: new Set(),
+  privateText: [],
+  written: [],
+  names: new Map(),
+  chars: 0,
+});
 
 function cachedReads(runId: string): RunReads {
   let reads = cache.get(runId);
-  if (!reads) {
-    reads = emptyReads();
-    if (cache.size >= CACHED_RUNS) cache.delete(cache.keys().next().value as string);
+  if (reads) {
+    // Used again: the newest, the last to go.
+    cache.delete(runId);
     cache.set(runId, reads);
+    return reads;
   }
+  reads = emptyReads(runId);
+  if (cache.size >= CACHED_RUNS) evict(cache.keys().next().value as string);
+  cache.set(runId, reads);
   return reads;
 }
 
@@ -93,7 +136,10 @@ function addResult(reads: RunReads, tool: string, content: string, data?: unknow
     if (web || own || reads.seen.has(u) || !urlCopiesPrivateText(u, reads.privateText)) reads.seen.add(u);
   }
   // The public web's results are no private text.
-  if (!web) reads.privateText.push(foldText(content));
+  if (web) return;
+  const folded = foldText(content);
+  reads.privateText.push(folded);
+  grew(reads, folded.length);
 }
 
 const stringsIn = (value: unknown): string[] =>
@@ -107,7 +153,12 @@ const stringsIn = (value: unknown): string[] =>
 function addWritten(reads: RunReads, tool: string, input: unknown) {
   if (!tool.startsWith("browser_")) return;
   for (const text of stringsIn(input)) {
-    reads.written.push(text, ...urlsIn(text).map((u) => [...new URL(u).searchParams.values()].join(" ")));
+    const added = [text, ...urlsIn(text).map((u) => [...new URL(u).searchParams.values()].join(" "))];
+    reads.written.push(...added);
+    grew(
+      reads,
+      added.reduce((n, a) => n + a.length, 0),
+    );
   }
 }
 

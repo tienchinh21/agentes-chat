@@ -15,7 +15,7 @@ import {
 } from "@agenteschat/client";
 import { ErrorBoundary } from "@agenteschat/client/lib/error-boundary";
 import { errorText } from "@agenteschat/client/lib/errors";
-import { holdSkies, installTitleTips, trackInput } from "@agenteschat/ui";
+import { holdSkies, holdSkiesWhileAway, installTitleTips, trackInput } from "@agenteschat/ui";
 import { AppProviders, type AppServices } from "./app/providers";
 import { createQueryClient } from "./app/query-client";
 import { backToSignIn } from "./app/unauthorized";
@@ -112,6 +112,8 @@ if (platform) {
   if (renderer) document.documentElement.dataset.desktopRenderer = renderer;
   if (renderer === "cpu") holdSkies();
 }
+// Nobody looking (hidden, in the background, or no input for a while): the skies stand still, at no cost.
+holdSkiesWhileAway();
 // Focus rings only while the keys move the focus (`data-pointer` on <html>, read by the stylesheet).
 trackInput();
 // Every `title` and icon-only control says its words in the product's tooltip, not the browser's.
@@ -136,7 +138,9 @@ void queryClient.prefetchQuery({ ...instanceQuery(api), queryFn: () => earlyInst
 if (earlyMe) void queryClient.prefetchQuery({ ...meQuery(api), queryFn: () => earlyMe });
 
 // The last lists and chats saved on this device show at once; everything revalidates as usual.
-const snapshot = createSnapshot(queryClient, snapshotStore);
+// Saved at most every 30 s while things change (each save turns the kept lists into one string on this thread), and
+// in full whenever the tab is hidden or closed.
+const snapshot = createSnapshot(queryClient, snapshotStore, { saveAfterMs: 30_000 });
 snapshot.start();
 // Another of the browser's accounts took this tab (ADR 0183), by the workspace menu or by the address the desktop app
 // opened (`?as=`): what the one before saved or left waiting to send stays behind.
@@ -153,6 +157,7 @@ outbox.keep(queryClient, {
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") void snapshot.flush();
 });
+window.addEventListener("pagehide", () => void snapshot.flush());
 /** Opening never waits longer than this for the snapshot (a slow disk loads from the server instead). */
 const SNAPSHOT_WAIT_MS = 300;
 

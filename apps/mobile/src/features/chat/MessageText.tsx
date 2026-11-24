@@ -85,7 +85,7 @@ export const MessageText = memo(function MessageText({
                 <Text variant={variant} tone="faint" style={[line, styles.mark, inked]} {...fit}>
                   {b.ordinal ? `${b.ordinal}.` : "•"}
                 </Text>
-                <Text variant={variant} tone={tone} style={[line, styles.flex, inked]} {...fit}>
+                <Text variant={variant} tone={tone} style={[line, styles.item, inked]} {...fit}>
                   {spans(b.inline)}
                 </Text>
               </View>
@@ -189,6 +189,11 @@ const styles = StyleSheet.create({
   /** Outside a conversation (a task's text, a document): the body's size on a line of ~1.42. */
   line: { lineHeight: 24 },
   flex: { flex: 1 },
+  /**
+   * A list item's words: as wide as they are, wrapping where the row ends. Never `flex: 1`: my own bubble is as
+   * wide as its words, and a basis of zero there leaves the item no width (a tall bubble with only the number).
+   */
+  item: { flexShrink: 1 },
   heading: { fontWeight: "700" },
   bullet: { flexDirection: "row", gap: 8, paddingLeft: 2 },
   mark: { minWidth: 14 },

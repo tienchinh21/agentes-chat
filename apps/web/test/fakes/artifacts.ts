@@ -333,6 +333,8 @@ export function createMockArtifacts(
       const qs = params.toString();
       return `/api/app/organizations/${orgId}/artifacts/${id}/file${qs ? `?${qs}` : ""}`;
     },
+    thumbUrl: (orgId, id, { version, width }) =>
+      `/api/app/organizations/${orgId}/artifacts/${id}/thumb?version=${version}&w=${width}`,
     download: async (orgId, id, version) => {
       const { text, type } = serializeContent((await detail(orgId, await find(orgId, id), version)).content);
       return {

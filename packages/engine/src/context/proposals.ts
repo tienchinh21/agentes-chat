@@ -30,6 +30,7 @@ import { type AgentDeletionDeps, deleteAgent } from "../agent-deletion";
 import { type Agent, getAgent, updateAgent } from "../agents";
 import {
   agentEditorIds,
+  agentKeeperIds,
   agentManagerIds,
   agentOwnerIds,
   audienceNotice,
@@ -329,10 +330,15 @@ export const editorDecides = (p: Pick<Proposal, "target" | "settings">) =>
  * Who decides: who reviews memory (instructions), configures the workspace (org context) or manages the team's
  * skills; for an agent's role who edits it (`agentEditorIds`), for its access who manages it (`agentManagerIds`), never
  * who merely holds "Editar qualquer agente" over a private agent (ADR 0085 addendum of 2026-11-17). Plus who edits the
- * agent for its instructions, and its owner when `ownerDecides`.
+ * agent for its instructions, and its owner when `ownerDecides`. An agent's instructions wait only on who looks after
+ * it (`agentKeeperIds`) while someone does (ADR 0085, addendum of 2026-11-24).
  */
 async function deciders(db: Database, p: Proposal) {
   if (p.target === "agent_settings") return settingsDeciders(db, p);
+  if (p.target === "agent_instructions" && p.agentId) {
+    const keepers = await agentKeeperIds(db, p.orgId, p.agentId);
+    if (keepers.length > 0) return keepers;
+  }
   const ids = new Set<string>();
   if (p.agentId && (p.target === "agent_role" || p.target === "agent_access")) {
     const who = p.target === "agent_role" ? agentEditorIds : agentManagerIds;
@@ -426,6 +432,13 @@ async function mayDecide(db: Database, actorId: string, p: Proposal, known?: Mem
   // A file that runs on agents' computers is a skill change of its own: who manages skills, as an update from its
   // link that changes one (`approveSkillUpdate`).
   if (p.target === "skill" && p.skillPath && runsCode(p.skillPath)) return can(membership, "manage_agents");
+  // An agent's instructions come from what it was told, which only who looks after it knows: while its owner or a
+  // named editor is there, nobody else decides them, an admin included (ADR 0085, addendum of 2026-11-24). Who asked
+  // for the change in their own words still does, by the rule below.
+  if (p.target === "agent_instructions" && p.agentId && p.requestedByUserId !== actorId) {
+    const keepers = await agentKeeperIds(db, p.orgId, p.agentId);
+    if (keepers.length > 0 && !keepers.includes(actorId)) return false;
+  }
   if (can(membership, "review_memory")) return true;
   // Its instructions are how it works: who edits it (`editsAgent`), as on its page.
   if (p.target === "agent_instructions" && p.agentId) {

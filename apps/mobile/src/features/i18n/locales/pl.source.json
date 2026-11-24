@@ -234,7 +234,7 @@
     "value": "Agents"
   },
   "tabs.activity": {
-    "value": "Activity"
+    "value": "Inbox"
   },
   "tabs.search": {
     "value": "Search"
@@ -2076,7 +2076,7 @@
     "female": "{{name}} asks again before this kind of work."
   },
   "activity.title": {
-    "value": "Activity"
+    "value": "Inbox"
   },
   "activity.chooseModel": {
     "value": "Choose another model"
@@ -3327,6 +3327,9 @@
   },
   "issues.linkMessagePlain": {
     "value": "The original message"
+  },
+  "issues.removeFileText": {
+    "value": "The file stays in the Drive."
   },
   "issues.subIssues": {
     "value": "Subtasks"
@@ -7714,6 +7717,153 @@
   },
   "live.doc.notHere": {
     "value": "This part is edited on the computer"
+  },
+  "aiHub.accounts": {
+    "value": "Accounts"
+  },
+  "aiHub.accountsHint": {
+    "value": "Every plan and API key in this workspace, whoever connected it. Tap an account for its limits and who may use it."
+  },
+  "aiHub.order": {
+    "value": "Order of use"
+  },
+  "aiHub.orderSub": {
+    "value": "At a limit, agents go on with the next account."
+  },
+  "aiHub.skipped": {
+    "value": "skipped"
+  },
+  "aiHub.orderGroup": {
+    "value": "{{plan}} · {{computer}}"
+  },
+  "aiHub.noOrder": {
+    "value": "With two accounts of the same AI on one computer, their order shows here."
+  },
+  "aiHub.keyFallback": {
+    "value": "Go on with the API key when every plan is at its limit"
+  },
+  "aiHub.keyFallbackHint": {
+    "value": "After the last account, agents go on with the workspace's API key, which is paid per use. Missions never move to the key."
+  },
+  "aiHub.keyFallbackLocked": {
+    "value": "Only an admin changes this."
+  },
+  "aiHub.limits": {
+    "value": "Limits"
+  },
+  "aiHub.permissions": {
+    "value": "Permissions"
+  },
+  "aiHub.manage": {
+    "value": "Manage"
+  },
+  "aiHub.manageSub": {
+    "value": "Rename, sign in again, remove"
+  },
+  "aiHub.manageHint": {
+    "value": "Who may rename this account, sign in to it again and remove it. Only whoever connected it changes this."
+  },
+  "aiHub.use": {
+    "value": "Use in agents"
+  },
+  "aiHub.useSub": {
+    "value": "Pick it in Who thinks"
+  },
+  "aiHub.useHint": {
+    "value": "Whose agents may think with this account, and whose Lodi. Whoever manages it changes this."
+  },
+  "aiHub.reply": {
+    "value": "Answer everyone"
+  },
+  "aiHub.replySub": {
+    "value": "Who the agents talk to"
+  },
+  "aiHub.replyHint": {
+    "value": "Who an agent on this account answers besides its own owner. Claude's terms ask that a plan is used by the person who pays for it: check them before opening it to everyone."
+  },
+  "aiHub.audience.owner": {
+    "value": "Only you"
+  },
+  "aiHub.audience.ownerOf": {
+    "value": "Only {{name}}"
+  },
+  "aiHub.audience.admins": {
+    "value": "You and admins"
+  },
+  "aiHub.audience.adminsOf": {
+    "value": "{{name}} and admins"
+  },
+  "aiHub.audience.roles": {
+    "value": "Roles…"
+  },
+  "aiHub.audience.people": {
+    "value": "People…"
+  },
+  "aiHub.audience.everyone": {
+    "value": "Everyone"
+  },
+  "aiHub.audience.agentOwner": {
+    "value": "Only the agent's owner"
+  },
+  "aiHub.audience.rolesCount": {
+    "value": {
+      "one": "{{count}} role",
+      "other": "{{count}} roles"
+    }
+  },
+  "aiHub.audience.peopleCount": {
+    "value": {
+      "one": "{{count}} person",
+      "other": "{{count}} people"
+    }
+  },
+  "aiHub.pickRoles": {
+    "value": "Roles"
+  },
+  "aiHub.pickPeople": {
+    "value": "People"
+  },
+  "aiHub.pickNone": {
+    "value": "Pick at least one."
+  },
+  "aiHub.choice.account": {
+    "value": "Account"
+  },
+  "aiHub.choice.model": {
+    "value": "Model"
+  },
+  "aiHub.choice.effort": {
+    "value": "Effort"
+  },
+  "aiHub.choice.yours": {
+    "value": "Yours"
+  },
+  "aiHub.choice.others": {
+    "value": "Team's"
+  },
+  "aiHub.choice.keys": {
+    "value": "API keys"
+  },
+  "aiHub.choice.workspace": {
+    "value": "The workspace's"
+  },
+  "aiHub.choice.workspaceSub": {
+    "value": "The workspace's API key"
+  },
+  "aiHub.choice.key": {
+    "value": "API key"
+  },
+  "aiHub.choice.keyDefault": {
+    "value": "workspace default"
+  },
+  "aiHub.choice.api": {
+    "value": "API"
+  },
+  "aiHub.missionAi": {
+    "value": "AI"
+  },
+  "aiHub.missionLocked": {
+    "value": "Who does the work is chosen before Start. The model can change any time."
   },
   "surface.on": {
     "value": "On"

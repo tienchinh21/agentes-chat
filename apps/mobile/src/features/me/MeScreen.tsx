@@ -215,7 +215,8 @@ function MePage() {
   // The sky's band: from the screen's top (behind the status bar and the clear bar) to the photo's middle. It reaches
   // `PULL_ROOM` higher, out of sight, so a pull down shows more sky (it clips its foot, where the photo hangs).
   const band = insets.top + 62 + PHOTO_OVERLAP;
-  const issues = useIssues(org.orgId);
+  // Only the count of tasks with me: no 10 s look while agents work, which this tab, always mounted, kept going.
+  const issues = useIssues(org.orgId, "", "", { poll: false });
   const overview = useOverview(org.orgId).data;
   const proposals = overview?.proposalsWaitingForMe ?? 0;
   const archived = useArchivedChannels(org.orgId).data?.length ?? 0;

@@ -22,6 +22,7 @@ import { useNow } from "@/components/missions/MissionBits";
 import { useOrg } from "@/components/org-context";
 import { WaitMark } from "@/components/RequestCard";
 import { useDirectory } from "@/hooks/useDirectory";
+import { useStorePart, type ValueStore } from "@/lib/value-store";
 import { useStreams } from "@/realtime/context";
 import { ThreadStatusChip } from "./ThreadBits";
 import "./threads.css";
@@ -35,14 +36,23 @@ import "./threads.css";
 export interface ChannelThreadsView {
   /** This channel's threads by root id (open and closed; archived ones aren't shown). */
   byId: Map<string, ThreadInfo>;
-  /** The thread open in the panel beside the channel (its line shows pressed). */
-  open: string | null;
   /** "Responder" threads by the message their line sits under, with how many replies went to the panel. */
   lines: Map<string, { thread: ThreadInfo; count: number }>;
 }
 
-export const ChannelThreadsContext = createContext<ChannelThreadsView | null>(null);
-export const useChannelThreadsView = () => useContext(ChannelThreadsContext);
+const NO_VIEW: ValueStore<ChannelThreadsView | null> = { get: () => null, subscribe: () => () => {} };
+/**
+ * The channel's threads (none in a thread view), as a store (`useValueStore`): each row reads its own thread
+ * (`useChannelThread`), so a reply landing in one redraws the row it is under, not every row.
+ */
+export const ChannelThreadsContext = createContext<ValueStore<ChannelThreadsView | null>>(NO_VIEW);
+/** The whole view, for what lays the rows out. */
+export const useChannelThreadsView = () => useStorePart(useContext(ChannelThreadsContext), (view) => view);
+/** The part of the view a row reads (its thread's line, whether the channel knows its thread). */
+export const useChannelThread = <P,>(pick: (view: ChannelThreadsView | null) => P) =>
+  useStorePart(useContext(ChannelThreadsContext), pick);
+/** The thread open in the panel beside the channel: its line shows pressed. */
+export const OpenThreadContext = createContext<string | null>(null);
 
 /**
  * "Abrir" for a thread: in a channel, the panel beside it; elsewhere, the
@@ -91,7 +101,7 @@ function OpenThread({
  */
 export function ThreadReplyLine({ thread, count }: { thread: ThreadInfo; count: number }) {
   const { t } = useTranslation();
-  const view = useChannelThreadsView();
+  const openId = useContext(OpenThreadContext);
   // A run in the thread right now (the list's `working` lags until it refetches): its agent's orbit.
   const liveAgent = useStreams(
     (s) => runsInChannel(s, thread.channelId).find((r) => r.threadId === thread.id && r.status !== "failed")?.agentId,
@@ -100,7 +110,7 @@ export function ThreadReplyLine({ thread, count }: { thread: ThreadInfo; count: 
   const people = thread.participants.flatMap((p) => (p.id ? [{ type: p.type, id: p.id }] : []));
   const at = thread.lastMessage?.createdAt ?? thread.lastActivityAt;
   const replies = t("threads.line.replies", { count });
-  const open = view?.open === thread.id;
+  const open = openId === thread.id;
   return (
     <OpenThread threadId={thread.id} className="thread-line" pressed={open}>
       <ThreadLineBody
@@ -133,7 +143,7 @@ export function ThreadReplyLine({ thread, count }: { thread: ThreadInfo; count: 
 export function ThreadReplyingLine({ messageId, channelId }: { messageId: string; channelId: string }) {
   const { t } = useTranslation();
   const actors = useActors();
-  const view = useChannelThreadsView();
+  const openId = useContext(OpenThreadContext);
   const agentIds = useStreams((s) =>
     [
       ...new Set(
@@ -146,7 +156,7 @@ export function ThreadReplyingLine({ messageId, channelId }: { messageId: string
   if (!agentIds) return null;
   const people = agentIds.split(",").map((id) => ({ type: "agent" as const, id }));
   return (
-    <OpenThread threadId={messageId} className="thread-line" pressed={view?.open === messageId}>
+    <OpenThread threadId={messageId} className="thread-line" pressed={openId === messageId}>
       <ThreadLineBody
         people={people}
         label={t("threads.line.replying", {

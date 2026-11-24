@@ -28,7 +28,7 @@ import { PLATFORM_CAP } from "./limits";
 import { machineOnline } from "./machines";
 import { type Message, parseMentionHandles, receiptsFor } from "./messages";
 import { NO_AI_CARD_REASONS } from "./no-ai";
-import { jobOf, jobsOfRun, OPERATOR_JOB_ERROR_MAX, selectJobs, spentColumns, spentOf } from "./operator-jobs";
+import { jobOf, OPERATOR_JOB_ERROR_MAX, selectJobs, spentColumns, spentOf } from "./operator-jobs";
 import {
   CODE,
   codeOf,
@@ -43,9 +43,11 @@ import {
   uuidOf,
   wordOf,
 } from "./operator-paging";
+import { jobsOfRun } from "./outbox";
 import { rightHandReaches } from "./right-hand";
 import { DEFAULT_CAP, UNDER_NEED_GATE } from "./router";
 import { RELEASE_REASONS } from "./run-inbox";
+import { runState } from "./run-state";
 import { runClaims } from "./run-timings";
 import {
   computerWaitSql,
@@ -132,7 +134,7 @@ export const runShownSql = sql<(typeof OPERATOR_RUN_SHOWN)[number]>`(case when $
   when ${outageParkedSql} then 'waiting_outage'
   else ${agentRuns.status}::text end)`;
 
-const WAIT = sql`${agentRuns.transcript}->'waitingForBrain'`;
+const WAIT = sql`${runState}->'waitingForBrain'`;
 
 const runColumns = {
   id: agentRuns.id,
@@ -154,7 +156,7 @@ const runColumns = {
   waitCode: sql<string | null>`coalesce(${WAIT}->>'code', case when ${outageParkedSql} then 'provider_outage' end)`,
   waitSource: sql<string | null>`${WAIT}->>'source'`,
   waitResetsAt: sql<string | null>`${WAIT}->>'resetsAt'`,
-  accountId: sql<string | null>`${agentRuns.transcript}->'accountMove'->>'to'`,
+  accountId: sql<string | null>`${runState}->'accountMove'->>'to'`,
   // Which plan it waits on: only what `planOfWaitKey` reads out of it is returned.
   waitPlan: sql<string | null>`${WAIT}->>'waitKey'`,
   waitingMachineId: agentRuns.waitingMachineId,

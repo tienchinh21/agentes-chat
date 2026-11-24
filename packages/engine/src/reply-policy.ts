@@ -1,6 +1,7 @@
 import { and, asc, type Executor, eq, gt, isNull, ne, schema, sql } from "@agenteschat/db";
 import { cutText } from "./format";
 import type { Message } from "./messages";
+import { runState } from "./run-state";
 import type { AgentRun } from "./runs";
 import type { ToolDefinition, ToolSource } from "./tools/types";
 
@@ -170,10 +171,10 @@ export async function loadReplyPolicy(
       hop: agentRuns.hop,
       trigger: agentRuns.trigger,
       background: agentRuns.background,
-      answerOwed: sql<boolean>`coalesce((${agentRuns.transcript} ->> 'answerOwed')::boolean, false)`,
-      passListed: sql<boolean>`coalesce((${agentRuns.transcript} ->> 'passListed')::boolean, false)`,
-      catchUp: sql<boolean>`coalesce((${agentRuns.transcript} -> 'catchUp' ->> 'mayPass')::boolean, false)`,
-      moot: sql<boolean>`coalesce((${agentRuns.transcript} ->> 'requestMoot')::boolean, false)`,
+      answerOwed: sql<boolean>`coalesce((${runState} ->> 'answerOwed')::boolean, false)`,
+      passListed: sql<boolean>`coalesce((${runState} ->> 'passListed')::boolean, false)`,
+      catchUp: sql<boolean>`coalesce((${runState} -> 'catchUp' ->> 'mayPass')::boolean, false)`,
+      moot: sql<boolean>`coalesce((${runState} ->> 'requestMoot')::boolean, false)`,
       authorType: messages.authorType,
       authorAgentId: messages.authorAgentId,
       meta: messages.meta,

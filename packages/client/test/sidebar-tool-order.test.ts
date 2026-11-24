@@ -14,16 +14,11 @@ const order: SidebarItem[] = [...SIDEBAR_ITEMS];
 
 describe("the tools' order", () => {
   test("a tool dropped before or after another takes that place; on itself or an unknown one, nothing moves", () => {
-    expect(placeTool(order, "drive", "threads", "before").slice(1, 4)).toEqual(["approvals", "proposals", "drive"]);
-    expect(placeTool(order, "approvals", "issues", "after").slice(1, 5)).toEqual([
-      "proposals",
-      "threads",
-      "issues",
-      "approvals",
-    ]);
+    expect(placeTool(order, "drive", "threads", "before").slice(1, 4)).toEqual(["proposals", "drive", "threads"]);
+    expect(placeTool(order, "proposals", "issues", "after").slice(1, 4)).toEqual(["threads", "issues", "proposals"]);
     expect(placeTool(order, "drive", "drive", "after")).toEqual(order);
     expect(placeTool(order, "drive", "nope" as SidebarItem, "after")).toEqual(order);
-    expect(new Set(placeTool(order, "calendar", "approvals", "before")).size).toBe(order.length);
+    expect(new Set(placeTool(order, "calendar", "proposals", "before")).size).toBe(order.length);
   });
 
   test("up and down step past the next tool shown in the list, over the ones in More between them", () => {
@@ -38,7 +33,8 @@ describe("the tools' order", () => {
   });
 
   test("a tool this build has no page for (newer, or removed) is dropped, one the saved order lacks comes last", () => {
-    const saved = ["drive", "from_a_newer_server", "forum", "threads"] as SidebarItem[];
+    // Approvals was a tool until the inbox took its place (ADR 0218): an order saved with it loses it.
+    const saved = ["drive", "from_a_newer_server", "forum", "approvals", "threads"] as SidebarItem[];
     const known = knownToolOrder(saved);
     expect(known.slice(0, 2)).toEqual(["drive", "threads"]);
     expect([...known].sort()).toEqual([...SIDEBAR_ITEMS].sort());
@@ -46,7 +42,7 @@ describe("the tools' order", () => {
   });
 
   test("the setup dialog moves a tool one place in the whole order", () => {
-    expect(moveSection(order, "issues", -1).slice(1, 5)).toEqual(["approvals", "proposals", "issues", "threads"]);
+    expect(moveSection(order, "issues", -1).slice(1, 4)).toEqual(["proposals", "issues", "threads"]);
     expect(moveSection(order, "taskManager", 1)).toEqual(order);
   });
 });

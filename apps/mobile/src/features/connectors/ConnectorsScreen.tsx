@@ -86,7 +86,7 @@ const LOCKUP_GAP = 12;
 /** A connected row's mark, the grouped list's leading size. */
 const ROW_MARK = 30;
 /** The featured cards at the top: the suggested services that open here, not connected yet (`suggestionsOf`). */
-const FEATURED = 3;
+const FEATURED = 6;
 /** Between a shelf's columns, and how much of the next one shows past the screen's edge (the shelf slides on). */
 const SHELF_GAP = 16;
 const SHELF_PEEK = 78;

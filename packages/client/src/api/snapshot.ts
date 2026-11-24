@@ -158,6 +158,12 @@ export function createSnapshot(qc: QueryClient, storage: SnapshotStorage, option
   let idle: (() => void) | null = null;
   /** Counts the wipes: a write that was on its way while one ran is taken back. */
   let wipes = 0;
+  /**
+   * Whether something kept changed since the last save, as `start` follows the cache: a flush with nothing new writes
+   * nothing. Not followed (no `start`), a flush always writes.
+   */
+  let dirty = true;
+  let following = false;
 
   const currentOwner = () => qc.getQueryData<Me | null>(["me"])?.user.id ?? null;
 
@@ -169,6 +175,7 @@ export function createSnapshot(qc: QueryClient, storage: SnapshotStorage, option
   };
 
   const save = async () => {
+    dirty = false;
     const me = qc.getQueryData<Me | null>(["me"]);
     if (!me) return;
     // Waiting for its deletion: the server alone says so at every opening, never a copy from disk whose session may
@@ -244,7 +251,8 @@ export function createSnapshot(qc: QueryClient, storage: SnapshotStorage, option
      * Returns the stop.
      */
     start(): () => void {
-      return qc.getQueryCache().subscribe((event) => {
+      following = true;
+      const off = qc.getQueryCache().subscribe((event) => {
         const q = event.query;
         if (q.queryHash === ME_HASH) {
           if (event.type === "removed") return void wipe();
@@ -258,14 +266,23 @@ export function createSnapshot(qc: QueryClient, storage: SnapshotStorage, option
         // Only new data is worth a save: a request starting, failing or marked stale changes nothing kept.
         if (event.type !== "updated" || (event.action.type !== "success" && event.action.type !== "setState")) return;
         if (!isKept(q.queryKey) && !chatPart(q.queryKey)) return;
+        dirty = true;
         if (!timer && !idle) timer = setTimeout(due, saveAfterMs);
       });
+      return () => {
+        following = false;
+        off();
+      };
     },
 
-    /** Saves now (the page is being hidden or the app goes to the background). */
+    /**
+     * Saves now (the page is being hidden or the app goes to the background), if anything kept changed since the last
+     * save: the whole snapshot is one string written on the thread that draws, and a stay away right after a save
+     * (the notification shade, a quick look at another app) has nothing new to write.
+     */
     flush: () => {
       cancel();
-      return save();
+      return dirty || !following ? save() : Promise.resolve();
     },
 
     wipe,
