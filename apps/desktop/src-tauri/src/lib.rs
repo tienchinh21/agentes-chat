@@ -8,6 +8,7 @@
 //! web view.
 
 mod app_icon;
+mod bench;
 mod cookies;
 mod cover;
 mod deep_link;
@@ -26,6 +27,7 @@ mod runners;
 mod servers;
 mod tailscale;
 mod tray;
+mod vitals;
 mod window_state;
 mod workspaces;
 
@@ -612,6 +614,8 @@ fn migrate_login_item(app: &AppHandle) {
 }
 
 pub fn run() {
+    // The opening's start (vitals.rs).
+    vitals::started();
     // Before any thread starts: WebKitGTK reads how to draw once.
     graphics::choose();
     // Taken once: a later reopen for an update keeps a start at login in the background.
@@ -709,6 +713,7 @@ pub fn run() {
             local_server::problem_report_parts,
             problem_report::problem_report_on,
             problem_report::problem_report_send,
+            vitals::problem_report_facts,
             local_server::local_server_sync,
             tailscale::tailscale_status,
             tailscale::tailscale_open,
@@ -779,7 +784,9 @@ pub fn run() {
             if servers::current(&handle).is_none() {
                 let _ = present(&handle, "welcome");
             } else if !at_login {
-                let _ = main_window::open(&handle, resume.as_ref().and_then(|r| r.page.clone()));
+                vitals::window_at_launch();
+                let page = bench::url().or_else(|| resume.as_ref().and_then(|r| r.page.clone()));
+                let _ = main_window::open(&handle, page);
             }
             if let Some(resume) = resume {
                 let _ = present(&handle, resume.window);
@@ -791,6 +798,7 @@ pub fn run() {
             }
             // The app icon picked on this computer (ADR 0179).
             app_icon::show(&handle);
+            bench::setup_done(&handle);
             Ok(())
         });
     // After long in the background macOS may end a window's page to free memory, which leaves it blank:
@@ -800,7 +808,7 @@ pub fn run() {
         let app = webview.app_handle();
         health::note(app, &format!("the web process of {} ended: loading it again", webview.label()));
         if webview.label() == main_window::LABEL {
-            cover::show(app, std::time::Duration::ZERO);
+            cover::show(app);
         }
         let _ = webview.reload();
     });

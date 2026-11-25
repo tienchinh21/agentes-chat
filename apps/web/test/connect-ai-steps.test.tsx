@@ -105,7 +105,7 @@ async function withPopup(run: () => Promise<void>) {
 
 /**
  * Settings › AI accounts with Ada (Walter's) on the MacBook, a computer someone else connected for the workspace
- * (`brain`: Ada's view; `machine`: over its row), and "Conectar uma IA" opened. `setup`: the workspace gets its own
+ * (`brain`: Ada's view; `machine`: over its row), and "Add account" opened (Connect). `setup`: the workspace gets its own
  * computer, this far.
  */
 async function connect({
@@ -169,7 +169,7 @@ async function connect({
   api.agents.brain = async (orgId, agentId) => ({ ...(await viewOf(orgId, agentId)), ownSignIn: false, ...brain });
   const { router, services } = await renderApp(path, { api });
   await settle(6);
-  if (!path.includes("connect=ai")) await click(screen().getByRole("button", { name: "Conectar uma IA" }));
+  if (!path.includes("connect=ai")) await click(screen().getByRole("button", { name: "Adicionar conta" }));
   await settle(4);
   // For one agent the picker; for the team (`crew`) the narrow dialog under the sky, whose title follows its screen.
   const dialog = screen().getByRole("dialog");
@@ -909,6 +909,27 @@ describe("Conectar uma IA: one picker, plans first", () => {
     expect(payWith(dialog, "Com chave de API").getAttribute("aria-checked")).toBe("true");
   });
 
+  test("a Windows computer where nothing holds Codex: ChatGPT dims, its panel says what Windows lacks and the way out", async () => {
+    const { dialog, choose } = await connect({
+      // The computer still takes a ChatGPT sign-in (the team's right hand thinks with it there): the agent's own view
+      // says it can't.
+      computers: [MAC],
+      brain: {
+        options: fakeAgentBrain(ADA_ID).options.map((o) =>
+          o.kind === "codex" ? { ...o, available: false, reason: "windows_sandbox" as const } : o,
+        ),
+      },
+    });
+    const rows = await openAiSelect(dialog);
+    expect(rows.find((o) => o.textContent === "ChatGPT")?.querySelector(".ac-brand--off")).not.toBeNull();
+    await closeAiSelect();
+    await choose("ChatGPT");
+    expect(dialog.textContent).toContain(
+      "O Windows do MacBook não consegue isolar os comandos do Codex. Escolha o Claude ou uma chave de API, ou atualize esse computador para o Windows\u00a011\u00a024H2 ou mais novo, com as atualizações em dia.",
+    );
+    expect(within(dialog).getByRole("button", { name: "Usar uma chave de API agora" })).toBeTruthy();
+  });
+
   test("OpenCode not installed on its computer: said so, with no API key offered, since the key row can't take OpenCode's", async () => {
     const { dialog, choose } = await connect({
       computers: [{ ...MAC, keys: false, brains: { claude_code: true, codex: true, opencode: false } }],
@@ -1080,7 +1101,7 @@ describe("Conectar uma IA: one picker, plans first", () => {
     api.machines.computerSetup = () => new Promise(() => {});
     await renderApp(`/org/${ORG_ID}/settings/keys`, { api });
     await settle(6);
-    await click(screen().getByRole("button", { name: "Conectar uma IA" }));
+    await click(screen().getByRole("button", { name: "Adicionar conta" }));
     const dialog = screen().getByRole("dialog", { name: "Conectar uma IA" });
     expect(within(dialog).queryByRole("button", { name: "Conectar um computador" })).toBeNull();
     expect(dialog.textContent).not.toMatch(/Conecte um seu|computador conectado/);

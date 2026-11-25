@@ -85,6 +85,7 @@ export type ActivityKind =
   | "runningCommandAny"
   | "usingScreen"
   | "cloningRepo"
+  | "listingRepos"
   | "openingPullRequest"
   | "handingOff"
   | "recordingFindings"
@@ -249,6 +250,7 @@ const BUILTIN: Record<string, ActivityKind> = {
   tell_agent: "tellingAgent",
   // Ours, though their first word reads like an app's name.
   git_clone: "cloningRepo",
+  list_repositories: "listingRepos",
   open_pull_request: "openingPullRequest",
   hand_off: "handingOff",
   record_findings: "recordingFindings",

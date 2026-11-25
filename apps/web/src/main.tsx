@@ -53,6 +53,7 @@ import { snapshotStore } from "./lib/snapshot-store";
 import { installSounds } from "./lib/sounds";
 import { STORAGE_KEYS, sessionStore } from "./lib/storage";
 import { createToastStore } from "./lib/toast";
+import { startVitals } from "./lib/vitals";
 import { withWebPushSignOut } from "./lib/web-push";
 import { routeTree } from "./routeTree.gen";
 
@@ -131,6 +132,9 @@ const queryClient = createQueryClient({
   onMutationError: (message) => toasts.show(message, "error"),
   describeError: (error) => errorText(i18n.t, error, i18n.language),
 });
+
+// How fast the app runs here, for its server (nobody's id): the opening, stalls, the heap, the reads after a return.
+startVitals(api, queryClient);
 
 // The answer above is the cache's: the sign-in guards don't ask again.
 void queryClient.prefetchQuery({ ...authConfigQuery(api), queryFn: () => authConfig });

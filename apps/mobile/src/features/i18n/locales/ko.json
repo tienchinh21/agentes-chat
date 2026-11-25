@@ -863,6 +863,9 @@
     },
     "kind": {
       "proposal_waiting_other": "{{names}}이(가) 개선을 제안해요",
+      "proposal_applied_other": "{{names}}이(가) 개선 {{count}}개를 적용했어요",
+      "proposal_applied_agents_other": "{{names}}이(가) 개선 {{count}}개를 적용했어요",
+      "proposal_applied_auto_other": "개선 {{count}}개가 자동으로 적용됐어요",
       "mention_other": "{{names}}이(가) 나를 멘션했어요",
       "thread_reply_other": "{{names}}이(가) 스레드에 답장했어요",
       "agent_reply_other": "{{names}}이(가) 답했어요",
@@ -1054,7 +1057,6 @@
     "fromWorkspace": "워크스페이스에서",
     "issues": "작업",
     "issuesWithMe_other": "나와 관련된 작업 {{count}}개",
-    "proposalsWaiting_other": "{{count}}개 대기 중",
     "drive": "Drive",
     "connectors": "커넥터와 MCP",
     "preferences": "환경설정",
@@ -1349,13 +1351,26 @@
     "agentLine_other": "메모리 {{count}}개",
     "uses_other": "{{count}}번 사용됨",
     "confirmed": "사람이 확인함",
-    "confirm": "확인",
-    "confirmedToast": "확인됨",
     "details": "기술 세부 정보",
     "before": "이전 내용: {{text}}",
     "fix": "수정",
     "forgetTitle": "이 메모리를 잊게 할까요?",
     "forgetText": "{{name}}이(가) 앞으로 대화에서 이 내용을 쓰지 않아요."
+  },
+  "proposals": {
+    "title": "에이전트 개선",
+    "emptyTitle": "아직 바뀐 것이 없어요",
+    "empty": "에이전트가 자신이나 동료의 지침을 개선하면 그 변경이 여기에 되돌리기와 함께 표시돼요.",
+    "more": "더 보기",
+    "reviewing": "검토 중…",
+    "appliedBy": "{{name}}이(가) 적용함",
+    "appliedBy_female": "{{name}}이(가) 적용함",
+    "appliedAuto": "자동으로 적용됨",
+    "leftOutBy": "{{name}}이(가) 적용하지 않음",
+    "leftOutBy_female": "{{name}}이(가) 적용하지 않음",
+    "leftOut": "적용 안 됨",
+    "undoneBy": "{{name}}님이 되돌림",
+    "undoneByYou": "내가 되돌림"
   },
   "wiki": {
     "map": "페이지 맵",
@@ -1407,6 +1422,15 @@
     "next": {
       "pr": "브랜치 푸시됨, 아직 풀 리퀘스트 없음",
       "mergeLocal": "{{base}}에 머지할 준비가 됐어요"
+    },
+    "terminal": {
+      "keys": "터미널 키",
+      "keyboard": "키보드",
+      "pasteHint": "복사한 내용을 터미널에 붙여넣기",
+      "key": {
+        "CtrlC": "Control-C, 중단",
+        "CtrlD": "Control-D, 입력 끝"
+      }
     }
   },
   "taskManager": {

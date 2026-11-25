@@ -465,7 +465,7 @@ export function startWorkers(deps: WorkerDeps) {
   });
 
   every("consultations", WORKER_INTERVALS_MS.approvals, async () => {
-    const expired = await expireConsultations({ db, pubsub: deps.pubsub });
+    const expired = await expireConsultations({ db, pubsub: deps.pubsub, judge: deps.context?.judge });
     if (expired > 0) log.info("agent consultations expired", { expired });
     const asks = await expireAgentProposalAsks({ db, pubsub: deps.pubsub });
     if (asks > 0) log.info("expired agent proposals left the inbox", { asks });
@@ -478,7 +478,7 @@ export function startWorkers(deps: WorkerDeps) {
 
   every("recovery", WORKER_INTERVALS_MS.recovery, async () => {
     const r = await recoverStaleRuns(
-      { db, pubsub: deps.pubsub },
+      { db, pubsub: deps.pubsub, judge: deps.context?.judge },
       { onError: (runId, error) => log.warn("a stale run couldn't be recovered", { runId, error: String(error) }) },
     );
     if (r.resumed.length + r.failed.length + r.requeued.length > 0) log.info("stale runs recovered", r);

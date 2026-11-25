@@ -173,8 +173,9 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
     if (away(c))
       return {
         icon: "alert",
-        text:
-          edition === "cloud"
+        text: work.machines.data?.find((m) => m.id === where.machineId)?.moving
+          ? t("machines.moving.named", { computer: nameOf(where.name) })
+          : edition === "cloud"
             ? t("agentPage.work.brain.offCloud", { computer: nameOf(where.name) })
             : t("agentPage.work.brain.off", { computer: nameOf(where.name) }),
       };

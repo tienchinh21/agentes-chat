@@ -259,6 +259,81 @@ test("parser: partial deltas, our tool calls with results, usage, and the final 
   expect(p.session).toBe(SESSION(1));
 });
 
+test("parser: usage.model uses the model that answered this turn, not a stale key from resumed modelUsage or a subagent", () => {
+  const p = new ClaudeStreamParser();
+  p.beginTurn();
+  // Main turn streams and answers with opus, while resumed modelUsage still lists fable first.
+  p.push(
+    line({
+      type: "stream_event",
+      session_id: SESSION(1),
+      parent_tool_use_id: null,
+      event: { type: "message_start", message: { id: "msg_1", model: "claude-opus-5-5" } },
+    }),
+  );
+  p.push(
+    line({
+      type: "assistant",
+      parent_tool_use_id: null,
+      message: { id: "msg_1", model: "claude-opus-5-5", content: [{ type: "text", text: "Hi" }] },
+    }),
+  );
+  // Synthetic error frame must not overwrite the real answering model.
+  p.push(
+    line({
+      type: "assistant",
+      parent_tool_use_id: null,
+      error: "rate_limit",
+      message: { id: "msg_err", model: "<synthetic>", content: [{ type: "text", text: "limit" }] },
+    }),
+  );
+  // A subagent on haiku speaks last, streamed and whole: still not the turn's model.
+  p.push(
+    line({
+      type: "stream_event",
+      parent_tool_use_id: "toolu_sub",
+      event: { type: "message_start", message: { id: "msg_sub", model: "claude-haiku-5-5" } },
+    }),
+  );
+  p.push(
+    line({
+      type: "assistant",
+      parent_tool_use_id: "toolu_sub",
+      message: { id: "msg_sub", model: "claude-haiku-5-5", content: [{ type: "text", text: "sub" }] },
+    }),
+  );
+  const end = p.push(
+    line({
+      type: "result",
+      subtype: "success",
+      is_error: false,
+      result: "Hi",
+      session_id: SESSION(1),
+      usage: { input_tokens: 10, output_tokens: 5 },
+      modelUsage: {
+        "claude-fable-5-2": { inputTokens: 100, outputTokens: 20 },
+        "claude-opus-5-5": { inputTokens: 10, outputTokens: 5 },
+      },
+    }),
+  );
+  expect(end.events).toEqual([{ type: "usage", input: 10, output: 5, source: "plan", model: "claude-opus-5-5" }]);
+
+  // Next turn resets turnModel so an earlier turn's model never leaks when only modelUsage is present.
+  p.beginTurn();
+  const next = p.push(
+    line({
+      type: "result",
+      subtype: "success",
+      is_error: false,
+      result: "Ok",
+      session_id: SESSION(1),
+      usage: { input_tokens: 4, output_tokens: 2 },
+      modelUsage: { "claude-sonnet-5-5": { inputTokens: 4, outputTokens: 2 } },
+    }),
+  );
+  expect(next.events).toEqual([{ type: "usage", input: 4, output: 2, source: "plan", model: "claude-sonnet-5-5" }]);
+});
+
 test("parser: a turn's usage says how many API calls it made, the most uncached and whole input one read, and the last's", () => {
   const p = new ClaudeStreamParser();
   p.beginTurn();

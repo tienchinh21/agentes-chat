@@ -44,7 +44,7 @@ import { admitFileAgents, type LiveAskSelection, type LiveRef, liveRefFor, liveR
 import { isMediaAfterReply, isStickerMood, type MessageMedia, mediaOf, mediaSettings, type StickerMood } from "./media";
 import { type MessageMemory, memoriesFor } from "./message-memories";
 import { readableBody, voiceOf } from "./message-preview";
-import { quietNoticeSql } from "./notices";
+import { agentOnlyNoticeSql, quietNoticeSql } from "./notices";
 import { can } from "./organizations";
 import { maySql } from "./permissions";
 import { afterReplyAnswered } from "./questions";
@@ -787,7 +787,8 @@ export async function insertMessageWithRuns(
   /**
    * SQL: a reply in a thread joins run `r` only when the person talks to its agent there: not for another agent, and
    * it quotes that agent, the run answers this person, or that agent spoke last in the thread. A run another agent
-   * started by naming it is not who the person talks to while the agent that named it spoke last.
+   * started by naming it is not who the person talks to while the agent that named it spoke last, and a notice only
+   * its agent reads is nobody speaking.
    */
   const talkingTo = (r: SQL) => sql`(not ${forAnother(sql`${r}.agent_id`)} and (
     ${r}.agent_id = ${quotedAgentId}::uuid
@@ -796,6 +797,7 @@ export async function insertMessageWithRuns(
     or ${r}.agent_id = coalesce(
       (select lm.author_agent_id from ${messages} lm where lm.org_id = ${input.orgId}::uuid
         and lm.channel_id = ${input.channelId}::uuid and lm.thread_id = ${threadId}::uuid and lm.author_type = 'agent'
+        and not ${agentOnlyNoticeSql(sql`lm.meta`)}
         order by lm.created_at desc limit 1),
       (select rm.author_agent_id from ${messages} rm where rm.org_id = ${input.orgId}::uuid
         and rm.id = ${threadId}::uuid))))`;
@@ -1732,8 +1734,14 @@ export async function classifyEveryone(
         limit 1`),
     ).length > 0;
   const ids = targets.map((t) => t.id);
+  // One answer for everyone comes from the channel's responsible agent when it is one of them (ADR 0095).
+  const [here] = await db
+    .select({ leadAgentId: channels.leadAgentId })
+    .from(channels)
+    .where(and(eq(channels.orgId, input.orgId), eq(channels.id, input.channelId)));
+  const lead = here?.leadAgentId && ids.includes(here.leadAgentId) ? here.leadAgentId : null;
   const decide = (answer: EveryoneAnswer, best: string, error?: string) => {
-    const by = answer === "one" && !named ? best : null;
+    const by = answer === "one" && !named ? (lead ?? best) : null;
     const runs = answer === "each" ? ids : by ? [by] : [];
     return {
       strategy: `everyone-${judge.name}`,

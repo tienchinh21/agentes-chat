@@ -917,6 +917,15 @@
       "proposal_waiting_one": "{{names}} propose une amélioration",
       "proposal_waiting_many": "{{names}} proposent des améliorations",
       "proposal_waiting_other": "{{names}} proposent des améliorations",
+      "proposal_applied_one": "{{names}} a appliqué une amélioration",
+      "proposal_applied_many": "{{names}} a appliqué {{count}} améliorations",
+      "proposal_applied_other": "{{names}} a appliqué {{count}} améliorations",
+      "proposal_applied_agents_one": "{{names}} ont appliqué une amélioration",
+      "proposal_applied_agents_many": "{{names}} ont appliqué {{count}} améliorations",
+      "proposal_applied_agents_other": "{{names}} ont appliqué {{count}} améliorations",
+      "proposal_applied_auto_one": "Une amélioration a été appliquée automatiquement",
+      "proposal_applied_auto_many": "{{count}} améliorations ont été appliquées automatiquement",
+      "proposal_applied_auto_other": "{{count}} améliorations ont été appliquées automatiquement",
       "mention_one": "{{names}} vous a mentionné",
       "mention_many": "{{names}} vous ont mentionné",
       "mention_other": "{{names}} vous ont mentionné",
@@ -1204,9 +1213,6 @@
     "issuesWithMe_one": "{{count}} avec vous",
     "issuesWithMe_many": "{{count}} avec vous",
     "issuesWithMe_other": "{{count}} avec vous",
-    "proposalsWaiting_one": "{{count}} en attente",
-    "proposalsWaiting_many": "{{count}} en attente",
-    "proposalsWaiting_other": "{{count}} en attente",
     "drive": "Drive",
     "connectors": "Connecteurs et MCP",
     "preferences": "Préférences",
@@ -1512,13 +1518,26 @@
     "uses_many": "Utilisé {{count}} fois",
     "uses_other": "Utilisé {{count}} fois",
     "confirmed": "Confirmé par une personne",
-    "confirm": "Confirmer",
-    "confirmedToast": "Confirmée",
     "details": "Détails techniques",
     "before": "Avant, c'était : {{text}}",
     "fix": "Corriger",
     "forgetTitle": "Oublier ce souvenir ?",
     "forgetText": "{{name}} cessera de l'utiliser dans les prochaines conversations."
+  },
+  "proposals": {
+    "title": "Améliorations des agents",
+    "emptyTitle": "Rien n'a encore changé",
+    "empty": "Quand un agent améliore ses instructions ou celles d'un collègue, le changement apparaît ici, avec Annuler.",
+    "more": "Afficher plus",
+    "reviewing": "Examen en cours…",
+    "appliedBy": "Appliqué par {{name}}",
+    "appliedBy_female": "Appliqué par {{name}}",
+    "appliedAuto": "Appliqué automatiquement",
+    "leftOutBy": "Écarté par {{name}}",
+    "leftOutBy_female": "Écarté par {{name}}",
+    "leftOut": "Écarté",
+    "undoneBy": "Annulé par {{name}}",
+    "undoneByYou": "Annulé par vous"
   },
   "wiki": {
     "map": "Carte des pages",
@@ -1575,6 +1594,15 @@
     "next": {
       "pr": "Branche poussée, pas encore de pull request",
       "mergeLocal": "Prête à fusionner dans {{base}}"
+    },
+    "terminal": {
+      "keys": "Touches du terminal",
+      "keyboard": "Clavier",
+      "pasteHint": "Coller dans le terminal ce que vous avez copié",
+      "key": {
+        "CtrlC": "Contrôle-C, interrompre",
+        "CtrlD": "Contrôle-D, fin de l’entrée"
+      }
     }
   },
   "taskManager": {

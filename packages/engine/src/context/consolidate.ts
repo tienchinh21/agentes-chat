@@ -255,7 +255,7 @@ export async function consolidateOrg(deps: ContextDeps, orgId: string, now = new
         inArray(contextItems.kind, ["lesson", "preference", "decision", "fact"]),
       ),
     );
-  // Nobody is asked to confirm the agent's own technical lessons (its playbook).
+  // The agent's own technical lessons (its playbook) stay in memory; the rest goes to the review (ADR 0219).
   for (const item of candidates) if (!isPlaybook(item) && (await proposeFromItem(deps, item))) proposals++;
   const skills = await promoteHowTos(deps, orgId, learnConfig(deps).skillAfter).catch(() => 0);
   const shared = await shareAcrossAgents(deps, orgId).catch(() => 0);

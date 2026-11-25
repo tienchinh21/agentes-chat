@@ -243,6 +243,12 @@ export const NOTIFICATION_KINDS = [
    */
   "right_hand_decided",
   /**
+   * An agent applied a change it judged worth making (ADR 0219) to an agent this person looks after or to the
+   * workspace's context: one row a day while unread, `count` how many, `latest.title` the newest change in a line,
+   * `source.agentId` the agent that applied it, `source.proposalId` the newest change. Inbox only.
+   */
+  "proposal_applied",
+  /**
    * The right hand stopped deciding for this person: three of its decisions undone in a week (ADR 0139 §2). Waiting
    * until they turn it back on, so it reaches their devices.
    */
@@ -502,6 +508,8 @@ const MERGING: ReadonlySet<NotificationKind> = new Set([
   "catch_up_closed",
   // The day's decisions the right hand made for the person, one row while unread.
   "right_hand_decided",
+  // The day's changes agents applied, one row while unread.
+  "proposal_applied",
   // One per person, read or not, until nothing waits on them.
   "proposal_waiting",
 ]);

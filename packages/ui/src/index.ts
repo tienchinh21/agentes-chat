@@ -224,6 +224,7 @@ export {
   type FilterChipProps,
   type FilterOption,
 } from "./components/FilterChip";
+export { FilterMenu, type FilterMenuChip } from "./components/FilterMenu";
 export { FoldRow } from "./components/FoldRow";
 export { GroupHeading } from "./components/GroupHeading";
 export { type Hosting, HostingScene, type Place, PlaceScene } from "./components/HostingScene";

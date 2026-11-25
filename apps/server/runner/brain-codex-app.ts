@@ -26,7 +26,7 @@ import {
   codexThreadKey,
   shellScript,
 } from "./brain-codex";
-import { CODEX_WINDOWS_CONFIG, codexLaunch } from "./codex-windows";
+import { type CodexWindowsSandbox, codexLaunch, codexWindowsConfig } from "./codex-windows";
 import { killTree } from "./exec";
 import { envValue } from "./executors";
 import {
@@ -95,10 +95,10 @@ import type { Spawn } from "./scope-gate";
  *   A turn where Codex would load someone's own rules runs on exec as well,
  *   which leaves them out (`codexRulesNear` in `runCodexTurn`): an allow there
  *   would run a command outside the sandbox and never ask the runner.
- * - Windows (`codex-windows.ts`): MXC named in `-c`, `approvalPolicy: "never"`
- *   (nothing asks: the command policy doesn't read PowerShell, so the sandbox
- *   is the limit, as for exec), and any approval Codex asks all the same is
- *   declined.
+ * - Windows (`codex-windows.ts`): the turn's sandbox (MXC, else Codex's own
+ *   `unelevated`) named in `-c`, `approvalPolicy: "never"` (nothing asks: the
+ *   command policy doesn't read PowerShell, so the sandbox is the limit, as
+ *   for exec), and any approval Codex asks all the same is declined.
  *
  * The protocol shapes below are the minimum this file reads, copied from
  * `codex app-server generate-ts` of codex-cli 0.163.0 (`ClientRequest`,
@@ -186,8 +186,8 @@ export function codexAppServerArgs(input: {
   writableRoots?: string[];
   /** Protocol 28: the agent's context limit (a process serves one). */
   contextTokens?: number;
-  /** Windows: the sandbox, named (`CODEX_WINDOWS_CONFIG`). */
-  windows?: boolean;
+  /** Windows: the sandbox, named (`codexWindowsConfig`). */
+  windows?: CodexWindowsSandbox;
 }): string[] {
   return [
     "app-server",
@@ -197,7 +197,7 @@ export function codexAppServerArgs(input: {
     CODEX_NO_NETWORK,
     "-c",
     codexWritableRoots(input.writableRoots ?? []),
-    ...(input.windows ? CODEX_WINDOWS_CONFIG.flatMap((c) => ["-c", c]) : []),
+    ...(input.windows ? codexWindowsConfig(input.windows).flatMap((c) => ["-c", c]) : []),
     ...codexContextOverride(input.contextTokens),
     ...(input.mcp
       ? [CODEX_DIRECT_MCP_CONFIG, ...codexBridgeOverrides({ runId: input.processId, ...input.mcp })].flatMap((o) => [
@@ -922,6 +922,8 @@ export class CodexAppServers implements CodexAppRunner {
       profile: input.profile ?? "work",
       // The context limit is the process's (`-c`): another one is another process.
       context: input.contextTokens ?? null,
+      // So is the sandbox on Windows.
+      sandbox: input.windowsSandbox ?? null,
     });
   }
 
@@ -994,7 +996,7 @@ export class CodexAppServers implements CodexAppRunner {
       mcp: { ...(opts.mcpCommand ? { command: opts.mcpCommand } : {}) },
       ...(input.writableRoots?.length ? { writableRoots: input.writableRoots } : {}),
       ...(input.contextTokens ? { contextTokens: input.contextTokens } : {}),
-      ...(platform === "win32" ? { windows: true } : {}),
+      ...(platform === "win32" ? { windows: input.windowsSandbox ?? "mxc" } : {}),
     });
     const brokenKey = `${opts.bin ?? "codex"}@${input.version}`;
     const launch = codexLaunch(args, {

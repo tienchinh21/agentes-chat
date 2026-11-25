@@ -632,6 +632,10 @@ export const Agent = z
       description:
         "Whether the current person sees how it works: who edits it (`canEdit`) and whoever it answers. Without it `instructions` is empty and its tools, memory, usage and activity answer 403 `agent.details_hidden`.",
     }),
+    factsOnly: z.boolean().optional().openapi({
+      description:
+        "A teammate's private agent seen through \"Editar agentes\" (ADR 0085, addendum of 2026-11-24): listed on Equipe with a lock, its page shows its facts and this month's usage, never how it works, and nothing to change. Absent (older servers): false.",
+    }),
     listed: z.boolean().optional().openapi({
       description:
         "Whether the current person's lists and pickers name it: every agent with `view_all_agents` or `manage_agents`, but a private one (it answers only its owner) only for who sees how it works (`seesDetails`). False: it stays out of every list; its messages and its public card still show. Absent (older servers): true.",
@@ -727,6 +731,10 @@ export const Channel = z
     replyInThreads: z.boolean().optional().openapi({
       description:
         "Agents asked in its main timeline answer in the thread under that message, which then shows as one line (ADR 0214). Regular channels only.",
+    }),
+    leadAgentId: z.uuid().nullable().optional().openapi({
+      description:
+        "The agent responsible for the channel, one of its member agents; null or absent: none. Regular channels only.",
     }),
     unreadCount: z.number().int().optional().openapi({
       description:
@@ -1107,6 +1115,7 @@ export const BrainUnavailable = z.enum([
   "not_reported",
   "system",
   "cant_start",
+  "windows_sandbox",
 ]);
 
 export const BrainOption = z
@@ -1114,6 +1123,10 @@ export const BrainOption = z
     kind: BrainKind,
     available: z.boolean(),
     reason: BrainUnavailable.optional().openapi({ description: "Why it can't be chosen now (computer brains)." }),
+    sandbox: z.enum(["partial"]).optional().openapi({
+      description:
+        "`partial`: Codex on a Windows computer without MXC, in Codex's own `unelevated` sandbox (writes held to the agent's folders, the internet only partly blocked).",
+    }),
     models: z.array(
       z.object({
         value: z.string().openapi({ description: "What is stored and passed to the CLI (`opus`, `gpt-…`)." }),

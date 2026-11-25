@@ -19,7 +19,7 @@ import {
   setAgentEditors,
   updateAgent,
 } from "../src";
-import { addMember, type Fixture, setup } from "./fixtures";
+import { addMember, type Fixture, queuedReviews, settleQueued, setup, withReview } from "./fixtures";
 
 let f: Fixture;
 afterEach(() => f?.close());
@@ -192,8 +192,8 @@ describe("the same change", () => {
 });
 
 describe("what waits on a person", () => {
-  test("the count and the inbox: who can decide it hears, who asked for it has its card, and it ends with the last one", async () => {
-    f = await setup();
+  test("nobody is asked: each change goes to the review, which applies the second on the text the first left", async () => {
+    f = await setup({ reply: withReview({ apply: true, why: "Uma regra que dura." }) });
     const bia = await addMember(f.db, f.org.id, "member", "bia");
     const ada = await teammate("ada");
     const [first] = (await propose([ada.id], "Primeira regra.", bia.id)).proposals;
@@ -201,25 +201,25 @@ describe("what waits on a person", () => {
 
     expect((await orgOverview(f.db, f.owner.id, f.org.id)).proposalsWaitingForMe).toBe(2);
     expect((await orgOverview(f.db, bia.id, f.org.id)).proposalsWaitingForMe).toBe(0);
-    const inbox = async (userId: string) =>
-      (await listNotifications(f, userId, f.org.id, { filter: "waiting" })).items.filter(
-        (n) => n.kind === "proposal_waiting",
-      );
-    const [row, ...more] = await inbox(f.owner.id);
-    expect(more).toEqual([]);
-    expect(row).toMatchObject({ waiting: true, count: 2 });
-    expect(row?.actors).toEqual([expect.objectContaining({ type: "agent", id: f.agent.id })]);
-    expect(await inbox(bia.id)).toEqual([]);
+    const inbox = async (userId: string, kind: string) =>
+      (await listNotifications(f, userId, f.org.id)).items.filter((n) => n.kind === kind);
+    expect(await inbox(f.owner.id, "proposal_waiting")).toEqual([]);
+    expect((await queuedReviews(f)).map((r) => [r.ids, r.origin])).toEqual([
+      [[first?.id ?? ""], "asked_other"],
+      [[second?.id ?? ""], "asked_other"],
+    ]);
 
-    // Accepting one moves the text the other was made against: it still waits, on the new text.
-    await decideProposal(f.db, f.owner.id, f.org.id, first?.id ?? "", "accept");
-    expect((await orgOverview(f.db, f.owner.id, f.org.id)).proposalsWaitingForMe).toBe(1);
-    expect(await inbox(f.owner.id)).toHaveLength(1);
-    await decideProposal(f.db, f.owner.id, f.org.id, second?.id ?? "", "accept");
+    // Applying the first moves the text the second was made against: it is carried onto the new text and applied.
+    expect((await settleQueued(f)).applied).toEqual([first?.id ?? "", second?.id ?? ""]);
     expect((await orgOverview(f.db, f.owner.id, f.org.id)).proposalsWaitingForMe).toBe(0);
-    expect(await inbox(f.owner.id)).toEqual([]);
     const [agent] = await f.db.select().from(schema.agents).where(eq(schema.agents.id, ada.id));
     expect(agent?.instructions).toContain("- Primeira regra.\n- Segunda regra.");
+    // Who looks after Ada hears it in one row for the day; Bia, who asked, has the card.
+    const [row, ...more] = await inbox(f.owner.id, "proposal_applied");
+    expect(more).toEqual([]);
+    expect(row).toMatchObject({ waiting: false, count: 2 });
+    expect(row?.actors).toEqual([expect.objectContaining({ type: "agent", id: f.agent.id })]);
+    expect(await inbox(bia.id, "proposal_applied")).toEqual([]);
   });
 
   test("accepted with other words, the others still add their rule to what was accepted", async () => {

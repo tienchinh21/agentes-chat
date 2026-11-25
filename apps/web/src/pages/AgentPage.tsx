@@ -8,12 +8,12 @@ import {
   useAgentSkills,
   useCredentials,
   useModels,
-  useProposals,
   useRuns,
   useSettings,
   useUpdateAgent,
 } from "@agenteschat/client";
 import { type Level, levelsOf, resourcesOf } from "@agenteschat/client/lib/access-levels";
+import { hidesAgentPage } from "@agenteschat/client/lib/agent-facts";
 import { groupOf, NO_GROUP } from "@agenteschat/client/lib/agent-groups";
 import { ownerPatchOf, ownerValueOf, ownsAgentAs, roleOfOwnerValue } from "@agenteschat/client/lib/agent-owner";
 import {
@@ -34,7 +34,6 @@ import { agentGrammar } from "@agenteschat/client/lib/grammar";
 import { overLimitText, tooLongToSend } from "@agenteschat/client/lib/message-length";
 import { edit, optimistic, without } from "@agenteschat/client/lib/optimistic";
 import { can } from "@agenteschat/client/lib/permissions";
-import { pendingOnAgent } from "@agenteschat/client/lib/proposals";
 import { isAuto } from "@agenteschat/client/lib/providers";
 import { type RepoChoice, repoChoiceOf, repoListOf, reposText } from "@agenteschat/client/lib/repos";
 import { isRightHand, tellsNameStory } from "@agenteschat/client/lib/right-hand";
@@ -168,7 +167,8 @@ export function AgentPage(props: AgentPageProps) {
       </div>
     );
   }
-  if (!agent) {
+  // A private agent whose page this person may not open reads as one that isn't there, as its link answers.
+  if (!agent || hidesAgentPage(agent)) {
     return (
       <div className="page page--full">
         <EmptyState icon="agent">{t("agent.notFound")}</EmptyState>
@@ -232,7 +232,6 @@ function AgentProfile({
   const repos = useAgentRepos(org.id, agent.id);
   const groups = useAgentGroups(org.id);
   const library = useAgentSkills(org.id, agent.id);
-  const proposals = useProposals(org.id);
   const runs = useRuns(org.id, agent.id, ownsOrManages(viewer));
   const visible = useVisibleChannels();
   const items = useConnectedById();
@@ -245,6 +244,8 @@ function AgentProfile({
   const [deleting, setDeleting] = useState(false);
   /** The dialog of the sentence under the name that is open (who thinks, where it works, the browser). */
   const [work, setWork] = useState<WorkDialog | null>(null);
+  // The screen "Quem pensa" opens on again from the Connect it closed for ("Adicionar conta").
+  const [reopenAt, setReopenAt] = useState<BrainScreen>();
   /** The repositories picker: open, with a repository to add ("Liberar"). */
   const [picking, setPicking] = useState<{ add?: string } | null>(null);
   const top = useRef<HTMLDivElement>(null);
@@ -756,7 +757,6 @@ function AgentProfile({
 
   /* ---------- Tabs ---------- */
 
-  const pending = pendingOnAgent(proposals.data ?? [], agent.id).length;
   const failures = !ownsOrManages(viewer)
     ? 0
     : (runs.data ?? []).filter((r) => r.status === "failed" && thisMonth(r.createdAt)).length;
@@ -768,15 +768,6 @@ function AgentProfile({
         <span className="agp-badge agp-badge--edit ac-num" title={t("agentPage.changesCount", { count: n })}>
           <Icon name="edit" size={14} />
           {n}
-        </span>
-      );
-    else if (id === "memory" && pending > 0)
-      badge = (
-        <span
-          className="agp-badge agp-badge--ask ac-num"
-          title={t("agentPage.memory.waitingCount", { count: pending })}
-        >
-          {pending}
         </span>
       );
     else if ((id === "activity" || (personal && id === "advanced" && view !== "activity")) && failures > 0)
@@ -959,12 +950,16 @@ function AgentProfile({
 
       <WorkDialogs
         open={work}
-        brainAt={section === "brain" ? brainAt : undefined}
+        brainAt={reopenAt ?? (section === "brain" ? brainAt : undefined)}
         onClose={() => {
           setWork(null);
+          setReopenAt(undefined);
           if (section === "brain") onNavigate(tab);
         }}
-        onReopen={() => setWork("brain")}
+        onReopen={(at) => {
+          setReopenAt(at);
+          setWork("brain");
+        }}
       />
 
       <Dialog

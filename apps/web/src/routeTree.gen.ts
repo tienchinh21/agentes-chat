@@ -24,6 +24,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReferRouteImport } from './routes/refer'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SurfacePageRouteImport } from './routes/surface-page'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as DesktopConnectorRouteImport } from './routes/desktop.connector'
@@ -147,6 +148,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurfacePageRoute = SurfacePageRouteImport.update({
+  id: '/surface-page',
+  path: '/surface-page',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -420,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/refer': typeof ReferRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/surface-page': typeof SurfacePageRoute
   '/termos': typeof TermosRoute
   '/terms': typeof TermsRoute
   '/desktop/connector': typeof DesktopConnectorRoute
@@ -486,6 +493,7 @@ export interface FileRoutesByTo {
   '/refer': typeof ReferRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/surface-page': typeof SurfacePageRoute
   '/termos': typeof TermosRoute
   '/terms': typeof TermsRoute
   '/desktop/connector': typeof DesktopConnectorRoute
@@ -552,6 +560,7 @@ export interface FileRoutesById {
   '/refer': typeof ReferRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/surface-page': typeof SurfacePageRoute
   '/termos': typeof TermosRoute
   '/terms': typeof TermsRoute
   '/desktop/connector': typeof DesktopConnectorRoute
@@ -620,6 +629,7 @@ export interface FileRouteTypes {
     | '/refer'
     | '/reset-password'
     | '/signup'
+    | '/surface-page'
     | '/termos'
     | '/terms'
     | '/desktop/connector'
@@ -686,6 +696,7 @@ export interface FileRouteTypes {
     | '/refer'
     | '/reset-password'
     | '/signup'
+    | '/surface-page'
     | '/termos'
     | '/terms'
     | '/desktop/connector'
@@ -751,6 +762,7 @@ export interface FileRouteTypes {
     | '/refer'
     | '/reset-password'
     | '/signup'
+    | '/surface-page'
     | '/termos'
     | '/terms'
     | '/desktop/connector'
@@ -818,6 +830,7 @@ export interface RootRouteChildren {
   ReferRoute: typeof ReferRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SurfacePageRoute: typeof SurfacePageRoute
   TermosRoute: typeof TermosRoute
   TermsRoute: typeof TermsRoute
   DesktopConnectorRoute: typeof DesktopConnectorRoute
@@ -934,6 +947,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surface-page': {
+      id: '/surface-page'
+      path: '/surface-page'
+      fullPath: '/surface-page'
+      preLoaderRoute: typeof SurfacePageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -1392,6 +1412,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReferRoute: ReferRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SurfacePageRoute: SurfacePageRoute,
   TermosRoute: TermosRoute,
   TermsRoute: TermsRoute,
   DesktopConnectorRoute: DesktopConnectorRoute,

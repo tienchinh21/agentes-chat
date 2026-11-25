@@ -1,7 +1,9 @@
-import type { AiChoiceState } from "@agenteschat/client";
+import type { AiChoiceState, PlanUsage } from "@agenteschat/client";
 import { useAiChoice } from "@agenteschat/client";
 import {
+  AI_CHOICE_GROUPS,
   type AiChoice,
+  type AiChoiceGroup,
   type AiChoiceRow,
   type AiChoiceTarget,
   accountShortName,
@@ -35,8 +37,10 @@ import "./ai-choice.css";
 /*
  * The one "Quem pensa" choice (web): Conta, then Modelo and Esforço, for every place that picks an AI (an agent, Lodi,
  * a new agent, a mission, several agents). The rows, their order and why one can't be used come from `useAiChoice`;
- * this only draws them. Conta is a searchable select of one-line rows (the name, its plan and whose it is muted, its
- * room at the end); an account that can't think here stays in the list, dimmed, with why.
+ * this only draws them. Conta is a searchable select: closed, one line (the name, its plan muted, its room); open, each
+ * account on two lines (the name over its plan and whose it is), its room at the end and a check on the chosen one. An
+ * account that can't think here stays in the list, dimmed, with why; one of the viewer's that signed out offers to sign
+ * in again where the caller can. "Adicionar conta" and "Gerenciar contas" stay at the list's foot, whatever is typed.
  */
 
 export type AiChoicePart = "account" | "model" | "effort";
@@ -90,9 +94,14 @@ function rowMeta(t: TFunction, row: AiChoiceRow, withOwner: boolean): string {
 
 /** A row's end: why it can't be used, else its room (the window closest to its limit), or nothing. */
 function RowEnd({ row }: { row: AiChoiceRow }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   if (!row.usable) return <span className="aa-room">{reasonText(t, row)}</span>;
-  const usage = row.account?.usage;
+  return <Room usage={row.account?.usage} />;
+}
+
+/** A plan's room: the window closest to its limit, as a short bar and its percent; at the limit, until when. */
+function Room({ usage }: { usage: PlanUsage | null | undefined }) {
+  const { t, i18n } = useTranslation();
   const line = usage ? planLine(usage, planMeterText(t, i18n.language)) : null;
   if (!line) return null;
   if (line.state === "limited")
@@ -113,7 +122,7 @@ function RowEnd({ row }: { row: AiChoiceRow }) {
   );
 }
 
-/** One option of Conta: the mark, the name, then its plan and owner muted, the room at the end; one line. */
+/** The closed field: the mark, the name, then its plan muted, the room at the end; one line. */
 function RowLine({ row, owner }: { row: AiChoiceRow; owner: boolean }) {
   const { t } = useTranslation();
   const name = rowName(t, row);
@@ -135,12 +144,87 @@ function RowLine({ row, owner }: { row: AiChoiceRow; owner: boolean }) {
   );
 }
 
-type RowOption = SelectOption & { row: AiChoiceRow };
+/** One option of the open list: the name over its plan and whose it is, its room (or "Entrar de novo") and the check. */
+function AccountOption({ row, chosen, again }: { row: AiChoiceRow; chosen: boolean; again: boolean }) {
+  const { t } = useTranslation();
+  const name = rowName(t, row);
+  const meta = rowMeta(t, row, true);
+  return (
+    <>
+      <span className="ac-menu__leading" aria-hidden="true">
+        {rowMark(row)}
+      </span>
+      <span className="ac-menu__label aa-row">
+        <span title={name}>{name}</span>
+        {meta && (
+          <span className="ac-menu__desc" title={meta}>
+            {meta}
+          </span>
+        )}
+      </span>
+      <span className="aa-row__end">
+        {again ? (
+          // The whole row signs in again (an option holds no button of its own): drawn as the button it acts as.
+          <span className="ac-btn ac-btn--sm aa-row__again">{t("aiAccounts.page.signInAgain")}</span>
+        ) : (
+          <RowEnd row={row} />
+        )}
+        <span className="ac-tz__check" aria-hidden="true">
+          {chosen && <Icon name="check" size={16} />}
+        </span>
+      </span>
+    </>
+  );
+}
+
+/**
+ * A way to think the accounts don't list, from the caller (an agent's "Quem pensa": its computer's own sign-in, a plan
+ * that moves it to another computer): drawn as an account, in its group, picked through `onPick`.
+ */
+export interface AiChoiceExtra {
+  key: string;
+  group: AiChoiceGroup;
+  name: string;
+  meta?: string;
+  mark: ReactNode;
+  usage?: PlanUsage | null;
+  /** It can't be picked: why, at the row's end. */
+  off?: string;
+  onPick: () => void;
+}
+
+/** An extra row of the open list, drawn as an account's. */
+function ExtraOption({ extra }: { extra: AiChoiceExtra }) {
+  return (
+    <>
+      <span className="ac-menu__leading" aria-hidden="true">
+        {extra.mark}
+      </span>
+      <span className="ac-menu__label aa-row">
+        <span title={extra.name}>{extra.name}</span>
+        {extra.meta && (
+          <span className="ac-menu__desc" title={extra.meta}>
+            {extra.meta}
+          </span>
+        )}
+      </span>
+      <span className="aa-row__end">
+        {extra.off ? <span className="aa-room">{extra.off}</span> : <Room usage={extra.usage} />}
+        <span className="ac-tz__check" aria-hidden="true" />
+      </span>
+    </>
+  );
+}
+
+type RowOption = SelectOption & { row?: AiChoiceRow; extra?: AiChoiceExtra };
+const EXTRA = "x:";
 
 /**
  * The selects of a choice, drawn from its state. `value`/`onChange`: the caller keeps the choice (a new agent, several
  * agents) and nothing saves here; else each change saves at once. `onAccount`: an account picked, for a caller with its
- * own way to switch (an agent's "Quem pensa": who else moves with it, signing in, undoing).
+ * own way to switch (an agent's "Quem pensa": who else moves with it, signing in, undoing). `onAdd`, `onManage`: the
+ * list's foot ("Adicionar conta", "Gerenciar contas"). `onAgain`: one of the viewer's signed-out accounts picked, to
+ * sign in again (without it such a row stays dimmed).
  */
 export function AiChoiceFields({
   state,
@@ -150,6 +234,11 @@ export function AiChoiceFields({
   onAccount,
   onSaved,
   modelHint,
+  onAdd,
+  onManage,
+  onAgain,
+  extra = [],
+  open = false,
   disabled = false,
   className,
 }: {
@@ -162,6 +251,16 @@ export function AiChoiceFields({
   onSaved?: (choice: AiChoice) => void;
   /** What the Modelo field's ⓘ says (a mission's: when it can change). */
   modelHint?: string;
+  /** "Adicionar conta" at the foot of the Conta list. */
+  onAdd?: () => void;
+  /** "Gerenciar contas" at the foot of the Conta list. */
+  onManage?: () => void;
+  /** One of the viewer's accounts that signed out, picked: sign in again. */
+  onAgain?: (row: AiChoiceRow) => void;
+  /** Ways to think the accounts don't list, each in its group (`AiChoiceExtra`). */
+  extra?: readonly AiChoiceExtra[];
+  /** The Conta list opens shown (a link that leads to the choice). */
+  open?: boolean;
   disabled?: boolean;
   className?: string;
 }) {
@@ -189,17 +288,36 @@ export function AiChoiceFields({
     );
   };
 
-  const accountOptions: RowOption[] = state.rows.map((r) => ({
+  // The viewer's own account that signed out: picking it signs in again, where the caller offers that.
+  const again = (r: AiChoiceRow) => !!onAgain && r.reason === "signed_out" && r.account?.mine === true;
+  const rowOptions: RowOption[] = state.rows.map((r) => ({
     value: r.key,
     label: rowName(t, r),
     // Lodi's "A do workspace" stands first on its own, with no heading.
     ...(r.group !== "workspace" ? { group: r.group } : {}),
     leading: rowMark(r),
-    disabled: !r.usable,
+    disabled: !r.usable && !again(r),
     row: r,
   }));
+  // The caller's extra rows after the accounts of their group.
+  const accountOptions: RowOption[] = AI_CHOICE_GROUPS.flatMap((g) => [
+    ...rowOptions.filter((o) => o.row?.group === g),
+    ...extra
+      .filter((x) => x.group === g)
+      .map((x) => ({
+        value: `${EXTRA}${x.key}`,
+        label: x.name,
+        group: g,
+        leading: x.mark,
+        disabled: !!x.off,
+        extra: x,
+      })),
+  ]);
   const pickAccount = (key: string) => {
+    const more = extra.find((x) => `${EXTRA}${x.key}` === key);
+    if (more) return more.onPick();
     const next = state.rows.find((r) => r.key === key);
+    if (next && onAgain && again(next)) return onAgain(next);
     if (!next || next.key === row?.key) return;
     if (onAccount) return onAccount(next);
     commit(aiChoiceOf(next, shown ?? null), next);
@@ -251,37 +369,88 @@ export function AiChoiceFields({
   const showAccount = parts.includes("account");
   const showModel = parts.includes("model") && models.length > 0;
   const showEffort = parts.includes("effort") && levels.length > 0;
+  // Nothing to show (a model of its own on a plan without a list, no levels): no empty block in the dialog's rhythm.
+  if (!showAccount && !showModel && !showEffort) return null;
+  // Codex on a Windows computer without MXC: what its own sandbox holds there, behind Conta's ⓘ.
+  const accountHint =
+    row && state.sandboxPartial(row)
+      ? { name: t("common.about", { label: t("agentPage.work.brain.account") }), text: t("brain.sandboxPartial") }
+      : undefined;
   const groupLabel = (g: string) =>
     g === "yours" || g === "others" || g === "keys" ? t(`aiHub.choice.groups.${g}`) : g;
   return (
     <div className={cx("aa-picker", className)} aria-busy={state.loading || undefined}>
       {showAccount && (
-        <Field label={t("agentPage.work.brain.account")} id={`${id}-account`}>
+        <Field
+          label={t("agentPage.work.brain.account")}
+          id={`${id}-account`}
+          {...(accountHint ? { hint: accountHint } : {})}
+        >
           <SearchSelect<string, RowOption>
             className="aa-account"
             value={row?.key}
             onValueChange={pickAccount}
             options={accountOptions}
             disabled={locked}
+            defaultOpen={open}
             placeholder={state.loading ? t("common.loading") : t("aiHub.choice.none")}
             labels={{
               search: t("aiHub.choice.search"),
               searchPlaceholder: t("aiHub.choice.search"),
               noResults: t("aiHub.choice.noMatch"),
+              empty: t("aiHub.choice.empty"),
               list: t("agentPage.work.brain.account"),
             }}
             groupLabel={groupLabel}
-            matches={(o, q) => matchesRow(t, o.row, q)}
-            renderOption={(o) => (
-              <>
-                <span className="ac-menu__leading" aria-hidden="true">
-                  {o.leading}
-                </span>
-                <RowLine row={o.row} owner />
-              </>
-            )}
+            matches={(o, q) =>
+              o.row ? matchesRow(t, o.row, q) : matchesWords(`${o.extra?.name ?? ""} ${o.extra?.meta ?? ""}`, q)
+            }
+            renderOption={(o) =>
+              o.row ? (
+                <AccountOption row={o.row} chosen={o.row.key === row?.key} again={again(o.row)} />
+              ) : o.extra ? (
+                <ExtraOption extra={o.extra} />
+              ) : null
+            }
+            {...(onAdd || onManage
+              ? {
+                  footer: (close: () => void) => (
+                    <>
+                      {onAdd && (
+                        <button
+                          type="button"
+                          className="ac-menu__item"
+                          onClick={() => {
+                            close();
+                            onAdd();
+                          }}
+                        >
+                          <Icon name="plus" />
+                          <span className="ac-menu__label">
+                            <span>{t("aiHub.choice.add")}</span>
+                            <span className="ac-menu__desc">{t("aiHub.choice.addLine")}</span>
+                          </span>
+                        </button>
+                      )}
+                      {onManage && (
+                        <button
+                          type="button"
+                          className="ac-menu__item"
+                          onClick={() => {
+                            close();
+                            onManage();
+                          }}
+                        >
+                          <Icon name="settings" />
+                          <span className="ac-menu__label">{t("aiHub.choice.manage")}</span>
+                        </button>
+                      )}
+                    </>
+                  ),
+                }
+              : {})}
             renderValue={(o) =>
-              o ? (
+              o?.row ? (
                 <span className="aa-value">
                   <span className="ac-select__lead" aria-hidden="true">
                     {o.leading}

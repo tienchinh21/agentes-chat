@@ -43,6 +43,7 @@ import { markdownToDocx } from "./docx";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "./errors";
 import { publishChannelEvent, publishListChanged } from "./events";
 import { MODEL_FILE_READ_BYTES, type ModelFile, readForModel, tooBigToReadNote, transcriptKey } from "./file-reader";
+import { FontError, fontMediaType, readFont, sniffFont } from "./fonts/sfnt";
 import { formatBytes, tableToCsv } from "./format";
 import { imageSize, pictureSize } from "./image-size";
 import { originOfActor } from "./live/access";
@@ -61,6 +62,7 @@ import {
   versionDoc,
 } from "./live/preview";
 import { docOf, liveDocMeta, loadStored, toB64 } from "./live/store";
+import { cleanPeaks } from "./voice";
 
 export { tableToCsv };
 
@@ -163,6 +165,13 @@ export interface FileContent {
   /** A picture's own size, read from its header when it was stored (`imageSize`); absent for older files. */
   width?: number;
   height?: number;
+  /** An audio file's wave and length (`setFileWave`); absent until an app measured it. */
+  wave?: FileWave;
+}
+
+export interface FileWave {
+  peaks: number[];
+  durationMs: number;
 }
 
 export type ArtifactContent =
@@ -656,6 +665,12 @@ const CONTENT_TYPES: Record<string, string> = {
   mp3: "audio/mpeg",
   wav: "audio/wav",
   ogg: "audio/ogg",
+  oga: "audio/ogg",
+  opus: "audio/ogg",
+  m4a: "audio/mp4",
+  aac: "audio/aac",
+  flac: "audio/flac",
+  weba: "audio/webm",
   ...Object.fromEntries(CODE_EXTENSIONS.map((ext) => [ext, "text/plain; charset=utf-8"])),
 };
 
@@ -699,7 +714,8 @@ const isTextFile = (name: string, contentType: string) =>
 
 /** A `file` version as content: metadata, plus its text when it is a small UTF-8 text file. */
 function fileContent(
-  v: Pick<VersionRow, "fileName" | "contentType" | "size" | "sha256"> & Partial<Pick<VersionRow, "width" | "height">>,
+  v: Pick<VersionRow, "fileName" | "contentType" | "size" | "sha256"> &
+    Partial<Pick<VersionRow, "width" | "height" | "wave">>,
   body: Uint8Array | null,
 ): FileContent {
   const name = v.fileName ?? "file";
@@ -710,6 +726,7 @@ function fileContent(
     content.width = v.width;
     content.height = v.height;
   }
+  if (v.wave) content.wave = v.wave;
   if (body && isTextFile(name, v.contentType)) {
     try {
       const text = new TextDecoder("utf-8", { fatal: true }).decode(body);
@@ -1731,7 +1748,19 @@ function fileInput(input: { name: string; bytes: Uint8Array; contentType?: strin
     const maxMb = ARTIFACT_LIMITS.fileBytes / 1024 / 1024;
     throw new ValidationError(`the file is too large (max ${maxMb} MB)`, "artifact.file_too_large", { maxMb });
   }
-  const contentType = fileContentType(name, input.contentType);
+  // A font is checked on the way in (ADR 0220 §2): one the server can't read never reaches the Drive as a font.
+  const font = sniffFont(input.bytes);
+  if (font) {
+    try {
+      readFont(input.bytes);
+    } catch (error) {
+      throw new ValidationError(
+        `This font can't be used: ${error instanceof FontError ? error.message : "it couldn't be read"}`,
+        "live.font_invalid",
+      );
+    }
+  }
+  const contentType = font ? fontMediaType(font) : fileContentType(name, input.contentType);
   return { name, stored: { body: input.bytes, contentType, fileName: name } satisfies Stored };
 }
 
@@ -2189,6 +2218,39 @@ export async function getArtifact(
   }
   const v = await versionRow(deps.db, a, version);
   return detail(view(a, editableKind(a.kind)), v.version, await contentOf(deps, a, v));
+}
+
+/** Longest sound a wave is kept for: past it, what an app sent is not a length. */
+const WAVE_MAX_MS = 24 * 3600_000;
+
+/**
+ * An audio file's wave and length, measured by the first app that played it (no audio decoder on the server) and kept
+ * with that version, so every app draws the same one. Anyone who can read the file may set it, once: it only draws.
+ */
+export async function setFileWave(
+  deps: ArtifactDeps,
+  actor: ArtifactActor,
+  orgId: string,
+  artifactId: string,
+  version: number,
+  input: { peaks: unknown; durationMs: unknown },
+): Promise<FileWave> {
+  const a = await readable(deps, actor, orgId, artifactId);
+  const v = await versionRow(deps.db, a, version);
+  if (a.kind !== "file" || !fileContentType(v.fileName ?? "", v.contentType).startsWith("audio/"))
+    throw new ValidationError("only an audio file has a wave", "artifact.not_audio");
+  if (v.wave) return v.wave;
+  const durationMs = Math.round(Number(input.durationMs));
+  if (!Number.isFinite(durationMs) || durationMs <= 0 || durationMs > WAVE_MAX_MS)
+    throw new ValidationError("the sound's length is not valid", "artifact.wave_invalid");
+  const wave = { peaks: cleanPeaks(input.peaks), durationMs };
+  const [kept] = await deps.db
+    .update(artifactVersions)
+    .set({ wave })
+    .where(and(eq(artifactVersions.id, v.id), isNull(artifactVersions.wave)))
+    .returning({ wave: artifactVersions.wave });
+  // Two apps measured it at once: the first one's stays.
+  return kept?.wave ?? (await versionRow(deps.db, a, version)).wave ?? wave;
 }
 
 /**

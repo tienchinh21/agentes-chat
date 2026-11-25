@@ -152,6 +152,11 @@ test("services: what of the computer agents may reach, one TCP or UDP port each,
   expect(normalizeStored({ services: "tcp/11434" })).toEqual({});
 });
 
+test("Push harder survives the config being read back: a restart or an edit keeps the owner's switch", () => {
+  expect(normalizeStored({ pushHarder: true }).pushHarder).toBe(true);
+  expect(normalizeStored({ pushHarder: "yes" })).toEqual({});
+});
+
 test("pause: until null holds until resumed; an until in the past counts as resumed", () => {
   const now = Date.parse("2026-10-17T12:00:00Z");
   expect(pauseOf(null, now)).toEqual({ paused: false });

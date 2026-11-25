@@ -270,7 +270,7 @@ pub fn open(app: &AppHandle, url: Option<Url>) -> Result<(), String> {
         })
         // A whole page loading again (⌘R, macOS ended it, a full navigation): the cover, never a blank window.
         .on_page_load(move |page, payload| match payload.event() {
-            PageLoadEvent::Started => crate::cover::show(&on_load, Duration::ZERO),
+            PageLoadEvent::Started => crate::cover::show(&on_load),
             // The page's own sizes follow the zoom (desktop.css), and the bar knows about full screen.
             PageLoadEvent::Finished => {
                 page_loaded();
@@ -310,6 +310,7 @@ pub fn open(app: &AppHandle, url: Option<Url>) -> Result<(), String> {
         // The buttons are placed by `place_lights` (on every fit), not with `traffic_light_position`.
         .hidden_title(true);
     let built = builder.build().map_err(|e| e.to_string())?;
+    crate::bench::window_built();
     // Linux's side of lib.rs `on_web_content_process_terminate` (macOS only in Tauri): a web process that died
     // leaves the window blank, so the page loads again.
     #[cfg(target_os = "linux")]
@@ -319,7 +320,7 @@ pub fn open(app: &AppHandle, url: Option<Url>) -> Result<(), String> {
             use webkit2gtk::WebViewExt;
             view.inner().connect_web_process_terminated(move |view, reason| {
                 crate::health::note(&app, &format!("the web process of {LABEL} ended ({reason:?}): loading it again"));
-                crate::cover::show(&app, Duration::ZERO);
+                crate::cover::show(&app);
                 view.reload();
             });
         });
@@ -770,9 +771,10 @@ fn front(app: &AppHandle) -> Result<(), String> {
 /// code with its own session), reconnecting it (`reconnect`), Preferences on a tab (`prefs`), the menu bar's
 /// access requests (`requests`), the Dock's badge (`badge`), the Go menu's organizations (`orgs`), a
 /// notification while the app is in the background (`notify`), the first run's window to pick another server
-/// (`servers`: the sign-in page's way out, the same window as Servers › Add a server…) and, on the server
-/// here, signing its owner in (`signIn`: the app spends its owner key on a one-time sign-in, which the window
-/// trades itself) and the folder of its files (`files`: Storage's "Show the folder"). Rust checks
+/// (`servers`: the sign-in page's way out, the same window as Servers › Add a server…), the app's own speed numbers
+/// for the site's report (`vitals`: its opening and its web view's memory) and, on the server here, signing its
+/// owner in (`signIn`: the app spends its owner key on a one-time sign-in, which the window trades itself) and the
+/// folder of its files (`files`: Storage's "Show the folder"). Rust checks
 /// each request, rebuilds it from the keys it may have, adds the asking page's own `origin`, whether agents may
 /// work here for it and whether it is the server here (`local`), and relays it: the popover's code owns the
 /// runners (apps/desktop/src/control/this-mac.ts) and answers through `this_mac_reply`. The machine's token
@@ -856,6 +858,8 @@ fn checked(request: &Value) -> Result<Value, String> {
         }
         // The folder is the app's to know: the page names none.
         Some("files") => Ok(json!({ "kind": "files" })),
+        // The app's own speed numbers (vitals.rs): the page asks, and says nothing.
+        Some("vitals") => Ok(json!({ "kind": "vitals" })),
         // The app icon (ADR 0179): one of the app's own ids, an agent the site drew (who it is and its two PNGs), or
         // none to read the one kept.
         Some("appIcon") => {
@@ -1144,6 +1148,14 @@ pub async fn this_mac(app: AppHandle, webview: tauri::Webview, request: Value) -
     }
     // What the app itself answers (the popover isn't needed).
     match request["kind"].as_str() {
+        // Its opening (once) and its web view's memory, for the site's speed report.
+        Some("vitals") => {
+            let measurer = app.clone();
+            let vitals = tauri::async_runtime::spawn_blocking(move || crate::vitals::for_site(&measurer))
+                .await
+                .map_err(|e| e.to_string())?;
+            return serde_json::to_value(vitals).map_err(|e| e.to_string());
+        }
         Some("badge") => {
             let count = |key: &str| u32::try_from(request[key].as_u64().unwrap_or(0)).unwrap_or(u32::MAX);
             crate::dock::set_badge(&app, count("waiting"), count("unread"));
@@ -1456,6 +1468,8 @@ mod tests {
     #[test]
     fn bridge_requests() {
         assert_eq!(checked(&json!({ "kind": "status", "extra": 1 })), Ok(json!({ "kind": "status" })));
+        // The app's speed numbers: whatever else the page sends is dropped.
+        assert_eq!(checked(&json!({ "kind": "vitals", "pid": 4 })), Ok(json!({ "kind": "vitals" })));
         // The app icon: an id of the app's, or an agent with its two PNGs (ADR 0179).
         assert_eq!(checked(&json!({ "kind": "appIcon", "icon": "moon" })), Ok(json!({ "kind": "appIcon", "icon": "moon" })));
         assert!(checked(&json!({ "kind": "appIcon", "icon": "../x" })).is_err());

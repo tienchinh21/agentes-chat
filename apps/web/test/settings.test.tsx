@@ -104,7 +104,7 @@ describe("Configurações do workspace", () => {
     expect(toggle.getAttribute("aria-checked")).toBe("true");
     // What is counted is the ⓘ's; no line under the switch while it can be changed.
     expect(describedBy(toggle)).toEqual([
-      "Contagens como pessoas, agentes, tamanho das máquinas, tokens de IA usados e o volume de dados que os navegadores dos agentes enviam e recebem. Nunca mensagens, arquivos, nomes ou sites.",
+      "Contagens como pessoas, agentes, tamanho das máquinas, tokens de IA usados, o volume de dados que os navegadores dos agentes enviam e recebem e com que rapidez os apps abrem e respondem. Nunca mensagens, arquivos, nomes ou sites.",
     ]);
     expect(card.querySelector(".settings-row__status")).toBeNull();
     await click(toggle);
@@ -127,7 +127,7 @@ describe("Configurações do workspace", () => {
       "Desligado nas configurações deste servidor (TELEMETRY=off).",
     );
     expect(describedBy(toggle)).toEqual([
-      "Contagens como pessoas, agentes, tamanho das máquinas, tokens de IA usados e o volume de dados que os navegadores dos agentes enviam e recebem. Nunca mensagens, arquivos, nomes ou sites.",
+      "Contagens como pessoas, agentes, tamanho das máquinas, tokens de IA usados, o volume de dados que os navegadores dos agentes enviam e recebem e com que rapidez os apps abrem e respondem. Nunca mensagens, arquivos, nomes ou sites.",
       "Desligado nas configurações deste servidor (TELEMETRY=off).",
     ]);
     cleanup();
@@ -294,9 +294,9 @@ describe("Configurações do workspace", () => {
 
   test("a key that isn't the chosen provider's: it asks whose it is (any sk- key could be several) and saves it there", async () => {
     const { state } = await go(seedState(), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     // Where the keys are kept is the title's ⓘ, not a line under it.
-    expect(hintOf("Chaves de provedor", keys).text).toBe(
+    expect(hintOf("Chaves de API", keys).text).toBe(
       "Ficam cifradas no servidor e nunca aparecem no navegador. Os agentes usam a chave que você escolher.",
     );
     expect(
@@ -358,7 +358,7 @@ describe("Configurações do workspace", () => {
 
   test("a Gemini key pasted while Claude is chosen: only Gemini is offered; its line says where and to turn on billing", async () => {
     const { state } = await go(seedState(), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     await click(within(keys).getByRole("button", { name: "Adicionar chave" }));
     const add = screen().getByRole("dialog", { name: "Adicionar chave de API" });
     const field = within(add).getByLabelText("Chave da API");
@@ -390,7 +390,7 @@ describe("Configurações do workspace", () => {
 
   test("an OpenRouter key: found by its shape, its line says where and who may keep what is sent; refused, it says so", async () => {
     const { state } = await go(seedState({ keyRefusal: "provider_key_invalid" }), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     await click(within(keys).getByRole("button", { name: "Adicionar chave" }));
     const add = screen().getByRole("dialog", { name: "Adicionar chave de API" });
     const field = within(add).getByLabelText("Chave da API");
@@ -416,7 +416,7 @@ describe("Configurações do workspace", () => {
 
   test("a Command Code key: its line names Command Code as the one that passes what is sent on", async () => {
     await go(seedState(), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     await click(within(keys).getByRole("button", { name: "Adicionar chave" }));
     const add = screen().getByRole("dialog", { name: "Adicionar chave de API" });
     // Joined at run time: a literal key shape reads as a real key to the secret scan.
@@ -436,7 +436,7 @@ describe("Configurações do workspace", () => {
       "settings/keys",
     );
     const before = state.credentials.length;
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     await click(within(keys).getByRole("button", { name: "Adicionar chave" }));
     const add = screen().getByRole("dialog", { name: "Adicionar chave de API" });
     await type(within(add).getByLabelText("Chave da API"), "sk-proj-abcdefghijklmnop1234");
@@ -460,7 +460,7 @@ describe("Configurações do workspace", () => {
     });
     seeded.credentials.push(OPENROUTER_KEY);
     const { state } = await go(seeded, "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     expect(keys.textContent).toContain("Cada tarefa usa um destes, conforme a dificuldade.");
     await click(within(keys).getByRole("button", { name: "Escolher" }));
     const dialog = screen().getByRole("dialog", { name: "Modelos do Automático" });
@@ -487,7 +487,7 @@ describe("Configurações do workspace", () => {
 
   test("provider keys: default marked; rotate keeps the key; the default can't be deleted; usage by kind", async () => {
     const { state, router } = await go(seedState(), "settings/keys");
-    const keys = () => screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = () => screen().getByRole("region", { name: "Chaves de API" });
     expect(keys().textContent).toContain("Claude da Acme");
     expect(keys().textContent).toContain("Claude · Termina em 7f2a");
     expect(keys().textContent).toContain("Padrão do workspace");
@@ -692,11 +692,11 @@ describe("Configurações do workspace", () => {
     cleanup();
     // IA e uso: the plans in percentages, never the workspace's keys, money or report.
     await go(state, "settings/usage");
-    expect(screen().queryByRole("region", { name: "Chaves de provedor" })).toBeNull();
+    expect(screen().queryByRole("region", { name: "Chaves de API" })).toBeNull();
     await usageTab();
     const plans = screen().getByRole("region", { name: "Contas" });
     expect(within(plans).getByRole("meter", { name: "5 horas" }).getAttribute("aria-valuenow")).toBe("62");
-    expect(screen().queryByRole("region", { name: "Chaves de provedor" })).toBeNull();
+    expect(screen().queryByRole("region", { name: "Chaves de API" })).toBeNull();
     expect(screen().queryByRole("region", { name: "Gastos da API por tipo" })).toBeNull();
     expect(screen().queryByRole("region", { name: "Orçamento padrão dos agentes" })).toBeNull();
     expect(document.body.textContent).not.toContain("US$");
@@ -1012,7 +1012,7 @@ describe("the same key saved more than once", () => {
       key("cred-d", { copyOf: "cred-a" }),
     ];
     const { state } = await go(seedState({ credentials }), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     expect(within(keys).getAllByText("Gateway")).toHaveLength(1);
     expect(keys.textContent).toContain("4 cópias iguais");
     await click(within(await keyMenu("Gateway")).getByRole("menuitem", { name: "Remover cópias" }));
@@ -1034,7 +1034,7 @@ describe("the same key saved more than once", () => {
   test("saving a key the workspace already has says it was updated, and adds no row", async () => {
     const claude = key("cred-a", { provider: "anthropic", label: "Claude", keyHint: "9999", endpoint: undefined });
     const { state } = await go(seedState({ credentials: [claude] }), "settings/keys");
-    const keys = screen().getByRole("region", { name: "Chaves de provedor" });
+    const keys = screen().getByRole("region", { name: "Chaves de API" });
     await click(within(keys).getByRole("button", { name: "Adicionar chave" }));
     const add = screen().getByRole("dialog", { name: "Adicionar chave de API" });
     await type(within(add).getByLabelText("Chave da API"), "sk-ant-api03-same-key-9999");

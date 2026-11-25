@@ -863,6 +863,9 @@
     },
     "kind": {
       "proposal_waiting_other": "{{names}} mengusulkan perbaikan",
+      "proposal_applied_other": "{{names}} menerapkan {{count}} perbaikan",
+      "proposal_applied_agents_other": "{{names}} menerapkan {{count}} perbaikan",
+      "proposal_applied_auto_other": "{{count}} perbaikan diterapkan secara otomatis",
       "mention_other": "{{names}} menyebutmu",
       "thread_reply_other": "{{names}} membalas di utas",
       "agent_reply_other": "{{names}} membalas",
@@ -1054,7 +1057,6 @@
     "fromWorkspace": "Dari ruang kerja",
     "issues": "Tugas",
     "issuesWithMe_other": "{{count}} bersamamu",
-    "proposalsWaiting_other": "{{count}} menunggu",
     "drive": "Drive",
     "connectors": "Konektor dan MCP",
     "preferences": "Preferensi",
@@ -1349,13 +1351,26 @@
     "agentLine_other": "{{count}} memori",
     "uses_other": "Dipakai {{count}} kali",
     "confirmed": "Dikonfirmasi oleh seseorang",
-    "confirm": "Konfirmasi",
-    "confirmedToast": "Dikonfirmasi",
     "details": "Detail teknis",
     "before": "Sebelumnya tertulis: {{text}}",
     "fix": "Perbaiki",
     "forgetTitle": "Lupakan memori ini?",
     "forgetText": "{{name}} berhenti memakai ini di percakapan berikutnya."
+  },
+  "proposals": {
+    "title": "Perbaikan agen",
+    "emptyTitle": "Belum ada yang berubah",
+    "empty": "Saat agen memperbaiki instruksinya sendiri atau instruksi rekannya, perubahannya muncul di sini, dengan Urungkan.",
+    "more": "Tampilkan lainnya",
+    "reviewing": "Sedang ditinjau…",
+    "appliedBy": "Diterapkan oleh {{name}}",
+    "appliedBy_female": "Diterapkan oleh {{name}}",
+    "appliedAuto": "Diterapkan otomatis",
+    "leftOutBy": "Tidak diterapkan oleh {{name}}",
+    "leftOutBy_female": "Tidak diterapkan oleh {{name}}",
+    "leftOut": "Tidak diterapkan",
+    "undoneBy": "Diurungkan oleh {{name}}",
+    "undoneByYou": "Diurungkan olehmu"
   },
   "wiki": {
     "map": "Peta halaman",
@@ -1407,6 +1422,15 @@
     "next": {
       "pr": "Branch sudah dikirim, belum ada pull request",
       "mergeLocal": "Siap di-merge ke {{base}}"
+    },
+    "terminal": {
+      "keys": "Tombol terminal",
+      "keyboard": "Papan ketik",
+      "pasteHint": "Tempel yang Anda salin ke terminal",
+      "key": {
+        "CtrlC": "Control-C, hentikan",
+        "CtrlD": "Control-D, akhir input"
+      }
     }
   },
   "taskManager": {

@@ -123,6 +123,7 @@ const Vitals = z
                 jsLagP95Ms: ClientVitalStat.optional(),
                 jsLagMaxMs: ClientVitalStat.optional(),
                 heapBytes: ClientVitalStat.optional(),
+                webviewBytes: ClientVitalStat.optional(),
                 getsPerReturn: ClientVitalStat.optional(),
                 reconnects: ClientVitalStat.optional(),
               }),
@@ -130,7 +131,7 @@ const Vitals = z
             .nullable()
             .openapi({
               description:
-                "What the apps that reported to it over its last minute measured, by platform (`ios`, `android`, `web`): cold start to the first frame and to the first rows, JavaScript stalls, heap, reads after each return to the app, socket reconnects. Null: no report.",
+                "What the apps that reported to it over its last minute measured, by platform (`ios`, `android`, `web`, and the desktop app on each system: `macos`, `windows`, `linux`): cold start to the first screen and to the first rows, JavaScript stalls, heap, the desktop's web view memory (`webviewBytes`), reads after each return to the app, socket reconnects. Null: no report.",
             }),
         }),
       )

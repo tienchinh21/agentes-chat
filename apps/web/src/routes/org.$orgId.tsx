@@ -26,6 +26,7 @@ import { PushOpens } from "@/components/NotificationOpen";
 import { NotMember } from "@/components/NotMember";
 import { NewAgentProvider } from "@/components/new-agent/new-agent-context";
 import { OrgProvider } from "@/components/org-context";
+import { ReconnectPill } from "@/components/ReconnectPill";
 import { RemoveMemberProvider } from "@/components/RemoveMember";
 import { Sidebar } from "@/components/Sidebar";
 import { BootSplash } from "@/components/Sky";
@@ -152,6 +153,7 @@ function OrgLayout() {
                       <div className="shell">
                         <CommandMenu />
                         <LeaveChannelDialog />
+                        <ReconnectPill />
                         {!focused && (
                           <>
                             <NavScrim />

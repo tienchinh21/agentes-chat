@@ -6464,6 +6464,8 @@ html:not([data-pointer]) .ac-hint:focus-visible {
   max-width: min(280px, calc(100vw - 32px));
   padding: 8px 12px;
   text-wrap: pretty;
+  /* A name with no place to break (a computer named by its address) wraps inside the bubble. */
+  overflow-wrap: anywhere;
   border-radius: 12px;
   color: var(--ink2);
   font-size: 13px;
@@ -9586,6 +9588,14 @@ html:not([data-pointer]) .ac-recur__day:focus-visible {
   font-size: 13px;
   color: var(--muted);
 }
+/* SearchSelect's `footer`: under the list whatever is typed, past a menu's separator, its rows drawn as a menu's. */
+.ac-tz__foot {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--menu-pad) var(--menu-pad);
+}
 .ac-tz__option[aria-disabled="true"] {
   color: var(--ink-muted);
   cursor: not-allowed;
@@ -9687,8 +9697,10 @@ html:not([data-pointer]) .ac-recur__day:focus-visible {
   justify-content: space-between;
   gap: 12px 16px;
 }
+/* As wide as the title on one line: when the buttons don't fit beside it, they go under it and the title stays whole. A
+   title wider than the page on its own wraps there. */
 .ac-pagehead__text {
-  flex: 1 1 280px;
+  flex: 1 1 auto;
   min-width: 0;
 }
 .ac-pagehead__titleline {
@@ -9709,7 +9721,9 @@ html:not([data-pointer]) .ac-recur__day:focus-visible {
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
+/* Its words never widen the header: only the title decides when the buttons go under it. */
 .ac-pagehead__meta {
+  contain: inline-size;
   min-height: 20px;
   margin: -2px 0 0;
   font-size: 14px;
@@ -10363,12 +10377,14 @@ html:not([data-pointer]) .ac-filtertoggle:focus-visible {
 .ac-filter--active:hover {
   background: color-mix(in srgb, var(--ink) 88%, var(--bg));
 }
+/* On the filled chip the × is its words' color, quieter; its plate shows only under the pointer. */
 .ac-filter--active .ac-filter__clear {
-  background: color-mix(in srgb, var(--bg) 20%, transparent);
-  color: var(--bg);
+  background: transparent;
+  color: color-mix(in srgb, var(--bg) 70%, transparent);
 }
 .ac-filter--active .ac-filter__clear:hover {
-  background: color-mix(in srgb, var(--bg) 32%, transparent);
+  background: color-mix(in srgb, var(--bg) 20%, transparent);
+  color: var(--bg);
 }
 .ac-filter__trigger {
   display: inline-flex;
@@ -10418,9 +10434,12 @@ html:not([data-pointer]) .ac-filter__clear:focus-visible {
   margin-right: var(--in);
   border: 0;
   border-radius: calc(var(--tool-r, var(--control-r-sm)) - var(--in));
-  background: var(--sunken);
+  background: transparent;
   color: var(--ink2);
   cursor: pointer;
+  transition:
+    background-color 0.15s var(--out),
+    color 0.15s var(--out);
 }
 .ac-filter__clear:hover {
   background: var(--plate);
@@ -10944,6 +10963,16 @@ html:not([data-pointer]) .ac-filter__option:focus-visible {
 :is(.ac-menu--dropdown, .ac-menu--select) .ac-menu__item:not(:has(> .ac-menu__leading > .ac-avatar)) > .ac-menu__label {
   white-space: normal;
   overflow-wrap: anywhere;
+}
+/* In a list with faces every option is one size (OptionRow): a row led by a bare glyph there (a channel, a kind) keeps
+   its one line too, a name wider than the menu ending in "…", so its glyph stays beside it. */
+:is(.ac-menu, .ac-palette__list):has(.ac-menu__leading > .ac-avatar)
+  .ac-menu__item:not(:has(> .ac-menu__leading > .ac-avatar))
+  > .ac-menu__label:not(:has(> .ac-menu__desc)) {
+  display: block;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
 }
 /* Its lead no taller than a line (an icon, a mark) keeps to the name's first line then, as an `.ac-iconline` lead. A list
    with faces centres every lead in its taller row instead. */

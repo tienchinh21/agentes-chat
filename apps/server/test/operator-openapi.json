@@ -224,6 +224,9 @@
                       "heapBytes": {
                         "$ref": "#/components/schemas/OperatorClientVitalStat"
                       },
+                      "webviewBytes": {
+                        "$ref": "#/components/schemas/OperatorClientVitalStat"
+                      },
                       "getsPerReturn": {
                         "$ref": "#/components/schemas/OperatorClientVitalStat"
                       },
@@ -233,7 +236,7 @@
                     },
                     "required": ["reports"]
                   },
-                  "description": "What the apps that reported to it over its last minute measured, by platform (`ios`, `android`, `web`): cold start to the first frame and to the first rows, JavaScript stalls, heap, reads after each return to the app, socket reconnects. Null: no report."
+                  "description": "What the apps that reported to it over its last minute measured, by platform (`ios`, `android`, `web`, and the desktop app on each system: `macos`, `windows`, `linux`): cold start to the first screen and to the first rows, JavaScript stalls, heap, the desktop's web view memory (`webviewBytes`), reads after each return to the app, socket reconnects. Null: no report."
                 }
               },
               "required": [
@@ -807,6 +810,24 @@
         "enum": ["payment", "unpaid", "ended", null],
         "description": "`payment`: no plan yet. `unpaid`: its payment failed. `ended`: its plan ended. Agents stop as with any hold; people still read and write."
       },
+      "OperatorStorageTotal": {
+        "type": "object",
+        "properties": {
+          "storageBytes": {
+            "type": "integer",
+            "description": "The sum of `meters.storageBytes` over the workspaces that keep their files on this server's storage."
+          },
+          "workspaces": {
+            "type": "integer",
+            "description": "How many workspaces it is the sum of: those with at least one byte counted."
+          },
+          "ownStorageWorkspaces": {
+            "type": "integer",
+            "description": "How many workspaces keep their files in a bucket of their own (`meters.ownStorage`): left out."
+          }
+        },
+        "required": ["storageBytes", "workspaces", "ownStorageWorkspaces"]
+      },
       "OperatorOutsideAccessState": {
         "type": "string",
         "enum": ["pending", "member"],
@@ -1245,6 +1266,15 @@
           }
         },
         "required": ["waiting"]
+      },
+      "OperatorMoving": {
+        "type": "object",
+        "properties": {
+          "moving": {
+            "type": "boolean"
+          }
+        },
+        "required": ["moving"]
       },
       "OperatorSignup": {
         "type": "object",
@@ -5072,7 +5102,7 @@
                 },
                 "reason": {
                   "type": ["string", "null"],
-                  "description": "An error's: `transient`, `provider_outage`, `brain_unavailable`, `brain_stalled`, `usage_wait`, `no_ai`, `canceled`, `gave_up`, `recovered`, `interrupted`… A `context` step's that handed the run's unread messages on to another run (`redispatchedMessageIds`): why, one of `done`, `failed`, `canceled`, `interrupted`, `swept`, `held`."
+                  "description": "An error's: `transient`, `provider_outage`, `brain_unavailable`, `brain_stalled`, `usage_wait`, `no_ai`, `canceled`, `gave_up`, `recovered`, `interrupted`… A `context` step's that handed the run's unread messages on to another run (`redispatchedMessageIds`): why, one of `done`, `failed`, `canceled`, `interrupted`, `swept`, `held`. A `context` step with `steerTriage`: how the triage said the agent takes a message sent while it works (`stop`, `interrupt`, `add`, `answer`, `queue`, `elsewhere`). One with `talkerDecision`: what the fast reply decided about that message (`reply`, `pass`, `error`, or why it was skipped)."
                 },
                 "toRunId": {
                   "type": ["string", "null"],
@@ -9304,6 +9334,35 @@
         }
       }
     },
+    "/storage": {
+      "get": {
+        "tags": ["Operator"],
+        "summary": "The bytes of files the whole instance keeps on this server's storage",
+        "description": "A workspace's `meters.storageBytes` (`GET /orgs/{orgId}`), summed over every workspace whose new files go to this server's storage: each version kept of the Drive's files, the skills' stored files, the voice recordings still kept and live files' pictures and documents, by the size each recorded when it was written. Left out: files in the trash, and a workspace that keeps its files in a bucket of its own, with whatever it still has on this server. Every file's row is read to answer it, and a read that runs too long ends in an error.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorStorageTotal"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/orgs/{orgId}/outside-access": {
       "post": {
         "tags": ["Operator"],
@@ -10176,6 +10235,91 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperatorEgressWaiting"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or wrong token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orgs/{orgId}/machines/{machineId}/moving": {
+      "put": {
+        "tags": ["Operator"],
+        "summary": "Say the workspace's computer is moving to another server, or no longer",
+        "description": "Say it (`true`) when its move starts, and `false` once its runner paired on the new server, or the move was cancelled or failed. While it is away its people see that it is moving and comes back in a few minutes, never that it is offline or not answering, for at most two hours after the latest `true` (say it again at each step of a long move). Removing the computer ends it. A change comes as `machine.updated`. 404 when the workspace has no such managed computer.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "orgId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "machineId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "moving": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["moving"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperatorMoving"
                 }
               }
             }

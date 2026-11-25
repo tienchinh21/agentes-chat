@@ -89,6 +89,12 @@ export const channels = pgTable(
      * was created with (`agent_runs.reply_in_thread`).
      */
     replyInThreads: boolean().notNull().default(true),
+    /**
+     * The agent responsible for the channel (ADR 0095, addendum of 2026-11-23): one of its member agents, or none.
+     * What a person says to the room goes to it, and it is given the turn when work it didn't hand off ends here.
+     * Regular channels only; cleared when the agent leaves the channel.
+     */
+    leadAgentId: uuid().references(() => agents.id, { onDelete: "set null" }),
   },
   (t) => [unique().on(t.orgId, t.name), unique().on(t.orgId, t.id), unique().on(t.orgId, t.dmKey)],
 );

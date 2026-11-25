@@ -420,10 +420,20 @@ export const organizationSettings = pgTable("organization_settings", {
   /** "Dar boas-vindas a quem entra": the right hand greets each person who joins, once. On without a row too. */
   welcomePeople: boolean().notNull().default(true),
   /**
+   * The right hand learns from conversations on its own, as every other agent does (each person can also turn it off
+   * for themselves, `organization_members.right_hand_learns`). Off: only what people ask it to remember. On without a row.
+   */
+  rightHandLearns: boolean().notNull().default(true),
+  /**
    * How much the workspace's agents ask before acting (ADR 0173 addendum 2026-11-15): what every agent without its
    * own choice (`agents.approvals_level_own`) uses. A workspace with no row here is at `risky`.
    */
   approvalsLevel: text().$type<"always" | "risky" | "never">().notNull().default("risky"),
+  /**
+   * People's computers may help when the workspace's computer is full or away, each as its owner allows
+   * (`machines.spill_own`, ADR 0233). An admin turns it off for everyone; on without a row.
+   */
+  devicesHelp: boolean().notNull().default(true),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
 

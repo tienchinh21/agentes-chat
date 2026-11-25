@@ -309,6 +309,18 @@ Only then do the apps offer it (`offersCode`, `offeredTools`): the sidebar's Mor
 the phone. A person who put Code in the sidebar's list keeps it there. The address still opens the page, which says
 what is missing, and a session's links keep working.
 
+### 13. Any git host, and in the person's name (addendum 2026-11-24, ADR 0227)
+
+A session works on a repository of any git host the workspace connected: GitHub's `owner/name`, or another host's with
+the host first (`gitlab:group/project`, `bitbucket:workspace/repo`, a git server's `git:team/project.git`), by name or
+by its address. A project only on the computer stays a plain name.
+
+When the person who asked connected that host as their own account (ADR 0099), the session's work on its repository
+goes out as them: the commits are authored with their name and the host's no-reply address for the account, the
+branch is pushed with their token, and the pull request is opened with it. Their token stays on the server; the
+agent's computer gets a name and an address for that turn. A host refusing their token, a run nobody asked for or a
+person with no account there: the workspace's connection, as before (ADR 0227 §5).
+
 ## Consequences
 
 - No new runner op for the worktree or the diff: the session reuses `mission.worktree` and `exec`. The terminal's

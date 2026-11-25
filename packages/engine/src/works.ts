@@ -30,8 +30,17 @@ import { ago, stepLine } from "./talker-snapshot";
 import { nameConversation } from "./thread-assess";
 import { maskCredentials } from "./tool-detail";
 
-const { agentConsultations, agentQuestions, agentRunSteps, agentWorks, agentRuns, messages, threadFollows, users } =
-  schema;
+const {
+  agentConsultations,
+  agentQuestions,
+  agentRunSteps,
+  agentWorks,
+  agentRuns,
+  channels,
+  messages,
+  threadFollows,
+  users,
+} = schema;
 
 export type WorkRow = typeof agentWorks.$inferSelect;
 export type WorkPlanItem = schema.WorkPlanItem;
@@ -71,6 +80,8 @@ export const WORK_JOB_YIELD_MS = 60 * 60_000;
 
 export const WORK_CHECK_IN_JOB = "agent_work.check_in";
 export const WORK_FOLLOW_UP_JOB = "agent_work.follow_up";
+/** A work ended in a channel with a responsible agent: the lead may take its next step (`tellChannelLead`). */
+export const CHANNEL_LEAD_JOB = "channel.lead_turn";
 export const WORK_IN_BACKGROUND_TOOL = "work_in_background";
 export const POST_UPDATE_TOOL = "post_update";
 export const STEER_WORK_TOOL = "steer_work";
@@ -1154,6 +1165,23 @@ export async function endWork(
           ? "continued"
           : "ended",
     );
+    // A channel's responsible agent may take the next step (ADR 0095): judged in a job, off this run's ending. Work
+    // handed off goes back to the agent that handed it (`reportHandOffs`).
+    if ((status === "done" || status === "failed") && !work.consultationId) {
+      const [lead] = await tx
+        .select({ id: channels.leadAgentId })
+        .from(channels)
+        .where(and(eq(channels.orgId, work.orgId), eq(channels.id, work.channelId)));
+      if (lead?.id && lead.id !== work.agentId)
+        await enqueue(tx, {
+          orgId: work.orgId,
+          kind: CHANNEL_LEAD_JOB,
+          payload: { workId: work.id, runId: run.id },
+          // Per end: Continuar ends it again in another run.
+          dedupeKey: `${CHANNEL_LEAD_JOB}:${work.id}:${run.id}`,
+          maxAttempts: 3,
+        });
+    }
     const released = await releaseQueuedWorks(tx, work.orgId);
     return { work: closed ?? work, end, released, status };
   });

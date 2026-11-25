@@ -58,15 +58,17 @@ describe("/conectar: confirm a computer's code", () => {
     expect(router.state.location.pathname).toMatch(new RegExp(`^/org/${ORG_ID}/settings/devices/.+`));
   });
 
-  test("other people's agents think on it only when the person turns that on here", async () => {
+  test("it helps when the team's computer is full or away unless the person turns that off here", async () => {
     const { state } = await open();
     const page = document.querySelector(".connect-page") as HTMLElement;
-    const others = within(page).getByRole("switch", { name: "Agentes de outras pessoas podem pensar aqui" });
-    expect(others.getAttribute("aria-checked")).toBe("false");
-    await click(others);
+    const help = within(page).getByRole("switch", {
+      name: "Ajudar quando o computador da equipe estiver cheio ou fora",
+    });
+    expect(help.getAttribute("aria-checked")).toBe("true");
+    await click(help);
     await click(within(page).getByRole("button", { name: "Conectar" }));
     await settle(6);
-    expect(calls(state, "devices.updateComputer").map((a) => a.at(-1))).toEqual([{ spill: { others: true } }]);
+    expect(calls(state, "devices.updateComputer").map((a) => a.at(-1))).toEqual([{ spill: { own: false } }]);
   });
 
   test("Não fui eu: the computer isn't connected", async () => {

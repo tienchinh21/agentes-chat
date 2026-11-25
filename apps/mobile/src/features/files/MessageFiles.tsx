@@ -1,5 +1,5 @@
 import type { ArtifactDetail } from "@agenteschat/client";
-import { formatBytes, mediaKindOfArtifact, pictureRatio } from "@agenteschat/client/lib/files";
+import { formatBytes, mediaKindOfArtifact, pictureRatio, previewKindOfName } from "@agenteschat/client/lib/files";
 import { keepWhole } from "@agenteschat/client/lib/format";
 import { Image } from "expo-image";
 import { useMemo, useState } from "react";
@@ -15,6 +15,7 @@ import { LiveFileCard } from "../live-files/LiveFileCard";
 import { opensLive } from "../live-files/routes";
 import { useColors, useOrgId } from "../shared/hooks";
 import { AttachmentTile } from "./AttachmentTile";
+import { FileVoice } from "./FileVoice";
 import { ImageStack, type StackImage } from "./ImageStack";
 import { isLocalMedia, type LocalFile, localRatio } from "./local-files";
 import {
@@ -76,6 +77,7 @@ export function MessageFiles({ files, align = "start" }: { files: MessageFile[];
   // A live file is its own card: a preview of it as it is now, opening its screen (ADR 0196 §9).
   const liveFiles: ArtifactDetail[] = [];
   const videos: { file: MessageFile; detail: ArtifactDetail | undefined }[] = [];
+  const sounds: { file: MessageFile; detail: ArtifactDetail | undefined }[] = [];
   const others: { file: MessageFile; detail: ArtifactDetail | undefined; failed: boolean }[] = [];
   live.forEach((file, i) => {
     const q = queries[i];
@@ -91,8 +93,12 @@ export function MessageFiles({ files, align = "start" }: { files: MessageFile[];
     // Until it loads, a name like "print.png" already says it's a picture (no jump into the grid).
     const isImage = detail ? fileInfo(detail).view === "image" : !q?.isError && IMAGE_EXT.has(extensionOf(file.title));
     const isVideo = detail ? fileInfo(detail).view === "video" : !q?.isError && VIDEO_EXT.has(extensionOf(file.title));
+    const isAudio = detail
+      ? fileInfo(detail).view === "audio"
+      : !q?.isError && previewKindOfName(file.title) === "audio";
     if (isImage) images.push({ file, detail });
     else if (isVideo) videos.push({ file, detail });
+    else if (isAudio) sounds.push({ file, detail });
     else others.push({ file, detail, failed: Boolean(q?.isError) });
   });
   const removed = files.filter((f) => f.deleted);
@@ -150,6 +156,9 @@ export function MessageFiles({ files, align = "start" }: { files: MessageFile[];
       {videos.map(({ file, detail }) => (
         <InlineVideo key={file.id} file={file} detail={detail} width={blockWidth} siblings={media} />
       ))}
+      {sounds.map(({ file, detail }) => (
+        <InlineAudio key={file.id} file={file} detail={detail} width={blockWidth} />
+      ))}
       {blocks.map((b) =>
         b.kind === "poll" ? (
           <PollCard key={b.id} id={b.id} version={b.shownVersion} />
@@ -195,6 +204,56 @@ export function MessageFiles({ files, align = "start" }: { files: MessageFile[];
       {removed.map((file) => (
         <RemovedCard key={file.id} />
       ))}
+    </View>
+  );
+}
+
+/**
+ * An audio file on a message plays in place, in the voice-message player, with its name under it, which opens it. One
+ * this phone can't play is its file's card.
+ */
+function InlineAudio({
+  file,
+  detail,
+  width,
+}: {
+  file: MessageFile;
+  detail: ArtifactDetail | undefined;
+  width: number;
+}) {
+  const { t } = useTranslation();
+  const title = detail?.title || file.title;
+  const size = detail?.content.kind === "file" ? detail.content.size : undefined;
+  const { i18n } = useTranslation();
+  return (
+    <View style={[styles.audio, { width }]}>
+      <FileVoice
+        id={file.id}
+        version={file.version}
+        wave={detail?.content.kind === "file" ? detail.content.wave : undefined}
+        fallback={
+          <AttachmentTile
+            file={file}
+            detail={detail}
+            failed={false}
+            picture={false}
+            width={width}
+            single
+            siblings={[]}
+          />
+        }
+      />
+      <PressScale
+        haptic={false}
+        onPress={() => openFile({ id: file.id, version: file.version, title: file.title, detail })}
+        accessibilityRole="button"
+        accessibilityLabel={t("artifacts.open", { title })}
+        style={styles.audioName}
+      >
+        <Text variant="caption" tone="muted">
+          {size === undefined ? title : `${title} · ${formatBytes(i18n.language, size)}`}
+        </Text>
+      </PressScale>
     </View>
   );
 }
@@ -519,6 +578,9 @@ function RemovedCard() {
 }
 
 const styles = StyleSheet.create({
+  audio: { gap: 4 },
+  // Under the player, in line with its card's inner edge.
+  audioName: { paddingHorizontal: 12 },
   wrap: { alignSelf: "stretch", gap: 8 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: GAP },
   gridEnd: { justifyContent: "flex-end" },

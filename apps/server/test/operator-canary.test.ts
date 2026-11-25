@@ -945,6 +945,7 @@ beforeAll(async () => {
     "/openapi.json",
     "/health",
     "/vitals",
+    "/storage",
     "/orgs?limit=200",
     "/orgs?q=acme",
     "/events",

@@ -1,6 +1,6 @@
 //! The main window's cover: a page of the app itself (`cover.html`, local) over the server's page, so the
-//! window is never blank. It shows when the app opens (at least 1 s), whenever the page loads whole again
-//! (⌘R, macOS ending the page, switching servers) and while the server can't be reached; it goes when the
+//! window is never blank. It shows when the app opens, whenever the page loads whole again (⌘R,
+//! macOS ending the page, switching servers) and while the server can't be reached; it goes when the
 //! page says it painted (`page_ready`). The cover only asks the server open now whether it answers, to tell
 //! offline from down, and may only ask to load the page again or to step aside (capabilities/cover.json).
 //!
@@ -11,7 +11,7 @@
 //! each step is written to the window's log (`window.log` in the app's log folder).
 
 use std::sync::Mutex;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use std::path::PathBuf;
 
@@ -22,8 +22,6 @@ use crate::main_window;
 
 pub const LABEL: &str = "main-cover";
 
-/// The splash when the app opens stays at least this long, even when the site is ready sooner.
-pub const OPENING: Duration = Duration::from_secs(1);
 /// The cover fades out (cover.css) before it is hidden.
 const FADE: Duration = Duration::from_millis(260);
 /// The sky's deepest tone (packages/ui sky SKY_TONES[0]), before the cover's page paints.
@@ -39,8 +37,8 @@ pub struct Cover(Mutex<Shown>);
 
 #[derive(Default)]
 struct Shown {
-    /// Since when it covers the site, and for how long at least; `None` when hidden.
-    since: Option<(Instant, Duration)>,
+    /// It covers the site now.
+    covering: bool,
     /// Each showing gets a new one: a late hide meant for an earlier showing does nothing.
     generation: u64,
 }
@@ -61,6 +59,13 @@ fn window_points(window: &tauri::Window) -> tauri::Result<LogicalSize<f64>> {
 
 /// Adds the cover to the freshly made main window, showing (the splash).
 pub fn attach(app: &AppHandle, window: &tauri::Window) -> tauri::Result<()> {
+    // Covering from before the cover's web view exists: making it can take seconds (WebView2's first start), and a
+    // site that paints meanwhile must still find a cover to step aside from.
+    {
+        let mut shown = lock(app);
+        shown.covering = true;
+        shown.generation += 1;
+    }
     if OVER_THE_SITE {
         let size = window_points(window)?;
         let cover = WebviewBuilder::new(LABEL, WebviewUrl::App("cover.html".into()))
@@ -70,10 +75,20 @@ pub fn attach(app: &AppHandle, window: &tauri::Window) -> tauri::Result<()> {
             .background_color(SKY)
             .auto_resize();
         window.add_child(cover, LogicalPosition::new(0.0, 0.0), size)?;
+        // The site painted while the cover was being made: it steps aside at once.
+        if !lock(app).covering {
+            if let Some(cover) = app.get_webview(LABEL) {
+                let _ = cover.hide();
+                crate::bench::cover_gone();
+                main_window::keep_lights(app);
+                if window_is_key(app) {
+                    if let Some(site) = app.get_webview(main_window::LABEL) {
+                        let _ = site.set_focus();
+                    }
+                }
+            }
+        }
     }
-    let mut shown = lock(app);
-    shown.since = Some((Instant::now(), OPENING));
-    shown.generation += 1;
     Ok(())
 }
 
@@ -81,19 +96,13 @@ fn lock(app: &AppHandle) -> std::sync::MutexGuard<'_, Shown> {
     app.state::<Cover>().inner().0.lock().unwrap_or_else(|e| e.into_inner())
 }
 
-/// Covers the site now (it is loading a whole page again), for at least `min`. Already covering (the
-/// splash, when the first load starts), it keeps whatever minimum is left.
-pub fn show(app: &AppHandle, min: Duration) {
+/// Covers the site now (it is loading a whole page again).
+pub fn show(app: &AppHandle) {
     let was_shown = {
         let mut shown = lock(app);
-        let now = Instant::now();
-        let left = shown
-            .since
-            .map(|(since, before)| before.saturating_sub(since.elapsed()))
-            .unwrap_or_default();
-        let was_shown = shown.since.is_some();
+        let was_shown = shown.covering;
         shown.generation += 1;
-        shown.since = Some((now, min.max(left)));
+        shown.covering = true;
         was_shown
     };
     let Some(cover) = app.get_webview(LABEL) else { return };
@@ -119,16 +128,17 @@ fn window_is_key(app: &AppHandle) -> bool {
         .unwrap_or(false)
 }
 
-/// The site painted: the cover fades and steps aside (after its minimum, when it has one).
+/// The site painted: the cover fades and steps aside.
 pub fn hide(app: &AppHandle) {
-    let (wait, generation) = {
+    let generation = {
         let shown = lock(app);
-        let Some((since, min)) = shown.since else { return };
-        (min.saturating_sub(since.elapsed()), shown.generation)
+        if !shown.covering {
+            return;
+        }
+        shown.generation
     };
     let app = app.clone();
     std::thread::spawn(move || {
-        std::thread::sleep(wait);
         let current = |app: &AppHandle| lock(app).generation == generation;
         let cover = app.get_webview(LABEL);
         if !current(&app) {
@@ -143,8 +153,9 @@ pub fn hide(app: &AppHandle) {
             if shown.generation != generation {
                 return; // shown again meanwhile
             }
-            shown.since = None;
+            shown.covering = false;
         }
+        crate::bench::cover_gone();
         let Some(cover) = cover else { return };
         let _ = cover.hide();
         // Hiding a web view lays the window out anew, the buttons back at the title bar's top.
@@ -162,7 +173,7 @@ pub fn hide(app: &AppHandle) {
 /// left nothing to reload, and the cover's own checks then find the server up and wait for a page that never
 /// comes, so while the site hasn't painted, the window asks for it again.
 pub fn server_here_ready(app: &AppHandle) {
-    if lock(app).since.is_none() {
+    if !lock(app).covering {
         return; // the site painted already
     }
     let Some(site) = main_window::site(app) else { return };
@@ -181,19 +192,25 @@ pub fn server_here_ready(app: &AppHandle) {
 pub fn over_server_here(app: &AppHandle) {
     let Some(site) = main_window::site(app) else { return };
     if crate::local_server::is_here(app, &site.origin().ascii_serialization()) {
-        show(app, Duration::ZERO);
+        show(app);
     }
 }
 
-/// The site, once it painted its first screen (apps/web `pageReady`).
+/// The site, once it painted its first screen (apps/web `pageReady`), or a page in its place (the proxy's "back in a
+/// moment" while the server restarts, the boot's fallback when the site's files didn't load): each lifts the cover,
+/// and only the site's own (`site`) ends the app's opening.
 #[tauri::command]
-pub fn page_ready(app: AppHandle, webview: tauri::Webview) -> Result<(), String> {
+pub fn page_ready(app: AppHandle, webview: tauri::Webview, site: Option<bool>) -> Result<(), String> {
     if webview.label() != main_window::LABEL {
         return Err("only the site says it painted".into());
     }
     if let Some(path) = pending_path(&app).filter(|p| p.exists()) {
         let _marker = MARKER.lock();
         let _ = std::fs::remove_file(path);
+    }
+    if site == Some(true) {
+        crate::vitals::painted();
+        crate::bench::painted(&app, &webview);
     }
     hide(&app);
     Ok(())

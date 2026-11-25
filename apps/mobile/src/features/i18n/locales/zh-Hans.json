@@ -863,6 +863,9 @@
     },
     "kind": {
       "proposal_waiting_other": "{{names}} 提议改进",
+      "proposal_applied_other": "{{names}} 应用了 {{count}} 项改进",
+      "proposal_applied_agents_other": "{{names}} 应用了 {{count}} 项改进",
+      "proposal_applied_auto_other": "已自动应用 {{count}} 项改进",
       "mention_other": "{{names}} 提及了你",
       "thread_reply_other": "{{names}} 在话题中回复了",
       "agent_reply_other": "{{names}} 回复了",
@@ -1054,7 +1057,6 @@
     "fromWorkspace": "来自工作区",
     "issues": "任务",
     "issuesWithMe_other": "{{count}} 个与你有关",
-    "proposalsWaiting_other": "{{count}} 条待处理",
     "drive": "Drive",
     "connectors": "连接器和 MCP",
     "preferences": "偏好设置",
@@ -1349,13 +1351,26 @@
     "agentLine_other": "{{count}} 条记忆",
     "uses_other": "已使用 {{count}} 次",
     "confirmed": "已由成员确认",
-    "confirm": "确认",
-    "confirmedToast": "已确认",
     "details": "技术细节",
     "before": "之前的内容：{{text}}",
     "fix": "更正",
     "forgetTitle": "忘记这条记忆？",
     "forgetText": "{{name}} 在以后的对话中将不再使用这条记忆。"
+  },
+  "proposals": {
+    "title": "智能体改进",
+    "emptyTitle": "还没有任何更改",
+    "empty": "当智能体改进自己或同伴的指令时，更改会显示在这里，并可撤销。",
+    "more": "显示更多",
+    "reviewing": "评估中…",
+    "appliedBy": "由 {{name}} 应用",
+    "appliedBy_female": "由 {{name}} 应用",
+    "appliedAuto": "已自动应用",
+    "leftOutBy": "{{name}} 决定不应用",
+    "leftOutBy_female": "{{name}} 决定不应用",
+    "leftOut": "未应用",
+    "undoneBy": "已由 {{name}} 撤销",
+    "undoneByYou": "已由你撤销"
   },
   "wiki": {
     "map": "页面地图",
@@ -1407,6 +1422,15 @@
     "next": {
       "pr": "分支已推送，还没有拉取请求",
       "mergeLocal": "可以合并到 {{base}} 了"
+    },
+    "terminal": {
+      "keys": "终端按键",
+      "keyboard": "键盘",
+      "pasteHint": "将复制的内容粘贴到终端",
+      "key": {
+        "CtrlC": "Control-C，中断",
+        "CtrlD": "Control-D，输入结束"
+      }
     }
   },
   "taskManager": {

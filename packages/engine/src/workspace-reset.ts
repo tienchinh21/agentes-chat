@@ -218,6 +218,7 @@ export const RESET_ERASES = [
   "skill_files",
   "skills",
   "surface_deliveries",
+  "surface_page_links",
   "team_action_checks",
   "team_actions",
   "telegram_updates",

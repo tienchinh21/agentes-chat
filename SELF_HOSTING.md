@@ -1123,8 +1123,8 @@ for another day, `--org <workspace id>` for one workspace).
 <summary><b>Optional services and what they receive</b></summary>
 
 **The usage report.** The instance sends agentes.chat anonymous usage statistics: counts such as people,
-agents, machine sizes, AI tokens used and how much data the agents' browsers send and receive, never
-messages, files, names or sites. The first goes about an hour after the server first starts, then one a
+agents, machine sizes, AI tokens used, how much data the agents' browsers send and receive, and how fast
+the apps open and run, never messages, files, names or sites. The first goes about an hour after the server first starts, then one a
 day at that time, restarts or not (one that came due while the server was off goes about 10 minutes
 after it starts again), as JSON in a POST to `TELEMETRY_URL` (`https://telemetry.agentes.chat/v1/report`).
 It passes through Cloudflare, which sits in front of agentes.chat and decrypts it on the way.
@@ -1136,7 +1136,7 @@ report replaces it. These are all its fields:
 | `report` | The report's format: `1`. |
 | `instance` | A random id made at the server's first start. Nothing else in the report identifies the server. |
 | `version`, `edition`, `install` | The server's version, as `/api/health` gives it (`0.0.0` while releases aren't numbered yet); `selfhost`; `docker`, `native` or `desktop`. |
-| `os`, `arch`, `uptimeHours` | The server's system (`linux`, `darwin`), processor (`x64`, `arm64`) and hours since it started. |
+| `os`, `osVersion`, `arch`, `uptimeHours` | The server's system (`linux`, `darwin`), its version as numbers alone (a Linux or Darwin kernel's, `6.8.0`, a Windows build, `10.0.19045`; `other` when there are none), processor (`x64`, `arm64`) and hours since it started. |
 | `host.size` | The machine the server runs on: its logical CPUs (`cpus`) and memory (`memoryGb`, to 0.5 GB), the disk holding the server's files (`diskGb`, to 1 GB: `FILES_DIR`, the data volume with Docker, else its working folder), and `limit` (`cpus`, `memoryGb`) when a container lets the server use less of the machine. |
 | `host.container` | Whether the server runs in a container. |
 | `host.load` | How busy that whole machine got over the last day, sampled every 5 minutes: the average and highest load per CPU (`loadAvg`, `loadPeak`: the 5-minute load average divided by the machine's CPUs, 1 is every CPU busy), the average and highest share of its memory in use (`memoryAvg`, `memoryPeak`, from 0 to 1), and the hours the samples cover (`hours`); `null` with no sample from the last day. |
@@ -1147,6 +1147,7 @@ report replaces it. These are all its fields:
 | `lastDay.runs`, `lastDay.toolCalls` | Agent runs started, and tool calls they made, in the last 24 hours. |
 | `lastDay.desktopMinutes`, `lastDay.terminalMinutes` | Minutes people watched or controlled agents' desktops, and had terminals open, in the last 24 hours. |
 | `lastDay.models` | For each AI provider and model used in the last 24 hours (the 50 most used): `provider`, `model`, `calls`, `inputTokens` (cached ones included) and `outputTokens`. A model that isn't in agentes.chat's model list (a name someone typed, a deployment, a fine-tune) goes as `other`. |
+| `lastDay.clientVitals` | How fast the apps ran since the last report, for each platform that said: the phone apps (`ios`, `android`), browsers (`web`) and the desktop app on each system (`macos`, `windows`, `linux`). How many speed reports came (`reports`), and for each measure how many values (`n`) with their median (`p50`) and 95th percentile (`p95`): the opening, to the first screen (`coldStartMs`: the desktop app from its start) and to the first rows (`firstRowsMs`), how late the app's JavaScript ran (`jsLagP95Ms`, `jsLagMaxMs`), its JavaScript heap (`heapBytes`), the memory behind the desktop app's window (`webviewBytes`), the reads after each return to the app (`getsPerReturn`) and the realtime connection's reconnects (`reconnects`). The apps send these numbers to their own server, about once at each start and each return to them, with nobody's id; the server keeps a sample of a few hundred of each until the report goes (none with `TELEMETRY=off`). |
 
 It never holds messages, files, names, emails, hostnames, paths, prompts, IP addresses, the sites agents'
 browsers visit, or ids of workspaces, people or computers (the request itself comes from your server's
@@ -1172,10 +1173,10 @@ report. A report holds:
 | --- | --- |
 | `format`, `source`, `place` | `1`; `server` or `desktop`; where it was sent from (`browser`, `computer`, `run`, `desktop_server`, `settings`). |
 | `instance` | The usage report's random id (`null` from the desktop app). |
-| `code`, `step`, `happenedAt`, `timings` | What failed and at which step, as codes (`browser.no_answer`, a run's error code), when, and counts or durations the screen measured (`attempts`). |
-| `versions` | The server's, the runner's (and its protocol), the desktop app's and the phone app's versions, the server's system and processor, and the browser's family and major version (`chrome 142`), never the whole User-Agent. |
+| `code`, `step`, `happenedAt`, `timings` | What failed and at which step, as codes (`browser.no_answer`, a run's error code), when, and counts or durations the screen measured (`attempts`; from the desktop app, `opening`: how long this opening took, from the app's start to the site's first screen). |
+| `versions` | The server's, the runner's (and its protocol), the desktop app's and the phone app's versions, the server's system and processor, and the browser's family and major version (`chrome 142`), never the whole User-Agent. From the desktop app, its computer's system version too, as numbers alone (`osVersion`: macOS's, Windows' build, Linux's kernel). |
 | `install`, `locale` | `docker`, `native` or `desktop`; the app's language. |
-| `facts` | Which settings differ from their defaults, as `config.<NAME>: "set"`, never their values (`TELEMETRY`, `INSTALL_MODE`, `NODE_ENV`, `LOG_LEVEL` and `MACHINE_PROVISIONING` by value, and `config.publicUrl` as `https`, `http` or `loopback`, never the address); how many workspaces, agents and computers; hours since the server started; migrations applied; for the computer involved, its system, processor, runner version, connection, last sign of life, pause, its coding CLIs' versions and which of its tools are on; for a run, its status, brain, turns and hop. |
+| `facts` | Which settings differ from their defaults, as `config.<NAME>: "set"`, never their values (`TELEMETRY`, `INSTALL_MODE`, `NODE_ENV`, `LOG_LEVEL` and `MACHINE_PROVISIONING` by value, and `config.publicUrl` as `https`, `http` or `loopback`, never the address); how many workspaces, agents and computers; hours since the server started; migrations applied; for the computer involved, its system, processor, runner version, connection, last sign of life, pause, its coding CLIs' versions and which of its tools are on; for a run, its status, brain, turns and hop; from the desktop app, its computer's CPUs, memory and the memory behind its window (`desktop.cpus`, `desktop.memoryGb`, `desktop.webviewMb`). |
 | `logs` | The last lines of the computer's `runner.log` (up to 300, from its app when it answers within 5 seconds), and the server's own last log lines from the last 30 minutes (only when the installation's owner sends it); the desktop app's server log and setup steps. Every line is scrubbed first: emails, IP addresses, keys, tokens and cookie headers masked, links cut to their origin (with any user and password in them), home folders as `~`, and the names of the server, its workspaces, computers, agents and the sender replaced by `[server]`, `[workspace]`, `[computer]`, `[agent]`, `[person]`. Lines over 1,000 characters are cut. |
 | `note`, `replyTo` | What the person wrote (credentials masked) and an email for a reply, both optional and empty unless filled in. |
 
@@ -1630,12 +1631,25 @@ installer), so `codex` is on that user's PATH; the app looks at the PATH again e
 restart. The app can install Claude Code there for you, but not Codex. Then sign in to ChatGPT in
 **Settings → AI and usage**. What differs from Linux and macOS:
 
-- Every turn that can run commands runs inside Windows' own isolation (Microsoft Execution Containers),
-  which needs **Windows 11 24H2 or newer** (`winver` shows yours). On an older Windows those turns fail with
-  "This Windows computer can't isolate Codex's commands": update Windows, give that agent Claude or an API
-  key, or move it to a Linux computer. Lodi's turns run no commands, so they work on any Windows.
-- Nothing asks for approval there: what the isolation refuses stays refused, and it has no network, so
-  `git push` or a package install doesn't run from Codex's own commands.
+- Every turn that can run commands runs isolated, and how well depends on the Windows:
+  - **Windows 11 24H2 with the August 2026 update** (build 26100.9278 or newer, `winver` shows yours) runs
+    them inside Windows' own isolation (Microsoft Execution Containers): writes only in the agent's folders,
+    no network.
+  - **Older Windows** (Windows 10, Windows 11 without that update) runs them in Codex's own sandbox: writes
+    still only in the agent's folders, but the network is blocked only through proxy settings (a program
+    that ignores them still gets out), and commands can read anything the Windows user can. The AI choice
+    and the computer's page say so behind an ⓘ.
+  - **When neither starts** (Codex's own sandbox fails to set up on some Windows 10 computers), Codex isn't
+    offered for agents on that computer and says why: give that agent Claude or an API key, update to
+    Windows 11 24H2 or newer with its latest updates, or move it to a Linux computer.
+
+  The computer checks which one works by itself, shortly after it starts, and while it runs on Codex's own
+  sandbox it looks for Windows' own isolation again every 10 minutes. Lodi's turns run no commands, so they
+  work on any Windows, ChatGPT included.
+- Nothing asks for approval there: what the isolation refuses stays refused. Windows' own isolation has no
+  network, so `git push` or a package install doesn't run from Codex's own commands. Codex's own sandbox
+  blocks only what honours the proxy settings: a program that ignores them (an SSH `git push`, for one) can
+  still reach the network.
 - No background Codex tasks, and Codex doesn't do a mission's items there (Claude Code or the agent does).
 - No plan on Windows, Codex's or Claude's, picks who answers a message (Plans, below).
 - The isolation leaves the computer's own loopback open: a command can reach a service listening on

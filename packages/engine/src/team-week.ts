@@ -28,6 +28,7 @@ import {
   NO_CHANNEL_REASON,
   OVER_BUDGET_REASON,
   proposeSettings,
+  queueSettle,
 } from "./context/proposals";
 import { personAgentDmKey } from "./dms";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "./errors";
@@ -1314,7 +1315,7 @@ export async function postTeamWeek(
     .where(eq(organizationSettings.orgId, orgId));
   // A personal workspace's week is the person's own with their agents (ADR 0159), not a team's.
   const week = settings?.mode === "personal" ? "teamWeekReadyPersonal" : "teamWeekReady";
-  return postFromLodi(deps, orgId, userId, {
+  const sent = await postFromLodi(deps, orgId, userId, {
     bodyCode: TEAM_WEEK_CARD,
     bodyParams: { from: card.from, to: card.to, ...(period === "day" ? { period } : {}) },
     // Only this person reads it: the push and the conversation list say it in their language.
@@ -1324,6 +1325,9 @@ export async function postTeamWeek(
     posted,
     lodi,
   });
+  // Its fixes are Lodi's to weigh and apply (ADR 0219): the card shows what became of each, with Desfazer.
+  if (sent) await queueSettle(db, orgId, card.proposalIds, "agent");
+  return sent;
 }
 
 // --- What a person does with it --------------------------------------------------------------------------------

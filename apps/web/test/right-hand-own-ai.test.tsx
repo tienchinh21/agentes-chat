@@ -104,7 +104,7 @@ test("Lodi's old settings address opens Lodi's page: three groups, the face open
   expect(dialog.textContent).toContain("Vale para quem não tem plano próprio.");
 });
 
-test("a member's Lodi page has nothing of the workspace's: Sua IA is one row that opens, and connects their plan from its dialog", async () => {
+test("a member's Lodi page has nothing of the workspace's: Sua IA is one row that opens, and adds their plan from its account list", async () => {
   const state = withRightHand(seedState());
   const me = state.me?.organizations[0];
   if (me) me.role = "member";
@@ -130,7 +130,9 @@ test("a member's Lodi page has nothing of the workspace's: Sua IA is one row tha
   const dialog = screen().getByRole("dialog", { name: "Quem pensa pelo Lodi para você" });
   // Who it is for: the footer's line.
   expect(dialog.textContent).toContain("Vale só para a sua conversa com o Lodi.");
-  await act(async () => fireEvent.click(within(dialog).getByRole("button", { name: "Conectar meu plano" })));
+  // "Adicionar conta" at the account list's foot: Connect, over which this dialog closes.
+  await openSelect(within(dialog).getByRole("combobox", { name: "Conta" }));
+  await act(async () => fireEvent.click(screen().getByRole("button", { name: /^Adicionar conta/ })));
   await settle(6);
   expect(screen().queryByRole("dialog", { name: "Quem pensa pelo Lodi para você" })).toBeNull();
   expect(screen().getByRole("dialog", { name: /Lodi/ })).toBeTruthy();
@@ -198,9 +200,12 @@ test("Sua IA is the one picker: A do workspace first, then the plans; picking it
   const account = within(dialog).getByRole("combobox", { name: "Conta" });
   expect(account.querySelector(".aa-opt__name")?.textContent).toBe("Trabalho");
   const options = await openSelect(account);
-  expect(options.map((o) => o.querySelector(".aa-opt__name")?.textContent)).toEqual(["A do workspace", "Trabalho"]);
+  expect(options.map((o) => o.querySelector(".aa-row > span:first-child")?.textContent)).toEqual([
+    "A do workspace",
+    "Trabalho",
+  ]);
   // Lodi's own AI takes no key of the workspace's: "A do workspace" is it.
-  expect(screen().queryByRole("group", { name: "Do workspace" })).toBeNull();
+  expect(screen().queryByRole("group", { name: "Chaves de API" })).toBeNull();
   await act(async () => fireEvent.click(options[0] as HTMLElement));
   await settle(8);
   expect(sent).toEqual([{ scope: "mine", brain: "model" }]);

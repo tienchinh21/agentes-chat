@@ -92,6 +92,7 @@ import {
   registerNativeRoutes,
 } from "./routes/desktop";
 import { deviceAppRoutes, registerConnectLinkInfo, registerConnectScripts } from "./routes/devices";
+import { registerFonts } from "./routes/fonts";
 import { registerGitProxy } from "./routes/git";
 import { githubAppRoutes, registerGitHubAppWebhook } from "./routes/github-app";
 import { registerHealth } from "./routes/health";
@@ -130,6 +131,7 @@ export interface AppOptions {
  *
  * Layout:
  * - `/api/health`         health probe
+ * - `/api/fonts/*`        public: the fonts live files use, their `@font-face` CSS and files (ADR 0220)
  * - `/api/instance`       public: what this server is, for the phone and desktop apps choosing a server
  * - `/api/auth/*`         Better Auth (sign-up, sign-in, sessions, OAuth callbacks)
  * - `/api/app/*`          private API of the web and phone apps (cookie session + CSRF, ADR 0035)
@@ -169,6 +171,7 @@ export function createApp(options: AppOptions) {
     description: "Session cookie set by `/api/auth/sign-in/*`.",
   });
 
+  registerFonts(api);
   registerHealth(api, {
     version,
     // agentes.chat itself runs the self-host image: its apps must still hide what only a self-hosted server has.

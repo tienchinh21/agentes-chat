@@ -12,7 +12,7 @@ import {
   setAgentEditors,
   updateAgent,
 } from "../src";
-import { addMember, type Fixture, setup } from "./fixtures";
+import { addMember, type Fixture, queuedReviews, settleQueued, setup, withReview } from "./fixtures";
 
 let f: Fixture;
 afterEach(async () => {
@@ -136,8 +136,8 @@ describe("an agent's instructions wait on who looks after it (ADR 0085, addendum
       },
     );
 
-  test("with an owner, an admin who isn't one neither decides nor is asked; the owner decides", async () => {
-    f = await setup();
+  test("with an owner, an admin who isn't one neither decides nor hears it; the review applies it as the owner", async () => {
+    f = await setup({ reply: withReview({ apply: true, why: "A lasting preference." }) });
     const admin = await addMember(f.db, f.org.id, "admin", "bia");
     const member = await addMember(f.db, f.org.id, "member", "caio");
     const {
@@ -145,12 +145,25 @@ describe("an agent's instructions wait on who looks after it (ADR 0085, addendum
     } = await propose(member.id);
     const id = proposal?.id ?? "";
     await expect(decideProposal(f.db, admin.id, f.org.id, id, "reject")).rejects.toThrow();
-    const waiting = await f.db
-      .select({ userId: schema.notifications.userId })
-      .from(schema.notifications)
-      .where(and(eq(schema.notifications.orgId, f.org.id), eq(schema.notifications.kind, "proposal_waiting")));
-    expect(waiting.map((n) => n.userId)).toEqual([f.owner.id]);
-    expect((await decideProposal(f.db, f.owner.id, f.org.id, id, "reject")).status).toBe("rejected");
+    const kinds = async (kind: string) =>
+      (
+        await f.db
+          .select({ userId: schema.notifications.userId })
+          .from(schema.notifications)
+          .where(and(eq(schema.notifications.orgId, f.org.id), eq(schema.notifications.kind, kind)))
+      ).map((n) => n.userId);
+    // Nobody is asked: the review weighs it, and applies it as who looks after the agent.
+    expect(await kinds("proposal_waiting")).toEqual([]);
+    expect(await queuedReviews(f)).toEqual([{ ids: [id], origin: "asked_other" }]);
+    expect((await settleQueued(f)).applied).toEqual([id]);
+    expect((await getAgent(f.db, f.org.id, f.agent.id))?.instructions).toContain("- Always answer in English.");
+    const [audit] = await f.db
+      .select()
+      .from(schema.auditLog)
+      .where(and(eq(schema.auditLog.orgId, f.org.id), eq(schema.auditLog.action, "proposal.accepted")));
+    expect(audit?.onBehalfOfUserId).toBe(f.owner.id);
+    // The owner hears it was applied; the admin, who doesn't look after it, doesn't.
+    expect(await kinds("proposal_applied")).toEqual([f.owner.id]);
   });
 
   test("someone its editors name decides too, and an admin who asked for the change decides their own", async () => {

@@ -917,6 +917,15 @@
       "proposal_waiting_one": "{{names}} propone una mejora",
       "proposal_waiting_many": "{{names}} proponen mejoras",
       "proposal_waiting_other": "{{names}} proponen mejoras",
+      "proposal_applied_one": "{{names}} aplicó una mejora",
+      "proposal_applied_many": "{{names}} aplicó {{count}} mejoras",
+      "proposal_applied_other": "{{names}} aplicó {{count}} mejoras",
+      "proposal_applied_agents_one": "{{names}} aplicaron una mejora",
+      "proposal_applied_agents_many": "{{names}} aplicaron {{count}} mejoras",
+      "proposal_applied_agents_other": "{{names}} aplicaron {{count}} mejoras",
+      "proposal_applied_auto_one": "Se aplicó una mejora automáticamente",
+      "proposal_applied_auto_many": "Se aplicaron {{count}} mejoras automáticamente",
+      "proposal_applied_auto_other": "Se aplicaron {{count}} mejoras automáticamente",
       "mention_one": "{{names}} te mencionó",
       "mention_many": "{{names}} te mencionaron",
       "mention_other": "{{names}} te mencionaron",
@@ -1204,9 +1213,6 @@
     "issuesWithMe_one": "{{count}} contigo",
     "issuesWithMe_many": "{{count}} contigo",
     "issuesWithMe_other": "{{count}} contigo",
-    "proposalsWaiting_one": "{{count}} en espera",
-    "proposalsWaiting_many": "{{count}} en espera",
-    "proposalsWaiting_other": "{{count}} en espera",
     "drive": "Drive",
     "connectors": "Conectores y MCP",
     "preferences": "Preferencias",
@@ -1512,13 +1518,26 @@
     "uses_many": "Usado {{count}} veces",
     "uses_other": "Usado {{count}} veces",
     "confirmed": "Confirmado por una persona",
-    "confirm": "Confirmar",
-    "confirmedToast": "Confirmada",
     "details": "Detalles técnicos",
     "before": "Antes decía: {{text}}",
     "fix": "Corregir",
     "forgetTitle": "¿Olvidar este recuerdo?",
     "forgetText": "{{name}} deja de usarlo en las próximas conversaciones."
+  },
+  "proposals": {
+    "title": "Mejoras de los agentes",
+    "emptyTitle": "Todavía no cambió nada",
+    "empty": "Cuando un agente mejora sus instrucciones o las de un compañero, el cambio aparece aquí, con Deshacer.",
+    "more": "Mostrar más",
+    "reviewing": "Evaluando…",
+    "appliedBy": "Aplicado por {{name}}",
+    "appliedBy_female": "Aplicado por {{name}}",
+    "appliedAuto": "Aplicado automáticamente",
+    "leftOutBy": "Descartado por {{name}}",
+    "leftOutBy_female": "Descartado por {{name}}",
+    "leftOut": "Descartado",
+    "undoneBy": "Deshecho por {{name}}",
+    "undoneByYou": "Deshecho por ti"
   },
   "wiki": {
     "map": "Mapa de páginas",
@@ -1575,6 +1594,15 @@
     "next": {
       "pr": "Rama enviada, aún sin pull request",
       "mergeLocal": "Lista para hacer merge en {{base}}"
+    },
+    "terminal": {
+      "keys": "Teclas del terminal",
+      "keyboard": "Teclado",
+      "pasteHint": "Pegar en el terminal lo que copiaste",
+      "key": {
+        "CtrlC": "Control-C, interrumpir",
+        "CtrlD": "Control-D, fin de la entrada"
+      }
     }
   },
   "taskManager": {

@@ -966,6 +966,13 @@ export const featureKeysEn = {
     kind: {
       proposal_waiting_one: "{{names}} proposes an improvement",
       proposal_waiting_other: "{{names}} propose improvements",
+      /** What agents applied today (ADR 0219), `count` the changes; `_agents`: several applied, `_auto`: none did. */
+      proposal_applied_one: "{{names}} applied an improvement",
+      proposal_applied_other: "{{names}} applied {{count}} improvements",
+      proposal_applied_agents_one: "{{names}} applied an improvement",
+      proposal_applied_agents_other: "{{names}} applied {{count}} improvements",
+      proposal_applied_auto_one: "An improvement was applied automatically",
+      proposal_applied_auto_other: "{{count}} improvements were applied automatically",
       mention_one: "{{names}} mentioned you",
       mention_other: "{{names}} mentioned you",
       thread_reply_one: "{{names}} replied in the thread",
@@ -1213,8 +1220,6 @@ export const featureKeysEn = {
     issues: "Tasks",
     issuesWithMe_one: "{{count}} with you",
     issuesWithMe_other: "{{count}} with you",
-    proposalsWaiting_one: "{{count}} waiting",
-    proposalsWaiting_other: "{{count}} waiting",
     drive: "Drive",
     connectors: "Connectors and MCPs",
     preferences: "Preferences",
@@ -1539,13 +1544,33 @@ export const featureKeysEn = {
     uses_one: "Used {{count}} time",
     uses_other: "Used {{count}} times",
     confirmed: "Confirmed by a person",
-    confirm: "Confirm",
-    confirmedToast: "Confirmed",
     details: "Technical details",
     before: "It used to say: {{text}}",
     fix: "Fix",
     forgetTitle: "Forget this memory?",
     forgetText: "{{name}} stops using this in future conversations.",
+  },
+  /**
+   * Agent improvements (ADR 0219): what agents changed in their own or their teammates' instructions, roles, apps and
+   * settings, a skill or the workspace's context. Their review applies each change or leaves it out; nobody is asked.
+   */
+  proposals: {
+    title: "Agent improvements",
+    emptyTitle: "Nothing changed yet",
+    empty: "When an agent improves its instructions or a teammate's, the change shows here, with Undo.",
+    /** Adds more of the history under it. */
+    more: "Show more",
+    /** A change the agent's review hasn't weighed yet (a few seconds). */
+    reviewing: "Reviewing…",
+    appliedBy: "Applied by {{name}}",
+    appliedBy_female: "Applied by {{name}}",
+    /** A workspace-wide lesson no agent holds. */
+    appliedAuto: "Applied automatically",
+    leftOutBy: "Left out by {{name}}",
+    leftOutBy_female: "Left out by {{name}}",
+    leftOut: "Left out",
+    undoneBy: "Undone by {{name}}",
+    undoneByYou: "Undone by you",
   },
   wiki: {
     map: "Page map",
@@ -1620,6 +1645,18 @@ export const featureKeysEn = {
     next: {
       pr: "Branch sent, no pull request yet",
       mergeLocal: "Ready to merge into {{base}}",
+    },
+    /** A session's terminal (the web's words are `codeTerminal.*`): the row of keys a phone keyboard lacks. */
+    terminal: {
+      keys: "Terminal keys",
+      /** The row's first button: shows or hides the phone's keyboard. */
+      keyboard: "Keyboard",
+      /** What VoiceOver says for a paste into the shell. */
+      pasteHint: "Paste what you copied into the terminal",
+      key: {
+        CtrlC: "Control-C, interrupt",
+        CtrlD: "Control-D, end of input",
+      },
     },
   },
   // The task manager (ADR 0128; the rest of its words are shared, `taskManager.*`).

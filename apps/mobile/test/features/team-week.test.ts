@@ -105,7 +105,7 @@ test("each suggestion is a line to mark: marked as the card shows, flipped by a 
   expect(mark).toContain("{!marked && onSkip ? (");
   expect(card).toContain("skipsAlone(row)");
   // The mark: filled in ink with the check in the page's color, a ring in faint unmarked, the check in ok once applied.
-  const tick = card.slice(card.indexOf("function Tick("), card.indexOf("function UndoAction("));
+  const tick = card.slice(card.indexOf("function Tick("));
   expect(tick).toContain('look === "on" && { backgroundColor: c.ink }');
   expect(tick).toContain('look === "off" && { borderWidth: 1.5, borderColor: c.faint }');
   expect(tick).toContain('<Icon name="check" size={13} weight="bold" color={c.bg} />');
@@ -316,11 +316,18 @@ test("the day's card: what waits opens Atividade, what is stuck its conversation
   });
 });
 
-test("suggestions: a row with a proposal applies it, and the ones that can be put away alone have Dismiss", () => {
+test("suggestions: Lodi's own fixes are its review's, and the ones that can be put away alone have Dismiss", () => {
   const card = src("right-hand/TeamWeekCard.tsx");
-  expect(card).toContain(
-    'else if ("proposalId" in row) await decide.mutateAsync({ id: row.proposalId, decision: "accept" });',
-  );
+  // A fix is a proposal its review applies or leaves out (ADR 0219): never marked, applied or accepted from the card.
+  expect(card).toContain('const isFix = (row: TeamWeekRow): row is FixRowData => "proposalId" in row;');
+  expect(card).toContain('const open = rows.filter((r) => r.state === "open" && !isFix(r.row));');
+  expect(card).not.toContain('decision: "accept"');
+  // "Reviewing…" until the review ends, then how it ended, its why and Undo while the reader may put it back.
+  const fix = card.slice(card.indexOf("function FixRow("), card.indexOf("function Tick("));
+  expect(fix).toContain("const outcome = proposal ? proposalOutcome(t, proposal, meId) : null;");
+  expect(fix).toContain("(outcome?.words ?? line)");
+  expect(fix).toContain('{proposal?.undoable && !back && state !== "skipped" ? (');
+  expect(fix).toContain("<UndoProposal id={proposal.id} row />");
   expect(card).toContain("skipsAlone(row)");
   expect(card).toContain("act: { rowId: row.id, skip: true }");
   expect(card).toContain('label={t("teamWeek.skip")}');
@@ -328,8 +335,7 @@ test("suggestions: a row with a proposal applies it, and the ones that can be pu
   // Nothing takes a second tap while one is on its way, and the marks hold still while the button applies them.
   expect(card).toContain("disabled={busy || skipping}");
   expect(card).toContain("disabled={applying}");
-  // Applied: what was done in the line's place, and Undo beside it while the receipt allows.
-  expect(card).toContain('label={t("teamWeek.undo")}');
-  expect(card).toContain('receipt?.undoneAt ? t("rightHand.card.undone") : doneText');
-  expect(card).toContain("<UndoAction message={message} actionId={receipt.id} />");
+  // One put back from its receipt (an older card's Undo) reads undone, with nothing left to undo.
+  expect(fix).toContain("const back = Boolean(receipt?.undoneAt);");
+  expect(fix).toContain('? t("rightHand.card.undone")');
 });

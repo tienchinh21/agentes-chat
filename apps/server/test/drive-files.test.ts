@@ -207,3 +207,47 @@ test("a picture is a snapshot: no versions, so a new one is refused in words the
   expect(shotV2.status).toBe(400);
   expect(((await shotV2.json()) as { error: { code: string } }).error.code).toBe("artifact.not_versioned");
 });
+
+test("an audio file keeps the wave the first app measured, and a sound stored untyped reads as audio by its name", async () => {
+  const owner = browser(t);
+  await signUp(owner, "owner@example.com");
+  const { orgId } = await seedOrg(owner);
+  const base = `/api/app/organizations/${orgId}`;
+  const api = (path: string, init?: Parameters<typeof owner>[1]) => owner(`${base}${path}`, init);
+  const sound = (name: string, type: string) =>
+    upload(owner, `${base}/artifacts/files`, { file: new File([new Uint8Array(64)], name, { type }) });
+
+  const m4a = (await (await sound("entrevista.m4a", "application/octet-stream")).json()) as {
+    id: string;
+    content: { contentType: string };
+  };
+  expect(m4a.content.contentType).toBe("audio/mp4");
+  for (const [name, type] of [
+    ["faixa.flac", "audio/flac"],
+    ["nota.opus", "audio/ogg"],
+  ]) {
+    const a = (await (await sound(name ?? "", "application/octet-stream")).json()) as {
+      content: { contentType: string };
+    };
+    expect(a.content.contentType).toBe(type ?? "");
+  }
+
+  const put = (id: string, json: unknown) => api(`/artifacts/${id}/wave?version=1`, { method: "PUT", json });
+  const first = await put(m4a.id, { peaks: [0.2, 0.9, 0.4], durationMs: 61_500 });
+  expect(first.status).toBe(200);
+  expect(await first.json()).toEqual({ peaks: [0.2, 0.9, 0.4], durationMs: 61_500 });
+  // Measured once: a second app's measure doesn't replace it.
+  expect(await (await put(m4a.id, { peaks: [1, 1], durationMs: 2_000 })).json()).toEqual({
+    peaks: [0.2, 0.9, 0.4],
+    durationMs: 61_500,
+  });
+  expect(((await (await api(`/artifacts/${m4a.id}`)).json()) as { content: unknown }).content).toMatchObject({
+    wave: { peaks: [0.2, 0.9, 0.4], durationMs: 61_500 },
+  });
+
+  const pdf = (await (
+    await upload(owner, `${base}/artifacts/files`, { file: new File([PDF], "a.pdf", { type: "application/pdf" }) })
+  ).json()) as { id: string };
+  expect((await put(pdf.id, { peaks: [0.5], durationMs: 1_000 })).status).toBe(400);
+  expect((await put(m4a.id, { peaks: [2], durationMs: 1_000 })).status).toBe(400);
+});

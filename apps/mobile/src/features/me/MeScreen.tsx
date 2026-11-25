@@ -218,7 +218,6 @@ function MePage() {
   // Only the count of tasks with me: no 10 s look while agents work, which this tab, always mounted, kept going.
   const issues = useIssues(org.orgId, "", "", { poll: false });
   const overview = useOverview(org.orgId).data;
-  const proposals = overview?.proposalsWaitingForMe ?? 0;
   const archived = useArchivedChannels(org.orgId).data?.length ?? 0;
   const push = usePushSwitch().on;
   const server = useAuthConfig().data;
@@ -276,12 +275,12 @@ function MePage() {
         onPress={() => open("/issues")}
       />
     ),
+    // What agents changed on their own (ADR 0219): a history, nothing waiting, so no count.
     proposals: (
       <GroupedRow
         key="proposals"
         icon="flag"
-        label={t("shell.proposals")}
-        {...(proposals > 0 ? { value: t("mobile.me.proposalsWaiting", { count: proposals }) } : {})}
+        label={t("mobile.proposals.title")}
         chevron
         onPress={() => open("/proposals")}
       />
