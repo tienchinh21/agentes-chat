@@ -20,6 +20,7 @@ import {
   brainEffortFor,
   brainFor,
   brainModelFor,
+  brainModelForTier,
   brainSessionId,
   type ChannelEvent,
   CODEX_IMAGE_NOTE,
@@ -242,7 +243,7 @@ test("availability: no computer, offline, old runner, not logged in, Codex missi
   notePlanLimit("m1", "claude_code", new Date(Date.now() + 3600_000).toISOString());
   expect(computerBrainUnavailable("claude_code", "m1", statusOf("m1"))?.code).toBe("plan_limit");
   expect(
-    computerBrainUnavailable("codex", "m1", statusOf("m1", { executors: { codex: { version: "0.163.0" } } })),
+    computerBrainUnavailable("codex", "m1", statusOf("m1", { executors: { codex: { version: "0.170.0" } } })),
   ).toBeNull();
   // On Windows a runner before CODEX_WINDOWS_PROTOCOL refuses every Codex turn: too old there, not elsewhere.
   const windows = (protocol: number) =>
@@ -1421,6 +1422,29 @@ test("a turn says a person waits on it only in the line's first rank: not for a 
   ).toBeUndefined();
 });
 
+test("a computer brain's turn carries the zone of its Now: the person's, else the workspace's", async () => {
+  f = await setup({});
+  await computerAgent(f);
+  const { brain, seen } = scriptedComputerBrain(() => [{ type: "done", text: "Feito." }]);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  const fx = f as Fixture;
+  const zoneOfTurn = async () => {
+    await post(fx, "@dev resuma as notas da semana");
+    await drainOutbox(fx.db, handlers);
+    return seen.at(-1)?.timeZone;
+  };
+  expect(await zoneOfTurn()).toBe("UTC");
+  await fx.db
+    .update(schema.organizationMembers)
+    .set({ timezone: "America/Sao_Paulo" })
+    .where(eq(schema.organizationMembers.userId, fx.owner.id));
+  expect(await zoneOfTurn()).toBe("America/Sao_Paulo");
+});
+
 test("Fast stays out of every run nobody waits for", async () => {
   f = await setup({});
   await computerAgent(f, { brain: "codex", brainModel: "gpt-6.1-sol", brainSpeed: "fast" });
@@ -1591,7 +1615,8 @@ test("a Claude Code turn's provider failure is kept on its account and told the 
         },
       ],
       [{ type: "done", text: "Feito." }],
-      // An older runner says no cause: its code says it.
+      // An older runner says no cause: its code says it. Its run tries once more, then fails.
+      [{ type: "error", code: "claude_failed", message: "boom", retryable: false }],
       [{ type: "error", code: "claude_failed", message: "boom", retryable: false }],
       [{ type: "error", code: "canceled", message: "The turn was canceled.", retryable: false }],
     ];
@@ -1634,6 +1659,7 @@ test("a Claude Code turn's provider failure is kept on its account and told the 
 
     await post(f, "@dev e agora?");
     await drainOutbox(f.db, handlers);
+    await drainOutbox(f.db, handlers, { now: new Date(Date.now() + 60_000) });
     expect(await account()).toMatchObject({ lastFailureCause: "unknown" });
     expect((await events("account.failure")).map((e) => (e as { cause: string }).cause)).toEqual([
       "account_disabled",
@@ -1658,6 +1684,38 @@ test("a Claude Code turn's provider failure is kept on its account and told the 
   } finally {
     enableOperatorEvents(false);
   }
+});
+
+test("a CLI that fails a turn before anything ran tries once more, then the run fails on what it said", async () => {
+  f = await setup();
+  await computerAgent(f);
+  const boom: BrainEvent[] = [{ type: "error", code: "claude_failed", message: "boom", retryable: false }];
+  // A sign-in failing for a moment: the second try answers.
+  const script: BrainEvent[][] = [boom, [{ type: "done", text: "Feito." }], boom, boom];
+  const { brain } = scriptedComputerBrain((n) => script[n] ?? []);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  const later = () => drainOutbox(f.db, handlers, { now: new Date(Date.now() + 60_000) });
+
+  await post(f, "@dev oi");
+  await drainOutbox(f.db, handlers);
+  expect((await f.db.select().from(schema.agentRuns)).map((r) => r.status)).toEqual(["running"]);
+  await later();
+  expect((await f.db.select().from(schema.agentRuns)).map((r) => r.status)).toEqual(["done"]);
+
+  // Failing again on its second try: once a run, then it says what the CLI said.
+  await post(f, "@dev de novo");
+  await drainOutbox(f.db, handlers);
+  await later();
+  await later();
+  const runs = await f.db.select().from(schema.agentRuns).orderBy(schema.agentRuns.createdAt);
+  expect(runs.map((r) => [r.status, r.error])).toEqual([
+    ["done", null],
+    ["failed", "cli_failed: Claude Code: boom"],
+  ]);
 });
 
 test("the agent's account and effort apply to its own brain; signed out or an older runner: unavailable", async () => {
@@ -3929,7 +3987,10 @@ test("no room on the computer: nothing in the chat, the person's message says it
   expect(profiles).toHaveLength(10);
   expect(profiles[0]).toEqual(claimed);
   expect(claimed?.stages.some((s) => s.stage === "room_wait")).toBe(false);
+  // Each says the computer it waited for and ran on.
+  expect(claimed).toMatchObject({ machineId });
   for (const later of profiles.slice(-2)) {
+    expect(later).toMatchObject({ machineId });
     expect(later.stages.map((s) => s.stage).slice(0, 2)).toEqual(["room_wait", "claim"]);
     expect(later.stages[0]?.ms).toBeGreaterThanOrEqual(0);
   }
@@ -4442,6 +4503,48 @@ test("a Claude plan sign-in at its cap: the next run waits in line like any othe
   expect((await runById(f, run?.id ?? ""))?.status).toBe("done");
   expect(seen).toHaveLength(1);
   expect((await timeline(f)).some((m) => m.body === "Pronto.")).toBe(true);
+});
+
+test("no cap on a Claude plan sign-in unless the server sets one: past 12 runs on it, the next starts at once", async () => {
+  f = await setup({ reply: () => ({ chunks: ["Pela API."] }) });
+  const machineId = await computerAgent(f);
+  const { brain, seen } = scriptedComputerBrain(() => [{ type: "done", text: "Pronto." }]);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  const ops = await createAgent(
+    f.db,
+    f.owner.id,
+    f.org.id,
+    { name: "Ops", handle: "ops", role: "Infra", instructions: "", credentialId: f.credential.id },
+    { model: "claude-sonnet-5-5" },
+  );
+  // The computer's own Claude sign-in already works on 13 other runs.
+  await f.db.insert(schema.agentRuns).values(
+    Array.from({ length: 13 }, () => {
+      const id = Bun.randomUUIDv7();
+      return {
+        id,
+        orgId: f.org.id,
+        agentId: ops.id,
+        channelId: f.general.id,
+        threadRootId: id,
+        triggerMessageId: id,
+        trigger: "mention" as const,
+        hop: 2,
+        status: "running" as const,
+        heartbeatAt: new Date(),
+        transcript: { roomAsk: { machineId, at: Date.now() - 60_000, signIn: "own" } },
+      };
+    }),
+  );
+  await post(f, "@dev oi");
+  await drainOutbox(f.db, handlers);
+  const run = (await f.db.select().from(schema.agentRuns)).find((r) => r.agentId !== ops.id);
+  expect(run?.status).toBe("done");
+  expect(seen).toHaveLength(1);
 });
 
 test("a run held in line behind its own sign-in's wait holds back only that sign-in's runs, never another's", async () => {
@@ -4974,6 +5077,82 @@ test("a model Codex's sign-in refuses: the turn goes again with no model in a fr
   expect(run?.brainSessionId).toBe(seen[1]?.session?.id ?? "");
 });
 
+test("any CLI that refuses the agent's model: one more try on its default in a fresh session", async () => {
+  f = await setup({});
+  await computerAgent(f);
+  // Claude Code's own words; the runner calls it `model_unavailable` (an older one says nothing: the words decide).
+  const refusal =
+    "There's an issue with the selected model (claude-x). It may not exist or you may not have access to it.";
+  const { brain, seen } = scriptedComputerBrain((_n, turn) =>
+    turn.model
+      ? [{ type: "error", code: "claude_failed", message: refusal, retryable: false }]
+      : [{ type: "done", text: "Feito." }],
+  );
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  await post(f, "@dev oi");
+  await drainOutbox(f.db, handlers);
+  expect(seen).toHaveLength(2);
+  expect(seen[0]?.model).toBe("sonnet");
+  expect(seen[1]?.model).toBeUndefined();
+  expect(seen[1]?.session?.id).not.toBe(seen[0]?.session?.id);
+  expect(seen[1]?.session?.resume).toBe(false);
+  expect((await timeline(f)).at(-1)?.body).toBe("Feito.");
+});
+
+test("a model refused on the CLI's default too: the run ends saying that model isn't available there", async () => {
+  f = await setup({});
+  await computerAgent(f);
+  const refusal = 'API Error: 404 {"type":"error","error":{"type":"not_found_error","message":"model: claude-x"}}';
+  const { brain, seen } = scriptedComputerBrain(() => [
+    { type: "error", code: "claude_failed", message: refusal, retryable: false, cause: "model_unavailable" },
+  ]);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  await post(f, "@dev oi");
+  await drainOutbox(f.db, handlers);
+  // Once on the agent's model, once on the default: never a third time, never on the API.
+  expect(seen).toHaveLength(2);
+  expect(f.provider.calls).toHaveLength(0);
+  const [run] = await f.db.select().from(schema.agentRuns);
+  expect(run?.status).toBe("failed");
+  expect(run?.error).toStartWith("provider_error: model_unavailable@");
+});
+
+test("a CLI below its floor: the turn isn't sent, the run waits for an update there", async () => {
+  f = await setup({});
+  await computerAgent(f);
+  const { brain, seen } = scriptedComputerBrain(() => [{ type: "done", text: "SENT" }]);
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: {
+      status: async (id) =>
+        statusOf(id, {
+          protocol: MACHINE_PROTOCOL_VERSION,
+          executors: { claude: { version: "2.1.100 (Claude Code)", loggedIn: true }, detectedAt: "x" },
+        }),
+    },
+  });
+  await post(f, "@dev oi");
+  await drainOutbox(f.db, handlers);
+  expect(seen).toHaveLength(0);
+  expect(f.provider.calls).toHaveLength(0);
+  const [run] = await f.db.select().from(schema.agentRuns);
+  expect(run?.status).toBe("waiting_input");
+  // Worded in the apps as "the program on my computer needs an update".
+  expect((await timeline(f)).at(-1)?.meta).toMatchObject({
+    bodyCode: "brain_unavailable",
+    brainUnavailable: { code: "cli_outdated" },
+  });
+});
+
 test("in a busy channel, its teammates now and why its session was lost reach the computer brain whole", async () => {
   f = await setup();
   await computerAgent(f);
@@ -5437,4 +5616,27 @@ test("a conversation's run warms its Claude Code at claim with the session and m
   expect(warmed.map((t) => [t.session, t.model])).toEqual(seen.map((t) => [t.session, t.model]));
   expect(warmed[1]?.session).toMatchObject({ machineId, resume: true });
   expect(warmed.every((t) => t.system === "" && t.messages.length === 0)).toBe(true);
+});
+
+test("Automático: the run warms on a guess, then again with the model and effort the judge chose for its turn", async () => {
+  f = await setup({ judge: (kind, id) => (kind === "auto_model" ? (id === "tier" ? "large" : "high") : undefined) });
+  await computerAgent(f, { brainModel: "auto", brainEffort: "auto" });
+  const { brain: scripted, seen } = scriptedComputerBrain(() => [{ type: "done", text: "ok" }]);
+  const warmed: BrainTurn[] = [];
+  const brain: Brain = { ...scripted, warm: async (turn) => void warmed.push(turn) };
+  const handlers = createJobHandlers({
+    ...f.jobDeps,
+    brains: { claude_code: () => brain },
+    machines: { status: async (id) => statusOf(id) },
+  });
+  await post(f, "@dev refatora o módulo de cobrança inteiro");
+  await drainOutbox(f.db, handlers);
+  expect(seen).toHaveLength(1);
+  // The guess with nothing kept here: the medium tier, medium effort.
+  expect(warmed.map((t) => [t.model, t.effort])).toEqual([
+    [brainModelForTier("claude_code", "medium"), "medium"],
+    [seen[0]?.model, "high"],
+  ]);
+  expect(seen[0]).toMatchObject({ model: brainModelForTier("claude_code", "large"), effort: "high" });
+  expect(warmed[1]?.session).toEqual(seen[0]?.session);
 });

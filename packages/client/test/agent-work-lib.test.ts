@@ -73,6 +73,11 @@ describe("an agent's list line (ADR 0084 addendum)", () => {
     // Where the viewer reads nothing: the bare state.
     expect(line(work({ channelId: null, channelKind: null, channelName: null }))?.text).toBe("trabalhando");
     expect(line(work({ routine: true, channelId: null }))?.text).toBe("numa rotina");
+    // Someone else's DM: says it is private, rather than a bare "trabalhando" that reads as nothing to open.
+    const hidden = work({ channelId: null, channelKind: null, channelName: null, private: true });
+    expect(line(hidden)?.text).toBe("numa conversa particular");
+    // The card's line says it already.
+    expect(workDetail(t, hidden, names)).toBeNull();
     expect(line(work({ state: "you", ask: "approval", since: ago(3) }))).toEqual({
       text: "esperando você",
       short: "esperando",

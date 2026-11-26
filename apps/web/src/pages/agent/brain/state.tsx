@@ -51,10 +51,10 @@ import {
 } from "@agenteschat/client/lib/plans";
 import { apiProviderOf, isAuto, keyLine, keySource, modelChoices } from "@agenteschat/client/lib/providers";
 import { isPersonal, modeKey } from "@agenteschat/client/lib/workspace-mode";
-import { Icon, type IconName, ProviderLogo, planState } from "@agenteschat/ui";
+import { type IconName, planState } from "@agenteschat/ui";
 import { useTranslation } from "react-i18next";
 import { modelOptions as apiModelOptions, DEFAULT_KEY } from "@/components/AgentFields";
-import { type HaveItem, renameOf } from "@/components/arrival/ConnectHave";
+import { type HaveItem, haveMark, renameOf } from "@/components/arrival/ConnectHave";
 import { useOrg } from "@/components/org-context";
 import { useComputerEdition } from "@/components/WorkspaceComputer";
 import { useDirectory } from "@/hooks/useDirectory";
@@ -251,7 +251,7 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
       about: !a.mine && !current ? undefined : (alsoUsed ?? accountAbout(t, c, agent.name)),
       whose,
       group: a.mine ? mine : { key: `owner:${a.ownerId}`, label: whose },
-      mark: <ProviderLogo id={a.provider ?? a.kind} size="xs" />,
+      mark: haveMark(a.provider ?? a.kind),
       usage: a.usage,
       // An account lives on the agent's computer: it thinks there only if its plan runs there.
       off: act === "locked" || (!current && !runsHere(plan)),
@@ -286,7 +286,7 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
         ...(k === "opencode"
           ? { whose: t("connectAi.chat.free"), group: { key: "free", label: t("connectAi.chat.free") }, free: true }
           : { whose: ownersWhose, group: ownersGroup }),
-        mark: <ProviderLogo id={k} size="xs" />,
+        mark: haveMark(k),
         usage: view.ownUsage[k] ?? null,
         off: !current && !runsHere(plan),
         lends: false,
@@ -298,8 +298,6 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
   // The workspace's keys, for whoever may pick one (admins); anyone else gets the API as the agent has it.
   const all = models.data?.models ?? [];
   const apiProvider = apiProviderOf(saved.model, all);
-  const keyMark = (provider: string | undefined) =>
-    provider ? <ProviderLogo id={provider} size="xs" /> : <Icon name="key" size={20} className="arrival-have__mark" />;
   const keysGroup = { key: "keys", label: t("connectAi.chat.keys") };
   const keyCurrent = saved.key ?? DEFAULT_KEY;
   const keyRow = (keyId: string | undefined, title: string, about: string | undefined, provider?: string): BrainRow => {
@@ -316,7 +314,7 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
       about,
       whose: keysGroup.label,
       group: keysGroup,
-      mark: keyMark(provider),
+      mark: haveMark(provider),
       usage: null,
       isKey: true,
       lends: false,
@@ -363,7 +361,7 @@ export function useBrainState(view: AgentBrain, opts: { added: readonly MachineA
           : t("agentPage.work.brain.planText", { plan: planLabel(t, c) })),
     whose: ownersWhose,
     group: ownersGroup,
-    mark: c === "key" ? keyMark(apiProvider) : <ProviderLogo id={planMark(c)} size="xs" />,
+    mark: haveMark(c === "key" ? apiProvider : planMark(c)),
     usage: null,
     off: savedCard !== c && !homeOf(c),
     lends: false,

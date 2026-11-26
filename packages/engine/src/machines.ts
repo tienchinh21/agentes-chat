@@ -528,6 +528,14 @@ export async function computerDrivers(db: Database, orgId: string, agentId: stri
   return ownersDriving.length > 0 ? ownersDriving : drivers;
 }
 
+/** How long the workspace's computer is said to go out through a lent one after it last did (ADR 0237). */
+export const EGRESS_VIA_SHOWN_MS = 5 * 60_000;
+
+/** The workspace's computer's last lent connection, while recent: whose computer carries its web traffic now. */
+export function egressViaNow(via: { machineId: string; at: string } | null | undefined, now = new Date()) {
+  return via && now.getTime() - Date.parse(via.at) < EGRESS_VIA_SHOWN_MS ? via.machineId : null;
+}
+
 /**
  * The machines of an org as one person sees them: every member sees them;
  * the workspace path and the access report only admins and the pairer.
@@ -584,6 +592,8 @@ async function machineViews(db: Database, actorId: string, orgId: string, only?:
     // The workspace's own computer (ADR 0056 §10) is a service people use, not a box they look into.
     const managed = m.kind === "managed";
     const online = shownOnline(m, now);
+    const viaId = managed ? egressViaNow(m.egressVia, now) : null;
+    const via = viaId ? rows.find((r) => r.machine.id === viaId) : undefined;
     return {
       id: m.id,
       name: m.name,
@@ -599,6 +609,8 @@ async function machineViews(db: Database, actorId: string, orgId: string, only?:
       /** The workspace's own computer's agents wait for their way out, as the operator says: a line, never an error. */
       egressWaiting: managed && machineOnline(m, now) && m.egressWaitingAt !== null,
       egress: managed && machineOnline(m, now) && m.egress?.ip ? { ...m.egress, ip: m.egress.ip } : null,
+      /** ADR 0237: the person's computer whose internet the workspace's own computer's web traffic uses now. */
+      egressVia: via ? { machineId: via.machine.id, name: via.machine.name, userName: via.pairedByName } : null,
       lastSeenAt: m.lastSeenAt?.toISOString() ?? null,
       hostname: managed ? "" : m.hostname,
       os: managed ? "other" : m.os,
@@ -632,6 +644,12 @@ async function machineViews(db: Database, actorId: string, orgId: string, only?:
       cliInstall: !managed && m.protocol >= CLI_INSTALL_PROTOCOL,
       /** The coding CLIs there that can't start, with their own error line; admins and the pairer only. */
       cliErrors: (admin || mine) && !managed ? (m.executors?.broken ?? null) : null,
+      /**
+       * ADR 0228 §6: the coding CLIs its runner fetches by itself there (none on the workspace's own computer or in
+       * system mode), and where each fetch stands (`fetching` with bytes, `ready`, `failed` with why).
+       */
+      cliFetchable: managed || m.executors?.mode === "system" ? [] : (m.executors?.copies?.fetchable ?? []),
+      cliFetch: managed ? null : (m.executors?.copies?.fetch ?? null),
       /** What holds Codex's commands on a Windows computer (`CODEX_UNELEVATED_PROTOCOL`); null elsewhere or unknown. */
       codexSandbox: m.os === "windows" ? (m.executors?.codex?.sandbox ?? null) : null,
       pairedBy: m.pairedByUserId ? { id: m.pairedByUserId, name: pairedByName ?? "" } : null,

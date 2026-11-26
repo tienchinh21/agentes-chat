@@ -37,6 +37,9 @@ describe("/conectar: confirm a computer's code", () => {
   test("shows the code, the computer and the warning; Conectar joins the chosen organization", async () => {
     const { state, router } = await open();
     expect(document.querySelector(".connect-page__code")?.textContent).toBe("K7Q·4ZP");
+    // The code never breaks across lines on a narrow screen.
+    const css = await Bun.file(new URL("../src/layout.css", import.meta.url).pathname).text();
+    expect(css.split("\n.connect-page__code {")[1]?.split("}")[0]).toContain("white-space: nowrap;");
     const page = document.querySelector(".connect-page") as HTMLElement;
     expect(page.textContent).toContain("MacBook do Walter");
     expect(page.textContent).toContain("macOS · walter-mbp");
